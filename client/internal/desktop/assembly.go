@@ -49,5 +49,6 @@ func assembleApplication(resources Resources) (*App, string, error) {
 		return nil, "", err
 	}
 	app.tray = applicationTray
+	app.startupLabels = resources.StartupLabels
 	return app, webViewDirectory, nil
 }

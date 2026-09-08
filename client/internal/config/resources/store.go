@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
 )
 
@@ -249,14 +250,19 @@ func (s *Store) DeleteRuleSet(id string) (State, error) {
 	return s.saveUnlocked(state)
 }
 
-func (s *Store) loadUnlocked() (State, error) {
+func (s *Store) loadUnlocked() (result State, resultErr error) {
 	contents, err := os.ReadFile(s.file)
 	if errors.Is(err, os.ErrNotExist) {
 		return State{Directory: s.root, StrategyGroups: []StrategyGroup{}, RuleSets: []RuleSet{}}, nil
 	}
 	if err != nil {
-		return State{}, fmt.Errorf("read local resource library: %w", err)
+		return State{}, configfile.Unreadable(s.file, fmt.Errorf("read local resource library: %w", err))
 	}
+	defer func() {
+		if resultErr != nil {
+			resultErr = configfile.Invalid(s.file, contents, resultErr)
+		}
+	}()
 	if len(contents) > maxLibraryBytes {
 		return State{}, fmt.Errorf("local resource library exceeds size limit")
 	}

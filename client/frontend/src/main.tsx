@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import "./i18n";
 import { App } from "./app/App";
+import { StartupGate } from "./app/startup/StartupGate";
 import { UIErrorBoundary } from "./app/recovery/UIErrorBoundary";
 import { installUIErrorReporting, reportUIFailure } from "./app/recovery/diagnostics";
 import "./styles/tokens.css";
@@ -28,6 +29,6 @@ createRoot(document.getElementById("root")!, {
   onUncaughtError: (error) => { void reportUIFailure(error, "render", "app"); },
 }).render(
   <StrictMode>
-    <UIErrorBoundary scope="app"><App /></UIErrorBoundary>
+    <UIErrorBoundary scope="app"><StartupGate><App /></StartupGate></UIErrorBoundary>
   </StrictMode>,
 );

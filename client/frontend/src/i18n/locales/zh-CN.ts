@@ -6,6 +6,7 @@ import {
 import { zhMacNetwork, zhMacNetworkHelp } from "./mac-network";
 import trayLabels from "../tray-labels.json";
 import recoveryLabels from "../recovery-labels.json";
+import startupLabels from "../startup-labels.json";
 import { zhLocalConfigFieldHelp } from "./local-config-field-help";
 import { zhRuleSetEntry } from "./rule-set-entry";
 import { zhSubscriptionNormalization } from "./subscription-normalization";
@@ -22,6 +23,7 @@ export const zhCN = {
   },
   tray: trayLabels["zh-CN"],
   recovery: recoveryLabels["zh-CN"],
+  startup: startupLabels["zh-CN"],
   nav: {
     home: "主页",
     subscriptions: "订阅",

@@ -75,6 +75,7 @@ declare global {
     go?: {
       desktop?: {
         App?: {
+          InitializeClient: (language: string) => Promise<void>;
           GetBootstrapState: () => Promise<BootstrapState>;
           GetDNSQueryPreferences: () => Promise<DNSQueryPreferences>;
           QueryDNS: (input: DNSQueryRequest) => Promise<DNSQueryResponse>;

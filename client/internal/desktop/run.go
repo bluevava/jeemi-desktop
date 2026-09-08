@@ -18,10 +18,11 @@ import (
 
 // Resources are embedded by the executable entry point and passed to the desktop host.
 type Resources struct {
-	Assets     fs.FS
-	IconPNG    []byte
-	IconICO    []byte
-	TrayLabels []byte
+	Assets        fs.FS
+	IconPNG       []byte
+	IconICO       []byte
+	TrayLabels    []byte
+	StartupLabels []byte
 }
 
 func (r Resources) trayIcon() []byte {

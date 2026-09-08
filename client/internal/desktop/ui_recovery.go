@@ -9,11 +9,17 @@ import (
 )
 
 func (a *App) ReportUIFailure(input uidiagnostics.Failure) error {
-	return a.service.ReportUIFailure(input)
+	if service := a.currentService(); service != nil {
+		return service.ReportUIFailure(input)
+	}
+	return nil
 }
 
 func (a *App) OpenUIDiagnosticsDirectory() error {
-	return a.service.OpenUIDiagnosticsDirectory()
+	if service := a.currentService(); service != nil {
+		return service.OpenUIDiagnosticsDirectory()
+	}
+	return errors.New("client startup is incomplete")
 }
 
 // ReloadInterface is also dispatched by the native tray, so a React failure

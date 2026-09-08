@@ -70,7 +70,8 @@ export function TopBarRuntimeIndicators() {
           flag: leadingCountryFlag(node),
         };
       })
-      .filter((item) => item.node);
+      .filter((item) => item.node)
+      .slice(0, 10);
   }, [mode, projection, projectionIsActive, proxyRuntime, t]);
   const traffic = trafficSamples.at(-1) ?? {
     up: 0,
@@ -78,7 +79,7 @@ export function TopBarRuntimeIndicators() {
     upTotal: 0,
     downTotal: 0,
   };
-  const twoRows = exits.length >= 5;
+  const twoRows = exits.length > 5;
   const flagStyle = twoRows
     ? ({ "--selector-flag-columns": Math.ceil(exits.length / 2) } as CSSProperties)
     : undefined;

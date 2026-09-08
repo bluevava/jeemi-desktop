@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"jeemi/internal/configfile"
 	"jeemi/internal/dnsquery"
 	"jeemi/internal/geodata"
 	"jeemi/internal/runtimeconfig"
@@ -208,12 +209,12 @@ func (s *Store) loadUnlocked() (Document, error) {
 		return Document{}, nil
 	}
 	if err != nil {
-		return Document{}, fmt.Errorf("read settings: %w", err)
+		return Document{}, configfile.Unreadable(s.path, fmt.Errorf("read settings: %w", err))
 	}
 
 	var document Document
 	if err := json.Unmarshal(contents, &document); err != nil {
-		return Document{}, fmt.Errorf("parse settings: %w", err)
+		return Document{}, configfile.Invalid(s.path, contents, fmt.Errorf("parse settings: %w", err))
 	}
 	normalizeDocument(&document)
 	return document, nil

@@ -121,7 +121,12 @@ func TestFallbackSwitchResetsConnectionsOnlyAfterAppliedUsingSavedPreference(t *
 				return &http.Response{StatusCode: status, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body))}, nil
 			})}
 			driver := &fallbackTestDriver{}
-			s.runtimeManager, err = mihomoruntime.NewManager(mihomoruntime.Options{DataDirectory: root, Driver: driver, SystemProxy: fallbackTestSystemProxy{}, HTTPClient: client, GOOS: "windows"})
+			s.runtimeManager, err = mihomoruntime.NewManager(mihomoruntime.Options{
+				DataDirectory: root, Driver: driver, SystemProxy: fallbackTestSystemProxy{}, HTTPClient: client, GOOS: "windows",
+				// The default mode is TUN, but the fake driver cannot create a real
+				// interface. Keep readiness independent of the host's network state.
+				ObserveTUN: func(context.Context, string) error { return nil },
+			})
 			if err != nil {
 				t.Fatal(err)
 			}

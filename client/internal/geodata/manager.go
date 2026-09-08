@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"jeemi/internal/config/document"
+	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
 
 	"gopkg.in/yaml.v3"
@@ -669,17 +670,23 @@ func (m *Manager) CleanOldRevisions(preferences Preferences) (State, error) {
 
 func (m *Manager) Directory() string { return m.directory }
 
-func (m *Manager) loadManifest() (manifest, error) {
+func (m *Manager) loadManifest() (loaded manifest, resultErr error) {
 	result := manifest{
 		Version: manifestVersion, Desired: map[string]string{}, Active: map[string]string{}, AvailableSHA256: map[string]string{}, AvailableURLs: map[string]string{},
 	}
-	contents, err := os.ReadFile(filepath.Join(m.directory, "manifest.json"))
+	path := filepath.Join(m.directory, "manifest.json")
+	contents, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return result, nil
 	}
 	if err != nil {
-		return manifest{}, fmt.Errorf("read GEO data manifest: %w", err)
+		return manifest{}, configfile.Unreadable(path, fmt.Errorf("read GEO data manifest: %w", err))
 	}
+	defer func() {
+		if resultErr != nil {
+			resultErr = configfile.Invalid(path, contents, resultErr)
+		}
+	}()
 	if err := json.Unmarshal(contents, &result); err != nil {
 		return manifest{}, fmt.Errorf("parse GEO data manifest: %w", err)
 	}

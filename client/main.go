@@ -18,12 +18,16 @@ var applicationIconICO []byte
 //go:embed frontend/src/i18n/tray-labels.json
 var trayLabelsJSON []byte
 
+//go:embed frontend/src/i18n/startup-labels.json
+var startupLabelsJSON []byte
+
 func main() {
 	if err := desktop.Run(desktop.Resources{
-		Assets:     assets,
-		IconPNG:    applicationIconPNG,
-		IconICO:    applicationIconICO,
-		TrayLabels: trayLabelsJSON,
+		Assets:        assets,
+		IconPNG:       applicationIconPNG,
+		IconICO:       applicationIconICO,
+		TrayLabels:    trayLabelsJSON,
+		StartupLabels: startupLabelsJSON,
 	}); err != nil {
 		println("Jeemi startup failed:", err.Error())
 	}

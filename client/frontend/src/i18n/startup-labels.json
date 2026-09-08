@@ -1,0 +1,32 @@
+{
+  "zh-CN": {
+    "checking": "正在检查启动配置…",
+    "failed": "启动未完成，请处理提示中的配置文件后重新打开 Jeemi。",
+    "title": "Jeemi 配置文件错误",
+    "invalid": "以下配置文件的内容、字段或版本不符合要求：\n{{file}}",
+    "invalidOffset": "以下配置文件无法解析（字节位置 {{offset}}）：\n{{file}}",
+    "confirmMessage": "是否删除此文件并继续启动？该文件中保存的设置或资源将丢失，客户端会使用缺省配置继续启动；关联配置可能需要重新设置。\n\n选择“是”：仅删除上述文件并重新检查。\n选择“否”或关闭对话框：保留文件并退出，供你自行修复。",
+    "confirm": "是，删除并继续启动",
+    "cancel": "否，保留并退出",
+    "quit": "退出",
+    "errorTitle": "Jeemi 无法启动",
+    "readError": "无法读取或安全处理以下配置文件：\n{{file}}\n\n请检查文件权限、占用情况及路径后重新启动。文件未被删除，客户端将退出。",
+    "deleteError": "未能删除以下配置文件：\n{{file}}\n\n文件可能在确认后发生变化，或无法访问。请自行检查处理，客户端将退出。",
+    "otherError": "客户端初始化失败。请检查数据目录是否可访问，以及程序文件是否完整，然后重新启动。"
+  },
+  "en-US": {
+    "checking": "Checking startup configuration…",
+    "failed": "Startup did not complete. Fix the configuration file shown in the dialog and reopen Jeemi.",
+    "title": "Jeemi configuration file error",
+    "invalid": "This configuration file has invalid contents, fields, or a version that is not supported:\n{{file}}",
+    "invalidOffset": "This configuration file could not be parsed (byte offset {{offset}}):\n{{file}}",
+    "confirmMessage": "Delete this file and continue startup? Settings or resources stored in this file will be lost. Jeemi will continue with defaults; linked configurations may need to be adjusted.\n\nYes: delete only the file above and check again.\nNo or close this dialog: keep the file and exit so you can repair it manually.",
+    "confirm": "Yes, delete and continue",
+    "cancel": "No, keep and exit",
+    "quit": "Exit",
+    "errorTitle": "Jeemi could not start",
+    "readError": "This configuration file could not be read or safely accessed:\n{{file}}\n\nCheck its permissions, whether it is in use, and its path before restarting. The file was not deleted. Jeemi will exit.",
+    "deleteError": "This configuration file could not be deleted:\n{{file}}\n\nIt may have changed after confirmation or become inaccessible. Check the file manually. Jeemi will exit.",
+    "otherError": "Client initialization failed. Check that the data directory is accessible and the application files are intact, then restart."
+  }
+}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"jeemi/internal/application"
+	"jeemi/internal/platform/paths"
 	apptray "jeemi/internal/platform/tray"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -17,8 +18,14 @@ const windowActivityEvent = "jeemi:window-activity"
 // App is the narrow Wails binding surface exposed to the React renderer.
 // System and runtime behavior stays behind the application service.
 type App struct {
-	service *application.Service
-	tray    *apptray.Controller
+	service         *application.Service
+	tray            *apptray.Controller
+	serviceMu       sync.Mutex
+	dataDirectory   string
+	startupLabels   []byte
+	hostReady       chan struct{}
+	initializeOnce  sync.Once
+	initializeError error
 
 	runtimeMu         sync.RWMutex
 	runtimeCtx        context.Context
@@ -31,11 +38,10 @@ type App struct {
 }
 
 func NewApp(dataDirectory string) (*App, error) {
-	service, err := application.NewService(dataDirectory)
-	if err != nil {
+	if _, err := paths.SettingsFileFromRoot(dataDirectory); err != nil {
 		return nil, err
 	}
-	return &App{service: service}, nil
+	return &App{dataDirectory: dataDirectory, hostReady: make(chan struct{})}, nil
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -43,8 +49,10 @@ func (a *App) startup(ctx context.Context) {
 	a.runtimeCtx = ctx
 	a.runtimeMu.Unlock()
 	a.startSessionWatch(ctx)
-	a.service.Startup(ctx)
-	a.service.AcknowledgeJeemiRestart()
+	close(a.hostReady)
+}
+
+func (a *App) startTray(ctx context.Context) {
 	if a.tray != nil {
 		a.tray.Start(
 			func() {

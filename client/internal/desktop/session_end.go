@@ -25,8 +25,8 @@ func (a *App) cleanupForExit(ctx context.Context) {
 		a.exitCleanupDone = make(chan struct{})
 		go func() {
 			defer close(a.exitCleanupDone)
-			if a.service != nil {
-				_ = a.service.Shutdown(ctx)
+			if service := a.currentService(); service != nil {
+				_ = service.Shutdown(ctx)
 			}
 			if a.tray != nil {
 				a.tray.Stop()

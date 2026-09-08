@@ -6,6 +6,7 @@ import {
 import { enMacNetwork, enMacNetworkHelp } from "./mac-network";
 import trayLabels from "../tray-labels.json";
 import recoveryLabels from "../recovery-labels.json";
+import startupLabels from "../startup-labels.json";
 import { enLocalConfigFieldHelp } from "./local-config-field-help";
 import { enRuleSetEntry } from "./rule-set-entry";
 import { enSubscriptionNormalization } from "./subscription-normalization";
@@ -22,6 +23,7 @@ export const enUS = {
   },
   tray: trayLabels["en-US"],
   recovery: recoveryLabels["en-US"],
+  startup: startupLabels["en-US"],
   nav: {
     home: "Home",
     subscriptions: "Subscriptions",
