@@ -90,7 +90,7 @@ macOS 默认采用 ad-hoc 签名，GUI 与助手同时编译 `jeemi_local_test` 
 
 推送与 `client/wails.json` 一致的 `vX.Y.Z` 标签仍会触发同一流程。手动入口与标签入口共用发布队列，避免同时修改 Release。手动工作流创建标签后在本次运行内继续发布，不依赖标签推送再次触发构建。
 
-GitHub Actions 工作流只读取本仓库。发布任务使用仓库自身的 `GITHUB_TOKEN` 和明确声明的 `contents: write` 权限；当前 ad-hoc 签名无需证书 Secret。
+GitHub Actions 工作流只读取本仓库，并在 GitHub 托管的构建机器上独立运行。系统工具路径通过该构建机器的环境变量解析，不依赖维护者的电脑目录或编辑器配置。发布任务使用仓库自身的 `GITHUB_TOKEN` 和明确声明的 `contents: write` 权限；当前 ad-hoc 签名无需证书 Secret。
 
 分发归档由原生构建宿主生成：
 
@@ -99,5 +99,7 @@ node client/tools/release.mjs pack windows amd64
 ```
 
 同样支持其他两个平台。`Bin/jeemi/` 保留常规发布目录；GitHub 专用 ZIP 或 tar.gz、归档摘要及版本清单位于 `Bin/github/`。macOS 使用 `ditto` 归档，Linux 使用 tar.gz 保留执行权限。下载后的包包含自己的 `SHA256SUMS`，Release 另附所有归档的总摘要。
+
+Windows ZIP 使用系统目录中的 `System32\tar.exe`（bsdtar），避免 Git Bash 的同名 GNU tar 把盘符当成远程地址。运行构建工具时须保留 Windows 的 `SystemRoot` 或 `WINDIR` 环境变量。工具与 ZIP 格式说明见 [Microsoft tar 文档](https://learn.microsoft.com/en-us/windows/tar/)。
 
 发布先建立草稿并上传全部文件，完成后才公开。失败可以重跑原工作流；已公开版本不覆盖，后续变更需要新版本。工作流运行结果证明构建与测试通过，不替代真实桌面、授权和网络场景验证。

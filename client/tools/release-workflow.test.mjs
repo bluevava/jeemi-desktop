@@ -171,5 +171,5 @@ test("only a missing API resource means absent; permission and transport failure
     assert.doesNotMatch(error.message, new RegExp(token));
     return /请求失败或超时/.test(error.message);
   });
-  assert.throws(() => githubRequest("bluevava/jeemi-desktop-private", token));
+  assert.throws(() => githubRequest("example/unrelated-repository", token));
 });

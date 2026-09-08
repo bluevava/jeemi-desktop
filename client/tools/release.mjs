@@ -6,7 +6,7 @@ import {
   readdirSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, resolve, win32 } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   metadata,
@@ -28,6 +28,30 @@ export function archiveName(version, target) {
     target.directory +
     (target.platform === "linux" ? ".tar.gz" : ".zip")
   );
+}
+
+export function archiveCommand(target, source, archive, env = process.env) {
+  if (target.platform === "macos")
+    return {
+      command: "/usr/bin/ditto",
+      args: ["-c", "-k", "--sequesterRsrc", "--keepParent", source, archive],
+    };
+  if (target.platform === "windows") {
+    const systemRoot = env.SystemRoot || env.WINDIR;
+    if (!systemRoot || !win32.isAbsolute(systemRoot))
+      throw new Error("无法定位 Windows 系统目录，不能使用系统 ZIP 归档工具。");
+    // Git Bash can put GNU tar ahead of Windows bsdtar in PATH. GNU tar
+    // interprets drive-letter archive paths as remote hosts and cannot
+    // create ZIP files, so resolve the Windows implementation explicitly.
+    return {
+      command: win32.join(systemRoot, "System32", "tar.exe"),
+      args: ["-acf", archive, "-C", win32.dirname(source), target.directory],
+    };
+  }
+  return {
+    command: "tar",
+    args: ["-czf", archive, "-C", join(source, ".."), target.directory],
+  };
 }
 
 export function pack(platform, architecture, execute = run) {
@@ -74,23 +98,8 @@ export function pack(platform, architecture, execute = run) {
   const archive = join(output, archiveName(info.version, target));
   if (existsSync(archive))
     throw new Error("归档文件已存在，请保留或移走后重新生成。");
-  if (platform === "macos")
-    execute("/usr/bin/ditto", [
-      "-c",
-      "-k",
-      "--sequesterRsrc",
-      "--keepParent",
-      source,
-      archive,
-    ]);
-  else
-    execute(platform === "windows" ? "tar.exe" : "tar", [
-      platform === "windows" ? "-acf" : "-czf",
-      archive,
-      "-C",
-      join(source, ".."),
-      target.directory,
-    ]);
+  const command = archiveCommand(target, source, archive);
+  execute(command.command, command.args);
   const name = archiveName(info.version, target);
   writeFileSync(archive + ".sha256", sha256(archive) + "  " + name + "\n");
   copyFileSync(join(source, "release.json"), archive + ".release.json");

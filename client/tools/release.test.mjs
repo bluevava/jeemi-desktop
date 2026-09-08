@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { test } from "node:test";
 import {
   existsSync,
@@ -19,7 +20,7 @@ import {
   targetFor,
   validateBinary,
 } from "./release-common.mjs";
-import { archiveName, verifyArchives } from "./release.mjs";
+import { archiveCommand, archiveName, verifyArchives } from "./release.mjs";
 
 function temporary(t) {
   const root = mkdtempSync(join(tmpdir(), "jeemi-release-test-"));
@@ -124,6 +125,109 @@ test("release notes select an exact version and reject missing or empty notes", 
   assert.throws(() => releaseNotes("## 1.2.3\n\n## 1.2.2\nold", "1.2.3"));
   assert.throws(() => metadata(undefined, "v999.0.0"));
 });
+
+test("Windows ZIP tools resolve outside Git Bash PATH for both architectures", () => {
+  for (const arch of ["amd64", "arm64"]) {
+    const target = targetFor("windows", arch);
+    const source = "D:\\a\\source with spaces\\Bin\\jeemi\\" + target.directory;
+    const archive =
+      "D:\\a\\source with spaces\\Bin\\github\\" + archiveName("1.2.3", target);
+    const command = archiveCommand(target, source, archive, {
+      SystemRoot: "C:\\Windows",
+      PATH: "C:\\Program Files\\Git\\usr\\bin",
+    });
+    assert.equal(command.command, "C:\\Windows\\System32\\tar.exe");
+    assert.deepEqual(command.args, [
+      "-acf",
+      archive,
+      "-C",
+      "D:\\a\\source with spaces\\Bin\\jeemi",
+      target.directory,
+    ]);
+    // Synthetic alternate system root; this path is never executed.
+    assert.equal(
+      archiveCommand(target, source, archive, { WINDIR: "X:\\FixtureWindows" })
+        .command,
+      "X:\\FixtureWindows\\System32\\tar.exe",
+    );
+    assert.throws(
+      () => archiveCommand(target, source, archive, {}),
+      /系统目录/,
+    );
+    assert.throws(
+      () => archiveCommand(target, source, archive, { SystemRoot: "Windows" }),
+      /系统目录/,
+    );
+  }
+  assert.equal(
+    archiveCommand(
+      targetFor("linux", "amd64"),
+      "/release/Linux-amd64",
+      "/output/linux.tar.gz",
+      {},
+    ).command,
+    "tar",
+  );
+  assert.equal(
+    archiveCommand(
+      targetFor("macos", "arm64"),
+      "/release/macOS-arm64",
+      "/output/mac.zip",
+      {},
+    ).command,
+    "/usr/bin/ditto",
+  );
+});
+
+test(
+  "Windows native tar creates real ZIPs from drive-letter paths with spaces",
+  {
+    skip: process.platform !== "win32" && "requires Windows system bsdtar",
+  },
+  (t) => {
+    const root = temporary(t);
+    for (const arch of ["amd64", "arm64"]) {
+      const target = targetFor("windows", arch);
+      const source = join(root, "source with spaces", target.directory);
+      mkdirSync(source, { recursive: true });
+      writeFileSync(join(source, "Jeemi.exe"), "test GUI");
+      writeFileSync(join(source, "jeemi-authorizer.exe"), "test helper");
+      const archive = join(root, "output with spaces " + arch + ".zip");
+      const command = archiveCommand(target, source, archive);
+      const options = { encoding: "utf8", windowsHide: true, timeout: 10_000 };
+      execFileSync(command.command, command.args, options);
+      assert.equal(readFileSync(archive).readUInt32LE(0), 0x04034b50);
+      const entries = execFileSync(command.command, ["-tf", archive], options)
+        .replaceAll("\\", "/")
+        .trim()
+        .split(/\r?\n/);
+      assert.deepEqual(
+        new Set(entries),
+        new Set([
+          target.directory + "/",
+          target.directory + "/Jeemi.exe",
+          target.directory + "/jeemi-authorizer.exe",
+        ]),
+      );
+      assert.equal(
+        execFileSync(
+          command.command,
+          ["-xOf", archive, target.directory + "/Jeemi.exe"],
+          options,
+        ),
+        "test GUI",
+      );
+      assert.equal(
+        execFileSync(
+          command.command,
+          ["-xOf", archive, target.directory + "/jeemi-authorizer.exe"],
+          options,
+        ),
+        "test helper",
+      );
+    }
+  },
+);
 
 test("release requires all six archives with correct checksums and signing claims", (t) => {
   const root = temporary(t);

@@ -4,7 +4,7 @@
     ".github/workflows/ci.yml": "68ce9fd56d830d2ae4ee2911d7f256c0dd3aef6afaa4ef3af307a96d03eecff5",
     ".github/workflows/release.yml": "2fa62d026b630fd381c2a6187702631efa8300a3ac8bd1de92ad424a87e812d9",
     ".gitignore": "f9bc02f0ede181cf96dacfc181647eecc618e8135aa891a46c38c92aeb9f4a4d",
-    "BUILDING.md": "74f9cfca743cf3be69f1d5931bc0a6949368277112a682620ecc53370289daa4",
+    "BUILDING.md": "bdf2dc1b99f4a64f9026604dadceb0ad5aff4463e8a1da01d5b6582ebfb2ff97",
     "CHANGELOG.md": "ea90e65d43818bf37fc8d47c85e9e575d58d854b7a3e537323dcb333e298c05c",
     "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
     "README.md": "aad008a27816b33a2e882f261505094fabb37de8e755dcd173a8b7b757c52285",
@@ -578,9 +578,9 @@
     "client/tools/macos-package.mjs": "4b629fe5c1f72fd326e4a8bcea672c09cd480d693f683b87f1b0599263ce460b",
     "client/tools/release-common.mjs": "80dd9cde4c0c6d33252230ed3b68069538a97e344f141557229dedf4a8adc25f",
     "client/tools/release-workflow.mjs": "3a54a71c8909789075c59332114883e0cd69716657e17c2f263d350b7704030a",
-    "client/tools/release-workflow.test.mjs": "1e4890f4087fabd1ead6e072d7c0cbc51e883275802da44cdda8d1b27df588e2",
-    "client/tools/release.mjs": "3b898865607db238f682f820143c41f0cf3124e5e6c8aeac7d232f5cd7c9a570",
-    "client/tools/release.test.mjs": "e399cc89d2c2d96cc10c5609ffc4e930ce19a1ba492f817a31b8f85f9f9ae44a",
+    "client/tools/release-workflow.test.mjs": "100e9a649a81cb1e5cfcb2d3faa0a7168cf0101c99f64dde72c7529f771d72f2",
+    "client/tools/release.mjs": "0c7e9484e87543ed31ef63dc45deef2e43650a530c084e0401d0cd688e070fa5",
+    "client/tools/release.test.mjs": "bf28e188b5297e7fee269bb084840de0149ec9443790f687185b02985779d9b0",
     "client/wails.json": "1dcaf64041863be77cddbb8af6081a62a8b99bb761677e7095cb180f755bdd79"
   },
   "version": 1
