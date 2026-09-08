@@ -1,0 +1,1151 @@
+.local-config-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 300px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.local-config-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 288px));
+  align-items: stretch;
+  justify-content: start;
+  gap: 14px;
+}
+
+.local-config-card.ant-card,
+.local-config-create-card {
+  min-width: 0;
+  height: 144px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.local-config-card.ant-card:hover {
+  border-color: var(--color-accent);
+}
+
+.local-config-card .ant-card-body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  height: 100%;
+  padding: 12px;
+}
+
+.local-config-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 8px;
+}
+
+.local-config-card-heading .ant-btn {
+  flex: 0 0 auto;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.local-config-card-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+}
+
+.local-config-card-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+.local-config-card-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.local-config-card-copy strong,
+.local-config-card-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.local-config-card-copy strong {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.local-config-card-copy small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-config-card-facts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.local-config-card-facts span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.local-config-card-facts strong {
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+
+.local-config-card time {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.local-config-create-card {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 12px;
+  border-style: dashed;
+  color: var(--color-text);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.local-config-create-card:hover,
+.local-config-create-card:focus-within {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  outline: none;
+}
+
+.local-config-create-card .library-create-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+.local-config-create-card strong {
+  font-size: var(--font-size-body);
+}
+
+.local-config-library-tabs > .ant-tabs-nav {
+  margin-bottom: 18px;
+}
+
+.local-config-library-tabs .ant-tabs-tab {
+  font-size: var(--font-size-body);
+}
+
+.local-script-code-card.ant-card {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.local-script-code-card .ant-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.local-script-code-heading,
+.local-script-test-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.local-script-code-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.local-script-test-meta > span:not(.ant-tag) {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-script-source.ant-input,
+.local-script-test-result pre {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.local-script-source.ant-input {
+  min-height: 360px;
+  resize: vertical;
+}
+
+.local-script-test-result {
+  display: grid;
+  gap: 12px;
+}
+
+.local-script-test-result pre {
+  max-height: 62vh;
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  white-space: pre;
+}
+
+.local-script-error-text {
+  white-space: pre-wrap;
+}
+
+.config-resource-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.config-resource-card-heading > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.config-resource-card-heading small {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-resource-title-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.config-resource-title-line strong {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.config-resource-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+  gap: 14px;
+}
+
+.config-resource-card.ant-card,
+.config-resource-create-card {
+  height: 152px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.config-resource-card .ant-card-body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 9px;
+  height: 100%;
+  padding: 13px;
+}
+
+.config-resource-card-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 9px;
+}
+
+.config-resource-card-heading strong,
+.config-resource-card-heading small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-resource-card-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.config-resource-card-heading .ant-btn {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.config-resource-tags {
+  display: flex;
+  overflow: hidden;
+  gap: 5px;
+}
+
+.config-resource-tags .ant-tag {
+  overflow: hidden;
+  max-width: 46%;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-resource-card time {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.config-resource-create-card {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 14px;
+  border-style: dashed;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.config-resource-create-card:hover,
+.config-resource-create-card:focus-within {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  outline: none;
+}
+
+.config-resource-create-card .library-create-icon {
+  color: var(--color-accent);
+  font-size: 20px;
+}
+
+.library-create-card {
+  position: relative;
+}
+
+.library-create-action {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.library-create-action:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.library-create-icon,
+.library-create-label {
+  position: relative;
+  pointer-events: none;
+}
+
+.library-create-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.library-create-label .feature-help-button {
+  flex: 0 0 auto;
+  pointer-events: auto;
+}
+
+.config-resource-form {
+  display: grid;
+  gap: 15px;
+  padding-top: 8px;
+}
+
+.config-resource-form > label,
+.config-resource-form-row > label,
+.config-resource-field {
+  display: grid;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.config-resource-form > label > small,
+.config-resource-form-row > label > small {
+  line-height: 1.5;
+}
+
+.config-resource-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.config-resource-form-row.three-columns {
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.35fr) minmax(
+      120px,
+      0.35fr
+    );
+}
+
+.strategy-group-name-row {
+  grid-template-columns: minmax(0, 1fr) 108px;
+}
+
+.strategy-group-name-row.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.strategy-selector-basics {
+  grid-template-columns: minmax(132px, 0.55fr) minmax(0, 1.45fr);
+}
+
+.strategy-selector-basics.with-lazy {
+  grid-template-columns: minmax(132px, 0.55fr) minmax(0, 1.45fr) minmax(
+      116px,
+      0.5fr
+    );
+}
+
+.config-resource-form .ant-select,
+.config-resource-form .ant-input-number {
+  width: 100%;
+}
+
+.config-resource-field-label {
+  display: flex;
+  align-items: center;
+  min-height: 22px;
+  gap: 3px;
+  line-height: 1.35;
+}
+
+.config-resource-field-label > strong {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.config-resource-field-label .feature-help-button.compact {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+}
+
+.config-segmented-control.ant-segmented {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+}
+
+.config-segmented-control .ant-segmented-group {
+  width: 100%;
+}
+
+.config-segmented-control .ant-segmented-item {
+  min-width: 0;
+  flex: 1 1 0;
+  border-radius: 9px;
+  text-align: center;
+}
+
+.config-resource-readonly-control {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+}
+
+.config-resource-switch-control {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  gap: 10px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+}
+
+.config-resource-switch-control > span {
+  margin-left: auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.rule-set-http-row {
+  grid-template-columns: minmax(0, 1fr) 150px;
+}
+
+.config-emoji-select .ant-select-selection-item,
+.config-emoji-select .ant-select-selection-placeholder {
+  font-family:
+    "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 18px;
+  text-align: center;
+}
+
+.config-country-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.config-country-option > :first-child {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+}
+
+.strategy-rule-set-editor {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.strategy-rule-set-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.strategy-rule-set-heading > div:not(.config-resource-field-label) {
+  display: grid;
+  gap: 3px;
+}
+
+.strategy-rule-set-empty {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.strategy-rule-set-list {
+  display: grid;
+  gap: 7px;
+}
+
+.strategy-rule-set-row {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+
+.strategy-drag-handle {
+  color: var(--color-text-secondary);
+  cursor: grab;
+}
+
+.local-config-editor-page {
+  padding-bottom: 16px;
+}
+
+.local-config-metadata .ant-card-body {
+  padding: 14px 18px;
+}
+
+.local-config-metadata-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.65fr) minmax(0, 1.35fr);
+  gap: 12px 18px;
+}
+
+.local-config-rule-plan-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
+.local-config-rules-activation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.local-config-rule-plan-modes > label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-config-ordered-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.local-config-ordered-groups-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.local-config-ordered-groups-heading > div:not(.ant-select) {
+  display: grid;
+  gap: 4px;
+}
+
+.local-config-ordered-groups-heading span,
+.local-config-ordered-group-row small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.local-config-ordered-groups-heading > .ant-select {
+  min-width: min(280px, 42%);
+}
+
+.local-config-ordered-group-list {
+  display: grid;
+  gap: 8px;
+}
+
+.local-config-ordered-group-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.local-config-ordered-group-row.is-disabled {
+  color: var(--color-text-secondary);
+}
+
+.local-config-ordered-group-row.is-disabled .local-config-ordered-group-icon {
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+.local-config-ordered-group-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.local-config-ordered-group-row > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.local-config-ordered-group-row strong,
+.local-config-ordered-group-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.local-config-metadata-grid > label,
+.config-field-control {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-config-metadata-grid .ant-select,
+.config-field-control .ant-select,
+.config-field-control .ant-input-number {
+  width: 100%;
+}
+
+.local-config-description-field {
+  min-width: 0;
+}
+
+.local-config-workbench {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.36fr) minmax(480px, 1fr);
+  gap: 18px;
+  min-height: 570px;
+}
+
+.config-tree-card.ant-card,
+.config-field-card.ant-card {
+  min-width: 0;
+}
+
+.config-field-card.ant-card {
+  --config-field-panel-max-height: calc(
+    100vh - var(--top-bar-height) - 16px - 104px
+  );
+  --config-field-panel-max-height: calc(
+    100dvh - var(--top-bar-height) - 16px - 104px
+  );
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  max-height: var(--config-field-panel-max-height);
+  overflow: hidden;
+}
+
+.config-tree-card .ant-card-body,
+.config-field-card .ant-card-body {
+  height: 100%;
+  padding: 18px;
+}
+
+.config-field-card .ant-card-body {
+  height: auto;
+  max-height: var(--config-field-panel-max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.config-tree-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.config-tree-toolbar {
+  display: grid;
+  gap: 10px;
+}
+
+.config-tree-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.config-tree-filter-row > label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.config-tree-card .ant-tree {
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 7px;
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.config-tree-field-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+}
+
+.config-tree-field-title .anticon {
+  color: var(--color-warning);
+}
+
+.config-field-editor {
+  display: grid;
+  gap: 20px;
+}
+
+.config-field-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.config-field-heading > div {
+  display: grid;
+  gap: 6px;
+}
+
+.config-field-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.config-field-title-line code {
+  color: var(--color-text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.config-field-heading > div > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.config-field-output-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 16px;
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.config-field-output-row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.config-field-output-row strong {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.config-field-output-row span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.config-field-value-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.config-yaml-input {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-body);
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.config-sensitive-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 120px;
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-config-action-wrap {
+  --wails-draggable: no-drag;
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+}
+
+.local-config-action-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(128px, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-navigation);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.local-config-action-bar .ant-btn {
+  border-radius: 13px;
+  font-size: var(--font-size-body);
+  font-weight: 650;
+}
+
+.local-config-preview {
+  display: grid;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.local-config-preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.local-config-preview pre {
+  overflow: auto;
+  max-height: 54vh;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.local-config-transform-preview {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.local-config-transform-preview code {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+
+@media (max-width: 1080px) {
+  .local-config-workbench {
+    grid-template-columns: minmax(250px, 0.42fr) minmax(400px, 1fr);
+  }
+
+  .local-config-rule-plan-modes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .config-field-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .local-config-card-grid,
+  .local-config-metadata-grid,
+  .local-config-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .local-config-description-field {
+    grid-column: auto;
+  }
+
+  .config-resource-form-row,
+  .config-resource-form-row.three-columns,
+  .strategy-group-name-row,
+  .strategy-group-name-row.single-column,
+  .strategy-selector-basics,
+  .strategy-selector-basics.with-lazy,
+  .strategy-rule-set-row {
+    grid-template-columns: 1fr;
+  }
+
+  .local-config-ordered-groups-heading,
+  .strategy-rule-set-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .local-config-ordered-groups-heading > .ant-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .local-config-workbench {
+    min-height: 0;
+  }
+
+  .config-tree-card .ant-card-body {
+    max-height: 440px;
+  }
+
+  .config-field-card.ant-card {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .config-field-card .ant-card-body {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .local-config-action-bar {
+    grid-template-columns: repeat(3, minmax(82px, 1fr));
+  }
+}
+
+.local-config-sections.ant-collapse {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+.local-config-sections .ant-collapse-header-text {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+}
+.local-config-sections .ant-collapse-content-box {
+  padding: 16px;
+}
+.local-config-sections .local-config-workbench {
+  min-height: 400px;
+}
+.strategy-group-info-row {
+  grid-template-columns: 110px minmax(180px, 0.7fr) minmax(0, 1.3fr);
+}
+.rule-set-page-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.35fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.local-resource-editor-page .feature-card {
+  min-width: 0;
+}
+.resource-create-menu-anchor {
+  display: grid;
+  min-width: 0;
+}
+.flag-picker {
+  width: min(340px, 75vw);
+}
+.flag-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+.strategy-rule-set-heading.node-name-filter-heading {
+  align-items: center;
+  flex-direction: row;
+}
+.node-name-filter-heading .config-resource-field-label {
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .strategy-group-info-row {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+  .strategy-group-info-row > label:last-child {
+    grid-column: 1 / -1;
+  }
+  .rule-set-page-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.local-resource-editor-page .ant-card-head {
+  min-height: 44px;
+  padding-inline: 18px;
+}
+.local-resource-editor-page .ant-card-head-title {
+  font-size: var(--font-size-body);
+}
+.local-resource-editor-page .ant-card-body {
+  padding: 16px 18px;
+}
+.local-package-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.local-package-preview {
+  max-height: min(60vh, 560px);
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+
+.local-package-preview section {
+  margin-top: 16px;
+}
+
+.local-package-preview ul {
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+
+.local-package-error pre {
+  max-height: 40vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}

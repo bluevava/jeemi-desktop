@@ -1,0 +1,331 @@
+.connections-panel {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-height: 360px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.connections-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 18px;
+}
+
+.connections-heading,
+.connections-title-line,
+.connections-toolbar-actions,
+.connection-traffic {
+  display: flex;
+  align-items: center;
+}
+
+.connections-heading {
+  min-width: 0;
+  gap: 12px;
+}
+
+.connections-heading-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 19px;
+}
+
+.connections-heading > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.connections-title-line {
+  gap: 4px;
+}
+
+.connections-title-line strong {
+  color: var(--color-text);
+  font-size: var(--font-size-section-title);
+}
+
+.connections-heading small {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connections-toolbar-actions {
+  flex: 1 1 820px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.connections-toolbar-actions .ant-input-affix-wrapper {
+  width: min(320px, 40vw);
+}
+
+.connections-toolbar-actions .ant-select {
+  width: min(260px, 34vw);
+}
+
+.connections-toolbar-actions .ant-segmented {
+  flex: 0 0 auto;
+}
+
+.connections-loading {
+  display: flex;
+  min-height: 260px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  gap: 10px;
+}
+
+.connection-list {
+  display: grid;
+  gap: 8px;
+  transition: opacity 160ms ease;
+}
+
+.connection-list.stale {
+  opacity: 0.58;
+}
+
+.connection-item {
+  display: grid;
+  grid-template-areas: "target process rule outbound traffic close";
+  grid-template-columns:
+    minmax(220px, 1.45fr)
+    minmax(130px, 0.8fr)
+    minmax(110px, 0.65fr)
+    minmax(150px, 1fr)
+    minmax(150px, auto)
+    34px;
+  align-items: center;
+  min-width: 0;
+  min-height: 70px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  background: var(--color-surface-muted);
+  gap: 13px;
+}
+
+.connection-target { grid-area: target; }
+.connection-process { grid-area: process; }
+.connection-rule { grid-area: rule; }
+.connection-outbound { grid-area: outbound; }
+.connection-traffic { grid-area: traffic; }
+.connection-close { grid-area: close; }
+
+.connection-target,
+.connection-detail {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.connection-target strong,
+.connection-detail strong,
+.connection-details-trigger {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-details-trigger {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.connection-details-trigger:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.connection-details-trigger:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.connection-details-body {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.connection-details-body .ant-descriptions {
+  width: 100%;
+}
+
+.connection-details-body .ant-descriptions-item-label {
+  white-space: nowrap;
+}
+
+.connection-details-body .ant-descriptions-item-content {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+.connection-process-path {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.connection-rule-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.connection-rule-field-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.connection-rule-field > .ant-btn {
+  flex-shrink: 0;
+}
+
+.connection-details-dialog .rule-documentation-heading,
+.connection-rule-set-dialog .rule-documentation-heading {
+  margin-right: 28px;
+}
+
+.rule-entry-form {
+  display: grid;
+  gap: 16px;
+  max-height: min(68vh, 650px);
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.rule-entry-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rule-entry-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rule-entry-refresh {
+  margin-left: auto;
+}
+
+.rule-entry-preview {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.connection-target small,
+.connection-detail span {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-traffic {
+  justify-content: flex-end;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  gap: 9px;
+}
+
+@media (max-width: 1120px) {
+  .connections-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .connections-toolbar-actions {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+
+  .connection-item {
+    grid-template-columns: minmax(140px, 1.3fr) minmax(95px, 0.8fr) minmax(110px, 1fr) minmax(100px, 0.9fr) minmax(90px, auto) 34px;
+    gap: 10px;
+  }
+
+  .connection-traffic {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 760px) {
+  .connections-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .connections-toolbar-actions .ant-input-affix-wrapper {
+    width: 100%;
+  }
+
+  .connections-toolbar-actions .ant-select {
+    width: 100%;
+  }
+
+  .connection-item {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) 34px;
+    grid-template-areas:
+      "target target close"
+      "process outbound outbound"
+      "rule rule rule"
+      "traffic traffic traffic";
+  }
+
+  .connection-traffic {
+    flex-direction: row;
+    gap: 9px;
+  }
+}

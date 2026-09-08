@@ -1,0 +1,337 @@
+.app-shell {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  grid-template-rows: var(--top-bar-height) minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.app-overlay-layer {
+  --wails-draggable: no-drag;
+  position: absolute;
+  z-index: 75;
+  top: var(--top-bar-height);
+  right: var(--scrollbar-size);
+  left: 0;
+  pointer-events: none;
+}
+
+.app-overlay-layer > * {
+  pointer-events: auto;
+}
+
+.top-bar {
+  --wails-draggable: drag;
+  position: relative;
+  z-index: 80;
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  align-items: center;
+  min-height: var(--top-bar-height);
+  height: var(--top-bar-height);
+  padding: 0 14px 0 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  backdrop-filter: blur(22px) saturate(150%);
+  user-select: none;
+}
+
+.top-bar-native {
+  /* AppKit owns the real buttons, their hit targets and fullscreen behavior. */
+  padding-left: var(--macos-window-controls-inset);
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 7px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  box-shadow: 0 8px 20px var(--color-accent-soft);
+  object-fit: cover;
+}
+
+.top-bar-app-name {
+  flex: 0 0 auto;
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+  letter-spacing: 0.02em;
+}
+
+.top-bar-page-title {
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-bar button:not(:disabled),
+.top-bar a[href],
+.top-bar input:not(:disabled),
+.top-bar textarea:not(:disabled),
+.top-bar select:not(:disabled),
+.top-bar [role="button"]:not([aria-disabled="true"]) {
+  --wails-draggable: no-drag;
+}
+
+.page-settings-button.ant-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.page-settings-button.ant-btn:hover,
+.page-settings-button.ant-btn.active {
+  background: var(--color-accent-soft) !important;
+  color: var(--color-accent) !important;
+}
+
+.top-bar-button-slot {
+  display: inline-flex;
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.top-bar-runtime-indicators {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  margin-right: 4px;
+}
+
+.top-bar-selector-flags {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 26px;
+  padding: 2px 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface-muted);
+}
+
+.top-bar-selector-flags.two-rows {
+  display: grid;
+  grid-template-columns: repeat(var(--selector-flag-columns), 13px);
+  grid-template-rows: repeat(2, 13px);
+  grid-auto-flow: row;
+  column-gap: 2px;
+  row-gap: 0;
+}
+
+.top-bar-selector-flag {
+  display: inline-grid;
+  width: 18px;
+  height: 20px;
+  place-items: center;
+  color: var(--color-text-secondary);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.top-bar-selector-flags.two-rows .top-bar-selector-flag {
+  width: 13px;
+  height: 13px;
+  font-size: 11px;
+}
+
+.top-bar-traffic {
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.top-bar-traffic.stale {
+  color: var(--color-text-secondary);
+}
+
+.top-bar-actions .ant-btn {
+  color: var(--color-text-secondary);
+}
+
+.top-bar-actions .ant-btn:hover {
+  color: var(--color-text) !important;
+}
+
+.window-control-divider {
+  height: 22px;
+  margin-inline: 7px !important;
+  border-color: var(--color-border) !important;
+}
+
+.window-close-button:hover {
+  background: var(--color-danger) !important;
+  color: var(--color-on-danger) !important;
+}
+
+.app-content {
+  width: 100%;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 28px var(--page-padding-inline) 104px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
+.app-content::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--color-scrollbar-thumb);
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bottom-navigation-wrap {
+  --wails-draggable: no-drag;
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+}
+
+.settings-action-wrap {
+  --wails-draggable: no-drag;
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+}
+
+.settings-action-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(126px, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-navigation);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.settings-action-bar .ant-btn {
+  border-radius: 13px;
+  font-size: var(--font-size-body);
+  font-weight: 650;
+}
+
+.bottom-navigation {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 17px;
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-navigation);
+  backdrop-filter: blur(24px) saturate(155%);
+}
+
+.bottom-navigation-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 74px;
+  height: 41px;
+  padding: 0 10px;
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.bottom-navigation-item:hover {
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.bottom-navigation-item.active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.bottom-navigation-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+@media (max-width: 1080px) {
+  .status-pill-label {
+    display: none;
+  }
+
+  .app-content {
+    padding-inline: clamp(22px, 3vw, 36px);
+  }
+}
+
+@media (max-width: 760px) {
+  .top-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .app-content {
+    padding: 22px 18px 96px;
+  }
+
+  .bottom-navigation-item {
+    min-width: 52px;
+    padding-inline: 7px;
+  }
+
+  .bottom-navigation-item > span:last-child {
+    display: none;
+  }
+}

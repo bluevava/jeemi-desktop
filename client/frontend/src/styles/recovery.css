@@ -1,0 +1,78 @@
+.ui-recovery {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  padding: 24px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: var(--font-size-body);
+}
+
+.ui-recovery-app {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.ui-recovery-card {
+  width: min(100%, 640px);
+  padding: 28px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.ui-recovery-card h2 {
+  margin: 0 0 16px;
+  font-size: var(--font-size-section-title);
+}
+
+.ui-recovery-card p {
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+.ui-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block: 20px;
+}
+
+.ui-recovery-actions button,
+.ui-recovery-actions a,
+.ui-recovery-status {
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-control);
+  background: var(--color-control);
+  color: var(--color-text);
+  padding: 7px 14px;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  --wails-draggable: no-drag;
+}
+
+.ui-recovery-actions .ui-recovery-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.ui-recovery button:focus-visible,
+.ui-recovery a:focus-visible,
+.ui-recovery-status:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.ui-recovery-diagnostic {
+  margin-bottom: 0;
+  font-size: var(--font-size-caption);
+}
+
+.ui-recovery-status {
+  padding: 3px 8px;
+  color: var(--color-warning);
+  font-size: var(--font-size-caption);
+}

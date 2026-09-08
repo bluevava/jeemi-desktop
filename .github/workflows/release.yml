@@ -1,0 +1,130 @@
+name: 构建并发布 Jeemi
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'bluevava/jeemi-desktop'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: windows, arch: amd64, runner: windows-2022 }
+          - { platform: windows, arch: arm64, runner: windows-2022 }
+          - { platform: linux, arch: amd64, runner: ubuntu-22.04 }
+          - { platform: linux, arch: arm64, runner: ubuntu-22.04-arm }
+          - { platform: macos, arch: amd64, runner: macos-15-intel }
+          - { platform: macos, arch: arm64, runner: macos-15 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: client/go.mod
+          cache-dependency-path: client/go.sum
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: client/.node-version
+      - name: 校验版本并读取工具版本
+        id: meta
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node client/tools/release.mjs metadata "$RELEASE_TAG"
+      - name: Linux 开发库
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev binutils
+      - name: 安装固定版本工具和依赖
+        env:
+          PNPM_VERSION: ${{ steps.meta.outputs.pnpm }}
+          WAILS_VERSION: ${{ steps.meta.outputs.wails }}
+        run: |
+          npm install --global "pnpm@$PNPM_VERSION"
+          go install "github.com/wailsapp/wails/v2/cmd/wails@$WAILS_VERSION"
+          pnpm --dir client/frontend install --frozen-lockfile
+      - name: 测试
+        env:
+          TARGET_PLATFORM: ${{ matrix.platform }}
+        run: |
+          pnpm --dir client/frontend typecheck
+          pnpm --dir client/frontend test --maxWorkers=2
+          node --test client/tools/*.test.mjs
+          if [ "$TARGET_PLATFORM" = linux ]; then
+            go -C client test -tags webkit2_41 ./...
+            go -C client vet -tags webkit2_41 ./...
+          elif [ "$TARGET_PLATFORM" = macos ]; then
+            go -C client test -tags jeemi_local_test ./...
+            go -C client vet -tags jeemi_local_test ./...
+          else
+            go -C client test ./...
+            go -C client vet ./...
+          fi
+      - name: 构建并归档
+        env:
+          TARGET_PLATFORM: ${{ matrix.platform }}
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          node client/tools/build.mjs --platform "$TARGET_PLATFORM" --arch "$TARGET_ARCH"
+          node client/tools/release.mjs pack "$TARGET_PLATFORM" "$TARGET_ARCH"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-${{ matrix.platform }}-${{ matrix.arch }}
+          path: Bin/github/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: client/.node-version
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: 验证完整产物与更新说明
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node client/tools/release.mjs prepare release-assets "$RELEASE_TAG"
+      - name: 创建草稿、上传全部产物后发布
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --json isDraft > release-state.json; then
+            node -e "if (!JSON.parse(require('fs').readFileSync('release-state.json')).isDraft) throw Error('该版本已经发布，不覆盖发布产物');"
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Jeemi $RELEASE_TAG" --notes-file release-assets/release-notes.md
+          fi
+          gh release edit "$RELEASE_TAG" --notes-file release-assets/release-notes.md
+          shopt -s nullglob
+          assets=(release-assets/*.zip release-assets/*.tar.gz release-assets/*.sha256 release-assets/*.release.json release-assets/SHA256SUMS)
+          gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          gh release edit "$RELEASE_TAG" --draft=false --latest

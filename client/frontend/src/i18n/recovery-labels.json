@@ -1,0 +1,34 @@
+{
+  "zh-CN": {
+    "appTitle": "界面暂时无法显示",
+    "pageTitle": "此页面遇到了问题",
+    "statusTitle": "实时状态暂不可用",
+    "description": "可以重试此区域，或重新加载界面。界面恢复不会重启 mihomo，也不会修改已保存的配置。",
+    "draftCaution": "发生异常的区域中，未保存的编辑可能已经丢失。重新加载会丢弃其余未保存的编辑。",
+    "retry": "重试",
+    "reload": "重新加载界面",
+    "reloadConfirm": "重新加载界面会丢弃未保存的编辑。mihomo 会保持运行。是否继续？",
+    "home": "返回主页",
+    "diagnostics": "打开诊断目录",
+    "saved": "已保存脱敏界面诊断，可用于排查此次故障。",
+    "saving": "正在保存界面诊断…",
+    "unavailable": "此次诊断未能保存。",
+    "actionFailed": "操作未完成，可从系统托盘重新加载界面。"
+  },
+  "en-US": {
+    "appTitle": "The interface could not be displayed",
+    "pageTitle": "This page encountered a problem",
+    "statusTitle": "Live status is unavailable",
+    "description": "Retry this area or reload the interface. Recovery does not restart mihomo or change saved configuration.",
+    "draftCaution": "Unsaved edits in the affected area may already be lost. Reloading discards any remaining unsaved edits.",
+    "retry": "Retry",
+    "reload": "Reload interface",
+    "reloadConfirm": "Reloading discards unsaved edits. mihomo will keep running. Continue?",
+    "home": "Go to home",
+    "diagnostics": "Open diagnostics folder",
+    "saved": "Sanitized interface diagnostics have been saved for troubleshooting.",
+    "saving": "Saving interface diagnostics…",
+    "unavailable": "Diagnostics could not be saved for this incident.",
+    "actionFailed": "The action could not be completed. Try reloading from the system tray."
+  }
+}

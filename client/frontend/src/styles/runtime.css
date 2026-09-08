@@ -1,0 +1,542 @@
+.home-runtime-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(270px, 1fr);
+  align-items: stretch;
+  gap: 24px;
+}
+
+.home-runtime-overview-grid > .feature-card {
+  min-width: 0;
+  height: 100%;
+}
+
+.home-runtime-overview-grid .feature-card .ant-card-body {
+  height: 100%;
+  padding: 20px 22px;
+}
+
+.home-runtime-overview-grid .feature-card-heading {
+  margin-bottom: 14px;
+}
+
+.runtime-configuration-view {
+  display: grid;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.runtime-configuration-loading {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  gap: 10px;
+}
+
+.runtime-configuration-meta {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  gap: 8px;
+}
+
+.runtime-configuration-meta code {
+  overflow: hidden;
+  max-width: 420px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runtime-configuration-view pre {
+  overflow: auto;
+  max-height: 58vh;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.runtime-traffic-card .ant-card-body {
+  display: grid;
+  gap: 12px;
+}
+
+.runtime-traffic-rates,
+.runtime-traffic-legend {
+  display: flex;
+  align-items: center;
+}
+
+.runtime-traffic-rates {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  gap: 14px;
+}
+
+.runtime-traffic-rates span,
+.runtime-traffic-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.runtime-traffic-rates .download,
+.runtime-traffic-legend .download {
+  color: var(--color-accent);
+}
+
+.runtime-traffic-rates .upload,
+.runtime-traffic-legend .upload {
+  color: var(--color-positive);
+}
+
+.runtime-traffic-chart {
+  position: relative;
+  overflow: hidden;
+  height: 156px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, transparent, var(--color-surface-muted)),
+    var(--color-surface);
+}
+
+.runtime-traffic-chart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.runtime-traffic-chart.stale svg {
+  opacity: 0.48;
+}
+
+.traffic-grid-line {
+  stroke: var(--color-border);
+  stroke-dasharray: 4 7;
+  stroke-width: 1;
+}
+
+.traffic-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.traffic-line.download {
+  stroke: var(--color-accent);
+}
+
+.traffic-line.upload {
+  stroke: var(--color-positive);
+}
+
+.runtime-traffic-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.runtime-traffic-legend {
+  flex-wrap: wrap;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  gap: 14px;
+}
+
+.runtime-traffic-legend > span:last-child {
+  margin-left: auto;
+}
+
+.home-about-card .ant-card-body {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.home-about-card .feature-card-heading,
+.home-about-content {
+  position: relative;
+  z-index: 1;
+}
+
+.home-about-watermark {
+  position: absolute;
+  right: -34px;
+  bottom: -54px;
+  z-index: 0;
+  width: min(74%, 250px);
+  height: auto;
+  opacity: 0.075;
+  pointer-events: none;
+  user-select: none;
+}
+
+.home-about-content {
+  display: grid;
+  gap: 16px;
+}
+
+.home-about-content > p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+
+.home-about-facts {
+  display: grid;
+  margin: 0;
+}
+
+.home-about-facts > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  padding: 9px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.home-about-facts dt,
+.home-about-facts dd {
+  margin: 0;
+}
+
+.home-about-facts dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.home-about-facts dd {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runtime-preferences-card .ant-card-body {
+  display: grid;
+  gap: 18px;
+}
+
+.runtime-preferences-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 150px;
+  color: var(--color-text-secondary);
+}
+
+.runtime-preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.runtime-preferences-sections {
+  display: grid;
+  gap: 22px;
+}
+
+.runtime-preferences-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.runtime-preferences-section + .runtime-preferences-section {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.runtime-preferences-section-heading,
+.runtime-dns-resource-heading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.runtime-preferences-section-heading {
+  gap: 3px;
+}
+
+.runtime-preferences-section-heading h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.runtime-preference-item {
+  display: grid;
+  grid-template-columns: minmax(145px, 0.7fr) minmax(210px, 1.3fr);
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 15px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.runtime-preference-item.wide {
+  grid-column: 1 / -1;
+}
+
+.runtime-preference-copy {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.runtime-preference-copy strong {
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.runtime-preference-control {
+  min-width: 0;
+}
+
+.runtime-preference-control > .ant-select {
+  width: 100%;
+}
+
+.runtime-preference-control > .ant-input,
+.runtime-preference-control > .ant-input-number {
+  width: 100%;
+}
+
+.runtime-listener-controls {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 110px;
+  gap: 9px;
+}
+
+.runtime-listener-controls .ant-select,
+.runtime-listener-controls .ant-input-number {
+  width: 100%;
+}
+
+.runtime-dns-resources-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.runtime-dns-resource-editor {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.runtime-dns-resource-editor.disabled {
+  gap: 0;
+  padding-block: 11px;
+}
+
+.runtime-dns-resource-heading {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.runtime-dns-resource-title,
+.runtime-dns-resource-actions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.runtime-dns-resource-title {
+  gap: 4px;
+}
+
+.runtime-dns-resource-actions {
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.runtime-dns-resource-title > strong {
+  min-width: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+  overflow-wrap: anywhere;
+}
+
+.runtime-dns-resource-editor textarea.ant-input {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
+.runtime-yaml-error {
+  display: grid;
+  gap: 8px;
+}
+
+.runtime-yaml-error strong {
+  color: var(--color-danger);
+  font-size: var(--font-size-small);
+}
+
+.runtime-yaml-error pre {
+  max-height: 180px;
+  margin: 0;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: 10px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.runtime-lan-protection {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border: 1px solid var(--color-positive-soft);
+  border-radius: 14px;
+  background: var(--color-positive-soft);
+  color: var(--color-positive);
+}
+
+.runtime-lan-protection > .anticon {
+  font-size: 20px;
+}
+
+.runtime-lan-protection > div {
+  display: grid;
+  min-width: 0;
+}
+
+.runtime-lan-protection strong {
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+
+.runtime-lan-protection span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.runtime-lan-protection .ant-tag {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--color-positive);
+}
+
+.runtime-lan-editor-textarea.ant-input {
+  margin-top: 12px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  line-height: 1.55;
+}
+
+.runtime-lan-editor-footer,
+.runtime-lan-editor-footer > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.runtime-lan-editor-footer {
+  justify-content: space-between;
+}
+
+@media (max-width: 1120px) {
+  .runtime-dns-resources-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-runtime-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-preferences-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-preference-item.wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .runtime-preference-item {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-dns-resource-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .runtime-dns-resource-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .runtime-lan-protection {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .runtime-lan-protection .feature-help-button {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .runtime-lan-protection .ant-tag {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .runtime-lan-protection > .ant-btn {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .runtime-lan-editor-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .runtime-lan-editor-footer > div {
+    justify-content: flex-end;
+  }
+}

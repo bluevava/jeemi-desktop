@@ -1,0 +1,1119 @@
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.status-pill::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+  opacity: 0.55;
+}
+
+.status-pill.active {
+  border-color: var(--color-positive-soft);
+  background: var(--color-positive-soft);
+  color: var(--color-positive);
+}
+
+.status-pill.warning {
+  color: var(--color-danger);
+}
+
+.status-pill-label {
+  color: var(--color-text-secondary);
+}
+
+.status-pill-value {
+  color: currentColor;
+  font-weight: 700;
+}
+
+.runtime-power-button.active {
+  color: var(--color-positive) !important;
+}
+
+.feature-help-button {
+  color: var(--color-text-secondary) !important;
+}
+
+.feature-help-button:hover {
+  background: var(--color-accent-soft) !important;
+  color: var(--color-accent) !important;
+}
+
+.feature-help-button.compact {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.feature-help-content {
+  display: grid;
+  gap: 15px;
+  width: min(360px, calc(100vw - 56px));
+  max-height: min(560px, calc(100dvh - 140px));
+  padding: 4px 4px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.feature-help-section {
+  display: grid;
+  gap: 5px;
+}
+
+.feature-help-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+}
+
+.feature-help-section-title .anticon {
+  color: var(--color-accent);
+}
+
+.feature-help-section:last-child .feature-help-section-title .anticon {
+  color: var(--color-warning);
+}
+
+.feature-help-section p {
+  margin: 0 0 0 21px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.62;
+}
+
+.feature-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.feature-grid.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feature-grid.three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-card.ant-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.feature-card .ant-card-body {
+  padding: 24px;
+}
+
+.feature-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.feature-card-heading h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-section-title);
+  font-weight: 720;
+}
+
+.feature-card-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feature-card-heading-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.rule-documentation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rule-documentation-heading > .ant-btn {
+  flex-shrink: 0;
+}
+
+.feature-title-with-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.feature-title-with-help .feature-help-button,
+.feature-card-title-line .feature-help-button {
+  flex: 0 0 auto;
+}
+
+.overview-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 126px minmax(300px, 1fr) minmax(300px, 0.72fr);
+  align-items: center;
+  gap: 22px;
+  overflow: hidden;
+  min-height: 292px;
+  padding: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.connection-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 132px;
+  isolation: isolate;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  box-shadow:
+    inset 0 0 0 12px var(--color-surface),
+    var(--shadow-soft);
+}
+
+.connection-orb::before {
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border: 2px solid var(--color-danger);
+  border-radius: 50%;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--color-danger) 42%, transparent);
+  content: "";
+  opacity: 0.72;
+}
+
+.connection-orb.running::before {
+  border-color: var(--color-positive);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--color-positive) 42%, transparent);
+}
+
+.connection-orb.running::after {
+  position: absolute;
+  inset: -9px;
+  z-index: 3;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle 4px at 50% 3px,
+      var(--color-positive) 0 58%,
+      transparent 68%
+    ),
+    radial-gradient(
+      circle 3px at 50% calc(100% - 3px),
+      color-mix(in srgb, var(--color-positive) 70%, transparent) 0 58%,
+      transparent 70%
+    );
+  content: "";
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-positive) 82%, transparent)
+  );
+  pointer-events: none;
+  animation: orbit 2.4s linear infinite;
+  will-change: transform;
+}
+
+.connection-orb.transitioning::before {
+  animation: orbit 1s linear infinite;
+  border-right-color: transparent;
+}
+
+.connection-orb.transitioning.starting::before {
+  border-color: var(--color-positive);
+  border-right-color: transparent;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-positive) 48%, transparent);
+}
+
+.connection-orb.transitioning.stopping::before {
+  border-color: var(--color-danger);
+  border-right-color: transparent;
+}
+
+.connection-orb-app-icon {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+}
+
+.connection-orb-split {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  grid-template-rows: 1fr 1fr;
+  border-radius: 50%;
+}
+
+.connection-orb-action,
+.connection-orb-busy {
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 30px;
+}
+
+.connection-orb-action {
+  padding: 0;
+  background: color-mix(in srgb, var(--color-surface) 28%, transparent);
+  cursor: pointer;
+  opacity: 0.42;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.connection-orb-action:hover,
+.connection-orb-action:focus-visible {
+  background: var(--color-accent-soft);
+  opacity: 1;
+  outline: none;
+}
+
+.connection-orb-action:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.connection-orb-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.18;
+}
+
+.connection-orb-action.start {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 48px;
+  opacity: 0.52;
+}
+
+.connection-orb-action.start:disabled {
+  opacity: 0.34;
+}
+
+.connection-orb-action.restart {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-accent);
+}
+
+.connection-orb-action.stop {
+  color: var(--color-danger);
+}
+
+.connection-orb-action.stop:hover,
+.connection-orb-action.stop:focus-visible {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+}
+
+.connection-orb-busy {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-surface) 36%, transparent);
+  opacity: 0.72;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.overview-hero-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.state-label {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-runtime-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.hero-runtime-state.healthy {
+  border-color: var(--color-positive-soft);
+  background: var(--color-positive-soft);
+  color: var(--color-positive);
+}
+
+.hero-runtime-state.error {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+
+.hero-runtime-state.busy {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+button.status-navigation-action {
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hero-runtime-state.status-navigation-action:hover,
+.hero-runtime-state.status-navigation-action:focus-visible {
+  border-color: var(--color-danger);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.runtime-memory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.runtime-memory-grid > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+}
+
+.runtime-memory-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.runtime-memory-label > span {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runtime-memory-grid strong {
+  flex: 0 0 auto;
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.runtime-health-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 12px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
+}
+
+.runtime-health-summary > .anticon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.runtime-health-summary.healthy {
+  color: var(--color-positive);
+}
+
+.runtime-health-summary.error {
+  color: var(--color-danger);
+}
+
+.runtime-health-summary.status-navigation-action {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.runtime-health-summary.status-navigation-action:hover span,
+.runtime-health-summary.status-navigation-action:focus-visible span {
+  text-decoration: underline;
+}
+
+.runtime-health-summary.status-navigation-action:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.runtime-uptime-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.runtime-uptime-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.runtime-uptime-tag strong {
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+
+.runtime-uptime-tag.mihomo {
+  border-color: var(--color-positive-soft);
+  background: color-mix(in srgb, var(--color-positive-soft) 62%, transparent);
+  color: var(--color-positive);
+}
+
+.runtime-uptime-tag.mihomo strong {
+  color: var(--color-positive);
+}
+
+.overview-mode-controls {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  padding: 19px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-bg-elevated);
+  backdrop-filter: blur(14px);
+}
+
+.overview-mode-controls > .ant-segmented {
+  width: 100%;
+}
+
+.overview-appearance-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.overview-appearance-controls > .ant-segmented {
+  width: 100%;
+  min-width: 0;
+}
+
+.overview-appearance-controls .ant-segmented-item-label {
+  min-width: 0;
+  padding-inline: 4px;
+  font-size: var(--font-size-small);
+}
+
+.overview-mode-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 104px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.planned-capability {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 94px;
+  padding: 17px;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.planned-capability-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.settings-grid .feature-card .ant-card-body {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.feature-card-heading + .settings-row {
+  border-top: 0;
+}
+
+.settings-row-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.settings-label-line {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.settings-row-control {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.settings-empty-card.ant-card {
+  width: min(720px, 100%);
+  margin: 0 auto;
+}
+
+.settings-empty-card .ant-empty {
+  margin-block: 42px 54px;
+}
+
+.managed-storage-setting {
+  min-width: 0;
+}
+
+.managed-storage-setting > code {
+  display: block;
+  overflow: hidden;
+  padding: 13px 15px;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-small);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.managed-storage-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.mihomo-version-card .ant-card-body {
+  display: grid;
+  gap: 20px;
+}
+
+.core-manager-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+.core-manager-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+}
+
+.core-manager-facts {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 18px;
+}
+
+.core-manager-facts > div,
+.core-data-path {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-focus-target {
+  min-width: 0;
+  scroll-margin-top: 18px;
+}
+
+.manual-install-steps {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  padding-left: 24px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.65;
+}
+
+.manual-install-feedback {
+  margin-top: 12px;
+}
+
+.manual-install-steps li > .ant-btn-link {
+  height: auto;
+  padding-block: 0;
+}
+
+.manual-geodata-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.core-manager-facts span,
+.core-data-path span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.core-manager-facts strong {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+.core-manager-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.core-selection-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(240px, 0.65fr);
+  align-items: center;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.core-selection-row .ant-select {
+  width: 100%;
+}
+
+.core-version-section {
+  display: grid;
+  gap: 12px;
+}
+
+.core-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.core-section-heading h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.core-section-heading.compact-heading {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+}
+
+.core-version-list {
+  display: grid;
+  gap: 8px;
+}
+
+.core-version-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.geodata-manager-card .ant-card-body {
+  display: grid;
+  gap: 18px;
+}
+
+.geodata-preferences {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 12px;
+}
+
+.geodata-preference {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.geodata-preference > span,
+.geodata-custom-urls label > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.geodata-preference .ant-segmented {
+  width: 100%;
+}
+
+.geodata-custom-urls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  padding: 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.geodata-custom-urls label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.geodata-manager-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+}
+
+.geodata-manager-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 18px;
+}
+
+.geodata-manager-facts > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.geodata-manager-facts span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.geodata-manager-facts strong {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.geodata-manager-actions,
+.geodata-asset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.geodata-assets-section {
+  display: grid;
+  gap: 12px;
+}
+
+.geodata-asset-list {
+  display: grid;
+  gap: 8px;
+}
+
+.geodata-asset {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.geodata-asset-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.geodata-asset-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.geodata-asset-title strong {
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.geodata-asset-title code,
+.geodata-asset-copy > code {
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-caption);
+}
+
+.geodata-asset-copy > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.core-version-copy {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.core-version-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.core-version-title strong {
+  color: var(--color-text);
+  font-size: var(--font-size-emphasis);
+}
+
+.core-version-copy > span {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.core-version-copy code,
+.core-data-path code {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: var(--font-size-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.core-data-path {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 7px 12px;
+  padding: 14px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.planned-panel {
+  display: grid;
+  gap: 5px;
+  min-height: 104px;
+  place-content: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+  text-align: center;
+}
+
+.planned-panel span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.planned-panel strong {
+  color: var(--color-accent);
+  font-size: var(--font-size-emphasis);
+}
+
+@media (max-width: 960px) {
+  .overview-hero {
+    grid-template-columns: 120px 1fr;
+  }
+
+  .overview-mode-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  .feature-grid.three-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .geodata-preferences,
+  .geodata-manager-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .geodata-manager-toolbar,
+  .geodata-asset {
+    grid-template-columns: 1fr;
+  }
+
+  .geodata-manager-actions,
+  .geodata-asset-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .feature-grid.two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-hero {
+    grid-template-columns: 1fr;
+    padding: 26px;
+  }
+
+  .connection-orb {
+    width: 108px;
+    height: 108px;
+  }
+
+  .settings-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .settings-row-control {
+    justify-content: flex-start;
+  }
+
+  .core-manager-toolbar,
+  .core-selection-row,
+  .core-version-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .core-manager-facts,
+  .core-selection-row {
+    grid-template-columns: 1fr;
+  }
+
+  .core-manager-actions {
+    flex-wrap: wrap;
+  }
+
+  .core-version-item > .ant-btn,
+  .core-version-item > .ant-popconfirm,
+  .core-version-item > .ant-popconfirm .ant-btn {
+    width: 100%;
+  }
+
+  .core-data-path {
+    grid-template-columns: 1fr;
+  }
+
+  .geodata-custom-urls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

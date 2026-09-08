@@ -1,0 +1,26 @@
+{
+  "zh-CN": {
+    "tooltip": "Jeemi",
+    "show": "显示 Jeemi",
+    "showTooltip": "显示并还原 Jeemi 主界面",
+    "quit": "退出 Jeemi",
+    "quitTooltip": "完全退出 Jeemi",
+    "reload": "重新加载界面",
+    "reloadTooltip": "界面白屏或显示异常时重新加载 Jeemi 界面",
+    "reloadMessage": "重新加载界面会丢弃未保存的编辑，并返回主页。mihomo 会保持运行，已保存的配置不受影响。是否继续？",
+    "reloadConfirm": "重新加载",
+    "reloadCancel": "取消"
+  },
+  "en-US": {
+    "tooltip": "Jeemi",
+    "show": "Show Jeemi",
+    "showTooltip": "Show and restore the Jeemi window",
+    "quit": "Quit Jeemi",
+    "quitTooltip": "Quit Jeemi completely",
+    "reload": "Reload interface",
+    "reloadTooltip": "Reload the Jeemi interface if it is blank or displays incorrectly",
+    "reloadMessage": "Reloading discards unsaved edits and returns to home. mihomo will keep running and saved configuration is unchanged. Continue?",
+    "reloadConfirm": "Reload",
+    "reloadCancel": "Cancel"
+  }
+}

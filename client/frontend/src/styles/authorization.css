@@ -1,0 +1,19 @@
+.authorization-title { display: flex; align-items: center; gap: 10px; }
+.authorization-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-control); background: var(--color-accent-soft); color: var(--color-accent); }
+.proxy-authorization-dialog .ant-modal-container { border-radius: var(--radius-card); }
+.authorization-body { display: grid; gap: 16px; padding-top: 12px; max-height: 60vh; overflow-y: auto; font-size: var(--font-size-body); }
+.authorization-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.authorization-tags .ant-tag { margin: 0; }
+.authorization-reason { margin: 0; color: var(--color-text-secondary); line-height: 1.7; overflow-wrap: anywhere; }
+.authorization-checks { background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: var(--radius-control); padding: 0 14px; }
+.authorization-check { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; }
+.authorization-check + .authorization-check { border-top: 1px solid var(--color-border); }
+.authorization-check > span:last-child { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.authorization-check-ready { color: var(--color-positive); }
+.authorization-check-pending { color: var(--color-text-secondary); }
+.authorization-working { display: flex; align-items: center; gap: 10px; color: var(--color-text-secondary); }
+.authorization-footer, .authorization-footer > div { display: flex; align-items: center; gap: 8px; }
+.authorization-footer { justify-content: space-between; flex-wrap: wrap; margin-top: 20px; }
+.authorization-footer > div { margin-left: auto; }
+.home-about-cleanup { margin-top: 12px; }
+@media (max-width: 420px) { .authorization-footer > div { flex-wrap: wrap; } }

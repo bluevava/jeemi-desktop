@@ -1,0 +1,21 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Jeemi",
+  "outputfilename": "Jeemi",
+  "frontend:install": "pnpm install --frozen-lockfile",
+  "frontend:build": "pnpm run build",
+  "frontend:dev:watcher": "pnpm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Jeemi Contributors",
+    "email": ""
+  },
+  "info": {
+    "companyName": "Jeemi",
+    "productName": "Jeemi",
+    "productVersion": "0.1.0",
+    "copyright": "",
+    "comments": "Cross-platform mihomo desktop client"
+  }
+}
+
