@@ -5,7 +5,9 @@ package processmemory
 import (
 	"errors"
 	"os"
+	"syscall"
 	"testing"
+	"unsafe"
 )
 
 func TestProcessPrivateMemoryReadsCurrentProcess(t *testing.T) {
@@ -15,6 +17,46 @@ func TestProcessPrivateMemoryReadsCurrentProcess(t *testing.T) {
 	}
 	if bytes == 0 {
 		t.Fatal("processPrivateMemory() = 0, want a non-zero measurement")
+	}
+}
+
+func TestPrivateMemoryUsesExtendedWorkingSetOrPrivateCommitFallback(t *testing.T) {
+	ex2Size := uint32(unsafe.Sizeof(processMemoryCountersEx2{}))
+	exSize := uint32(unsafe.Sizeof(processMemoryCountersEx{}))
+	for _, tc := range []struct {
+		name        string
+		extended    processMemoryCountersEx2
+		extendedErr error
+		fallbackErr error
+		want        uint64
+		wantCalls   int
+	}{
+		{name: "extended working set", extended: processMemoryCountersEx2{PrivateWorkingSetSize: 4096}, want: 4096, wantCalls: 1},
+		{name: "successful older API without extended fields", want: 8192, wantCalls: 2},
+		{name: "unsupported extended structure", extendedErr: syscall.EINVAL, want: 8192, wantCalls: 2},
+		{name: "fallback failure stays unavailable", fallbackErr: syscall.EACCES, wantCalls: 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			calls := 0
+			bytes, err := readPrivateMemory(func(size uint32) (processMemoryCountersEx2, error) {
+				calls++
+				if calls == 1 {
+					if size != ex2Size {
+						t.Fatalf("initial counter size = %d, want %d", size, ex2Size)
+					}
+					return tc.extended, tc.extendedErr
+				}
+				if calls != 2 || size != exSize {
+					t.Fatalf("fallback call %d with counter size %d, want %d", calls, size, exSize)
+				}
+				return processMemoryCountersEx2{processMemoryCountersEx: processMemoryCountersEx{
+					PrivateUsage: 8192, WorkingSetSize: 65536,
+				}}, tc.fallbackErr
+			})
+			if bytes != tc.want || !errors.Is(err, tc.fallbackErr) || calls != tc.wantCalls {
+				t.Fatalf("readPrivateMemory() = %d, %v (%d calls); want %d, %v (%d calls)", bytes, err, calls, tc.want, tc.fallbackErr, tc.wantCalls)
+			}
+		})
 	}
 }
 

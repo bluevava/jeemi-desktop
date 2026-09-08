@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLocalCodeHashReadsActualMacSignature(t *testing.T) {
@@ -17,15 +18,33 @@ func TestLocalCodeHashReadsActualMacSignature(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Intel Go test binaries need not be signed. Prepare a signed fixture on
+	// both architectures without changing the running test binary or bundle.
+	data, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file = filepath.Join(t.TempDir(), "signed-test-fixture")
+	if err := os.WriteFile(file, data, 0700); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
+	defer cancel()
+	if output, err := exec.CommandContext(ctx, "/usr/bin/codesign", "--force", "--sign", "-", "--timestamp=none", file).CombinedOutput(); err != nil {
+		t.Fatalf("could not ad-hoc sign test fixture: %v %s", err, output)
+	}
+	if output, err := exec.CommandContext(ctx, "/usr/bin/codesign", "--verify", "--strict", file).CombinedOutput(); err != nil {
+		t.Fatalf("invalid test fixture signature: %v %s", err, output)
+	}
 	arch := runtime.GOARCH
 	if arch == "amd64" {
 		arch = "x86_64"
 	}
-	hash, err := codeHash(context.Background(), file, arch)
+	hash, err := codeHash(ctx, file, arch)
 	if err != nil || len(hash) != 40 {
 		t.Fatalf("could not read local code signature: %v", err)
 	}
-	hashes, err := codeHashes(context.Background(), file)
+	hashes, err := codeHashes(ctx, file)
 	if err != nil || len(hashes) != 1 || hashes[0] != hash {
 		t.Fatalf("thin native test binary signatures = %v, %v", hashes, err)
 	}

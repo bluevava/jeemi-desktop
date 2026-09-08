@@ -109,40 +109,43 @@ func processPrivateMemoryAt(pid uint32, started uint64) (uint64, error) {
 		}
 	}
 
-	// PROCESS_MEMORY_COUNTERS_EX2 exposes the private working set used by the
-	// Windows Task Manager Processes view. It avoids multiplying shared
-	// WebView2 pages across the browser, renderer, GPU and utility processes.
-	counters := processMemoryCountersEx2{}
-	counters.Size = uint32(unsafe.Sizeof(counters))
-	result, _, callErr := getProcessMemoryInfo.Call(
+	return readPrivateMemory(func(size uint32) (processMemoryCountersEx2, error) {
+		return queryProcessMemoryInfo(handle, size)
+	})
+}
+
+func queryProcessMemoryInfo(handle windows.Handle, size uint32) (processMemoryCountersEx2, error) {
+	counters := processMemoryCountersEx2{processMemoryCountersEx: processMemoryCountersEx{Size: size}}
+	result, _, err := getProcessMemoryInfo.Call(
 		uintptr(handle),
 		uintptr(unsafe.Pointer(&counters)),
-		uintptr(counters.Size),
+		uintptr(size),
 	)
 	if result != 0 {
+		return counters, nil
+	}
+	if err == nil || errors.Is(err, syscall.Errno(0)) {
+		err = fmt.Errorf("GetProcessMemoryInfo failed")
+	}
+	return processMemoryCountersEx2{}, err
+}
+
+func readPrivateMemory(query func(uint32) (processMemoryCountersEx2, error)) (uint64, error) {
+	// EX2 exposes the private working set used by Task Manager. Older Windows
+	// builds can accept its larger buffer but leave the extended fields zero,
+	// so a successful API call alone does not prove that EX2 is supported.
+	counters, err := query(uint32(unsafe.Sizeof(processMemoryCountersEx2{})))
+	if err == nil && counters.PrivateWorkingSetSize != 0 {
 		return uint64(counters.PrivateWorkingSetSize), nil
 	}
 
-	// Older Windows builds do not understand EX2. PrivateUsage is committed
-	// private memory rather than resident private memory, but remains a safer
-	// fallback than the shared-page WorkingSetSize previously reported.
-	fallback := processMemoryCountersEx{}
-	fallback.Size = uint32(unsafe.Sizeof(fallback))
-	result, _, fallbackErr := getProcessMemoryInfo.Call(
-		uintptr(handle),
-		uintptr(unsafe.Pointer(&fallback)),
-		uintptr(fallback.Size),
-	)
-	if result != 0 {
-		return uint64(fallback.PrivateUsage), nil
+	// Unavailable or zero private working sets use the established private
+	// commit fallback. Never add shared-page WorkingSetSize across processes.
+	fallback, err := query(uint32(unsafe.Sizeof(processMemoryCountersEx{})))
+	if err != nil {
+		return 0, err
 	}
-	if fallbackErr != nil && !errors.Is(fallbackErr, syscall.Errno(0)) {
-		return 0, fallbackErr
-	}
-	if callErr != nil && !errors.Is(callErr, syscall.Errno(0)) {
-		return 0, callErr
-	}
-	return 0, fmt.Errorf("GetProcessMemoryInfo failed")
+	return uint64(fallback.PrivateUsage), nil
 }
 
 func processHandleStarted(handle windows.Handle) (uint64, error) {
