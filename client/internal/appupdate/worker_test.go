@@ -38,10 +38,18 @@ func TestMain(m *testing.M) {
 }
 
 func TestWorkerSubprocessStagesWaitsReplacesAndAcknowledges(t *testing.T) {
+	testWorkerSubprocess(t, t.TempDir(), t.TempDir())
+}
+
+func TestWorkerSubprocessThroughDirectoryAliases(t *testing.T) {
+	testWorkerSubprocess(t, aliasedTempDir(t), aliasedTempDir(t))
+}
+
+func testWorkerSubprocess(t *testing.T, configRoot, root string) {
+	t.Helper()
 	if runtime.GOOS == "darwin" {
 		t.Skip("macOS requires a signed application bundle; covered by bundle unit tests")
 	}
-	configRoot := t.TempDir()
 	if runtime.GOOS == "windows" {
 		t.Setenv("APPDATA", configRoot)
 	} else {
@@ -64,7 +72,6 @@ func TestWorkerSubprocessStagesWaitsReplacesAndAcknowledges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
 	executable := filepath.Join(root, target.executable)
 	if err = os.WriteFile(executable, binary, 0755); err != nil {
 		t.Fatal(err)
@@ -72,6 +79,9 @@ func TestWorkerSubprocessStagesWaitsReplacesAndAcknowledges(t *testing.T) {
 	if err = os.WriteFile(filepath.Join(root, target.helper), []byte("old helper"), 0755); err != nil {
 		t.Fatal(err)
 	}
+	// Match the canonical executable recorded by Manager.Prepare, while keeping
+	// the data root aliased to exercise worker startup and restart acknowledgement.
+	executable = canonicalTestPath(t, executable)
 	id := strings.Repeat("c", 32)
 	jobRoot := filepath.Join(dataRoot, "updates", "jeemi", id)
 	packageFixture(t, filepath.Join(jobRoot, "extracted"), target, "1.2.3", binary)

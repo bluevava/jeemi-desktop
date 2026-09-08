@@ -120,8 +120,15 @@ func runWorker() error {
 		return ErrRestart
 	}
 	root := filepath.Join(dataRoot, "updates", "jeemi")
-	jobRoot := filepath.Join(root, os.Args[2])
+	jobRoot, err := filepath.EvalSymlinks(filepath.Join(root, os.Args[2]))
+	if err != nil {
+		return ErrRestart
+	}
 	self, err := os.Executable()
+	if err != nil {
+		return ErrRestart
+	}
+	self, err = filepath.EvalSymlinks(self)
 	if err != nil || filepath.Dir(self) != jobRoot {
 		return ErrRestart
 	}

@@ -18,6 +18,12 @@ import (
 // All archive entries are bounded before any install directory is touched.
 // macOS bundle links are created last and must resolve inside the bundle.
 func extract(ctx context.Context, archive, output string, t target) error {
+	// Resolve the boundary as well as the contained files. /var on macOS and
+	// Windows 8.3 directory names can denote the same location with different text.
+	output, err := filepath.EvalSymlinks(output)
+	if err != nil {
+		return ErrPackage
+	}
 	x := extractor{ctx: ctx, root: output, target: t, names: map[string]bool{}}
 	if t.extension == ".zip" {
 		reader, err := zip.OpenReader(archive)
@@ -196,6 +202,10 @@ type packageManifest struct {
 }
 
 func verifyPackage(ctx context.Context, directory, version string, t target) error {
+	directory, err := filepath.EvalSymlinks(directory)
+	if err != nil {
+		return ErrPackage
+	}
 	contents, err := readBounded(filepath.Join(directory, "release.json"), maxReleaseBytes)
 	if err != nil {
 		return ErrPackage

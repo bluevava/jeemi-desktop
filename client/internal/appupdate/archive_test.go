@@ -16,6 +16,15 @@ import (
 	"testing"
 )
 
+func canonicalTestPath(t *testing.T, filename string) string {
+	t.Helper()
+	resolved, err := filepath.EvalSymlinks(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resolved
+}
+
 func packageFixture(t *testing.T, parent string, target target, version string, executable []byte) string {
 	t.Helper()
 	directory := filepath.Join(parent, target.directory)
@@ -131,6 +140,20 @@ func TestPackageManifestRejectsMismatchAndUnlistedFiles(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(directory, target.helper), []byte("changed"), 0755)
 	if err := verifyPackage(context.Background(), directory, "v1.2.3", target); err != ErrPackage {
 		t.Fatal(err)
+	}
+}
+
+func TestPackageManifestThroughDirectoryAlias(t *testing.T) {
+	target, _ := targetFor("windows", "arm64")
+	directory := packageFixture(t, aliasedTempDir(t), target, "1.2.3", []byte("gui"))
+	if err := verifyPackage(context.Background(), directory, "v1.2.3", target); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(directory, "extra.exe"), []byte("extra"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyPackage(context.Background(), directory, "v1.2.3", target); err != ErrPackage {
+		t.Fatalf("unlisted file accepted through directory alias: %v", err)
 	}
 }
 

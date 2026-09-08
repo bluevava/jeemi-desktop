@@ -14,10 +14,13 @@ import (
 
 func replacementFixture(t *testing.T) (*replacement, string) {
 	t.Helper()
+	return replacementFixtureIn(t, t.TempDir(), t.TempDir())
+}
+
+func replacementFixtureIn(t *testing.T, jobRoot, root string) (*replacement, string) {
+	t.Helper()
 	target, _ := targetFor("windows", "amd64")
-	jobRoot := t.TempDir()
 	packageFixture(t, filepath.Join(jobRoot, "extracted"), target, "1.2.3", []byte("new gui"))
-	root := t.TempDir()
 	executable := filepath.Join(root, target.executable)
 	for _, name := range target.installItems() {
 		if err := os.WriteFile(filepath.Join(root, name), []byte("old "+name), 0755); err != nil {
@@ -25,6 +28,8 @@ func replacementFixture(t *testing.T) (*replacement, string) {
 		}
 	}
 	_ = os.WriteFile(filepath.Join(root, "keep.txt"), []byte("user file"), 0600)
+	// Manager.Prepare resolves the running executable before creating the job.
+	executable = canonicalTestPath(t, executable)
 	digest, _, _ := hashFile(executable)
 	job := installJob{ID: strings.Repeat("a", 32), Executable: executable, CurrentSHA256: digest, Version: "v1.2.3"}
 	r, err := prepareReplacement(context.Background(), jobRoot, job, target)
@@ -35,7 +40,16 @@ func replacementFixture(t *testing.T) (*replacement, string) {
 }
 
 func TestReplacementPairsFilesAndPreservesOtherContents(t *testing.T) {
-	r, root := replacementFixture(t)
+	testReplacementPair(t, t.TempDir(), t.TempDir())
+}
+
+func TestReplacementPairsFilesThroughDirectoryAliases(t *testing.T) {
+	testReplacementPair(t, aliasedTempDir(t), aliasedTempDir(t))
+}
+
+func testReplacementPair(t *testing.T, jobRoot, root string) {
+	t.Helper()
+	r, root := replacementFixtureIn(t, jobRoot, root)
 	if data, _ := os.ReadFile(filepath.Join(root, "Jeemi.exe")); string(data) != "old Jeemi.exe" {
 		t.Fatal("prepare changed installed app")
 	}
