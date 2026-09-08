@@ -476,7 +476,7 @@
     "client/internal/platform/screen/capture_test.go": "5b3df3768d416521e3a7ed2c83620e462d53e108dfdc6cc7bb7f8ec3c8f85396",
     "client/internal/platform/screen/portal_image_linux.go": "66eac415266e8d493574a95118e3803c13c375a46295a4c8f9df52d2dddbac0c",
     "client/internal/platform/screen/portal_linux.go": "31579efd2907364d03b34dd2bffe78f22243a5a9381351e4f9f0ee5b685fe7ad",
-    "client/internal/platform/screen/portal_linux_test.go": "578d991ac773ceec96f860457892b7c9fe9e179b501cc23f99f1a28c4c602ef5",
+    "client/internal/platform/screen/portal_linux_test.go": "2e308ce549d730a8ceaf8346487d173da6cd1a44d54ca090c2cb218bcb86526f",
     "client/internal/platform/sessionend/session.go": "0ca99dd93df2f2dc6f0d9dd668c69003cca2b494abf13400e72d3ec1dbc83d33",
     "client/internal/platform/sessionend/session_darwin.go": "3b4de76666a8c2332d8fc39c6c4a71dcccab3e441bef2144b9ec53a17b85f18d",
     "client/internal/platform/sessionend/session_darwin.m": "a8bd411fbdefade826bd96cce12ea58b5056684266ed562282131fceea891c7c",

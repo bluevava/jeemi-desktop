@@ -29,7 +29,24 @@ func privateBus(t *testing.T) {
 	if _, err := exec.LookPath("dbus-daemon"); err != nil {
 		t.Skip("dbus-daemon is not installed")
 	}
-	daemon := exec.Command("dbus-daemon", "--session", "--nofork", "--print-address=1")
+	// --session loads the host's service activation directories. An installed
+	// xdg-desktop-portal can then start on this bus, even though its address is
+	// private. Use a standalone configuration with no includes or servicedirs.
+	config := filepath.Join(t.TempDir(), "bus.conf")
+	if err := os.WriteFile(config, []byte(`<busconfig>
+  <type>session</type>
+  <listen>unix:tmpdir=/tmp</listen>
+  <auth>EXTERNAL</auth>
+  <policy context="default">
+    <allow own="*"/>
+    <allow send_destination="*"/>
+    <allow receive_sender="*"/>
+  </policy>
+</busconfig>
+`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	daemon := exec.Command("dbus-daemon", "--config-file="+config, "--nofork", "--print-address=1")
 	stdout, err := daemon.StdoutPipe()
 	if err != nil {
 		t.Fatal(err)
@@ -43,6 +60,42 @@ func privateBus(t *testing.T) {
 		t.Fatal("private bus returned no address")
 	}
 	t.Setenv("DBUS_SESSION_BUS_ADDRESS", scanner.Text())
+}
+
+func TestPrivateBusDoesNotLoadHostServices(t *testing.T) {
+	// A host-installed activation file must be invisible to the test bus.
+	// The harmless Exec is never invoked; listing names already detects the
+	// old --session behavior without launching any desktop service.
+	dataHome := t.TempDir()
+	serviceDirectory := filepath.Join(dataHome, "dbus-1", "services")
+	if err := os.MkdirAll(serviceDirectory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	service := "[D-BUS Service]\nName=" + portalName + "\nExec=/bin/false\n"
+	if err := os.WriteFile(filepath.Join(serviceDirectory, portalName+".service"), []byte(service), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("XDG_DATA_HOME", dataHome)
+	privateBus(t)
+	connection, err := dbus.ConnectSessionBus()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	var names []string
+	if err := connection.BusObject().CallWithContext(ctx, "org.freedesktop.DBus.ListActivatableNames", 0).Store(&names); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range names {
+		if name != "org.freedesktop.DBus" {
+			t.Fatalf("test bus inherited a host activation service: %s", name)
+		}
+	}
+	if _, err := capturePortal(ctx, readPortalScreenshot); !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("host-installed portal changed missing-service result: %v", err)
+	}
 }
 
 type fakePortal struct {
