@@ -28,6 +28,8 @@ Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络�
 
 从 [Releases](https://github.com/bluevava/jeemi-desktop/releases) 下载匹配系统与 CPU 的版本。发布目标为 Windows、Linux、macOS 各 amd64/arm64，共六种。
 
+发布版本由本仓库的 [GitHub Actions 构建发布工作流](https://github.com/bluevava/jeemi-desktop/actions/workflows/release.yml)自动编译、打包并发布到 Releases。六个目标的测试、构建与产物校验全部通过后才公开发布；可在工作流页面查看对应版本的构建记录。
+
 Windows/Linux 包中的 `Jeemi` 与 `jeemi-authorizer` 必须共同保留，Windows 文件带 `.exe` 后缀。首次使用需要准备 mihomo、所需 GEO 数据与订阅，并按客户端提示完成代理授权。应用设置保存在系统用户目录中的 `jeemi_data`，不写入程序目录。
 
 macOS 下载包使用 **ad-hoc 签名，未经 Apple 公证**。系统可能阻止首次打开，请按系统提供的“隐私与安全性”提示处理。公开构建采用固定 CDHash 的授权助手模式，首次安装或更新助手需要管理员授权；这不是 Developer ID 签名版。构建通过不代表所有 macOS 网络场景已经完成实机验证。

@@ -1,6 +1,7 @@
 name: 构建并发布 Jeemi
 
 on:
+  workflow_dispatch:
   push:
     tags: ["v*.*.*"]
 
@@ -8,12 +9,35 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: jeemi-release
   cancel-in-progress: false
 
 jobs:
-  build:
+  prepare:
     if: github.repository == 'bluevava/jeemi-desktop'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.source.outputs.tag }}
+      sha: ${{ steps.source.outputs.sha }}
+      ready: ${{ steps.source.outputs.ready }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: client/.node-version
+      - name: 校验版本、更新说明与已发布状态
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node client/tools/release-workflow.mjs check
+
+  build:
+    needs: prepare
+    if: needs.prepare.outputs.ready == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
@@ -43,7 +68,7 @@ jobs:
       - name: 校验版本并读取工具版本
         id: meta
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
         run: node client/tools/release.mjs metadata "$RELEASE_TAG"
       - name: Linux 开发库
         if: runner.os == 'Linux'
@@ -90,7 +115,7 @@ jobs:
           retention-days: 14
 
   publish:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -98,6 +123,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -109,13 +135,21 @@ jobs:
           merge-multiple: true
       - name: 验证完整产物与更新说明
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
         run: node client/tools/release.mjs prepare release-assets "$RELEASE_TAG"
+      - name: 复核发布状态并创建缺失的版本标签
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_COMMIT: ${{ needs.prepare.outputs.sha }}
+        run: node client/tools/release-workflow.mjs ensure-tag
       - name: 创建草稿、上传全部产物后发布
+        if: steps.tag.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           set -euo pipefail
           if gh release view "$RELEASE_TAG" --json isDraft > release-state.json; then

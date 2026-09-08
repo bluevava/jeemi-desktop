@@ -78,7 +78,17 @@ macOS 默认采用 ad-hoc 签名，GUI 与助手同时编译 `jeemi_local_test` 
 
 ## GitHub 发布
 
-普通分支与 PR 运行源码检查。推送与 `client/wails.json` 一致的 `vX.Y.Z` 标签会触发六目标构建，全部成功后才发布 Release。每个版本需要在 `CHANGELOG.md` 中有 `## X.Y.Z` 条目。
+普通分支与 PR 运行源码检查。发布版本由本仓库的 GitHub Actions 自动编译、打包并发布到 Releases，支持手动运行和推送版本标签两种入口。
+
+维护者手动发布步骤：
+
+1. 确认待发布源码已进入本仓库，源码检查通过；`client/wails.json` 的 `info.productVersion` 为本次版本，`CHANGELOG.md` 中有对应且非空的 `## X.Y.Z` 条目。
+2. 打开 [Actions → 构建并发布 Jeemi](https://github.com/bluevava/jeemi-desktop/actions/workflows/release.yml)，点击 **Run workflow**，选择包含待发布源码的分支（通常为 `main`），再确认运行。
+3. 工作流自动读取版本并固定本次提交，执行 Windows、Linux、macOS 各 amd64/arm64 的测试、构建与归档。全部成功后创建缺失的 `vX.Y.Z` 标签、上传产物并公开 Release，无需提前手动创建 Release。
+
+同版本已经成功公开发布时，准备阶段会显示“该版本已发布，跳过构建与发布”，后续构建与发布任务跳过。未发布的同名标签必须指向本次提交；指向其他提交时拒绝发布，不移动标签。六平台构建失败时，手动入口不会提前创建新标签；发布阶段失败留下的标签或草稿可通过重新运行原工作流继续处理。
+
+推送与 `client/wails.json` 一致的 `vX.Y.Z` 标签仍会触发同一流程。手动入口与标签入口共用发布队列，避免同时修改 Release。手动工作流创建标签后在本次运行内继续发布，不依赖标签推送再次触发构建。
 
 GitHub Actions 工作流只读取本仓库。发布任务使用仓库自身的 `GITHUB_TOKEN` 和明确声明的 `contents: write` 权限；当前 ad-hoc 签名无需证书 Secret。
 
