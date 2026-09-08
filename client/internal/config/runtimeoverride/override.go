@@ -15,6 +15,7 @@ import (
 var managedPaths = []string{
 	"/mode",
 	"/log-level",
+	"/find-process-mode",
 	"/ipv6",
 	"/allow-lan",
 	"/bind-address",
@@ -92,6 +93,7 @@ func ApplyForPlatform(configurationYAML []byte, preferences runtimeconfig.Prefer
 	}{
 		{path: "/mode", value: stringNode(preferences.OutboundMode)},
 		{path: "/log-level", value: stringNode(preferences.LogLevel)},
+		{path: "/find-process-mode", value: stringNode(preferences.FindProcessMode)},
 		{path: "/ipv6", value: boolNode(preferences.IPv6)},
 		{path: "/allow-lan", value: boolNode(preferences.AllowLAN)},
 		{path: "/bind-address", value: stringNode(bindAddress(preferences.AllowLAN))},

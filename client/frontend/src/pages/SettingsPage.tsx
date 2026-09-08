@@ -17,6 +17,7 @@ import { useRuntimeStatus } from "../app/runtime/RuntimeStatusContext";
 import { FeatureHelp, type HelpTopic } from "../components/help/FeatureHelp";
 import { FeatureCard } from "../components/layout/FeatureCard";
 import { MihomoVersionSettings } from "../features/mihomo/MihomoVersionSettings";
+import { JeemiUpdateButton } from "../features/update/JeemiUpdateButton";
 import { GeoDataSettings } from "../features/geodata/GeoDataSettings";
 import { geoDataPreferencesEqual } from "../features/geodata/model";
 import type { AppLanguage } from "../i18n/resources";
@@ -333,9 +334,7 @@ export function SettingsPage({ page }: SettingsPageProps) {
                 helpTopic="appUpdate"
                 title={t("settings.home.appUpdate")}
               >
-                <Button disabled size="small">
-                  {t("common.planned")}
-                </Button>
+                <JeemiUpdateButton />
               </SettingsRow>
             </FeatureCard>
           </div>

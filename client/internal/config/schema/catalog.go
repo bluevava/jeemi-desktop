@@ -83,7 +83,7 @@ var catalog = Catalog{
 				numberField("keep-alive-interval", "/keep-alive-interval", "15"),
 				numberField("keep-alive-idle", "/keep-alive-idle", "15"),
 				boolField("disable-keep-alive", "/disable-keep-alive", "false"),
-				enumField("find-process-mode", "/find-process-mode", "strict", "always", "strict", "off"),
+				lockedField("find-process-mode", "/find-process-mode", KindScalar),
 				mappingField("profile", "/profile", "store-selected: true\nstore-fake-ip: true"),
 				boolField("unified-delay", "/unified-delay", "true"),
 				boolField("tcp-concurrent", "/tcp-concurrent", "true"),

@@ -207,12 +207,13 @@
 }
 
 .home-about-facts > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 60px max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   min-width: 0;
-  padding: 9px 0;
+  min-height: 39px;
+  padding: 7px 0;
   border-top: 1px solid var(--color-border);
 }
 
@@ -221,12 +222,42 @@
   margin: 0;
 }
 
+.home-about-fact-action {
+  font-size: var(--font-size-caption);
+}
+
+.home-about-action.ant-btn {
+  height: auto;
+  min-height: 24px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--color-accent-soft);
+  box-shadow: none;
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+}
+
+.home-about-action.ant-btn:not(:disabled):hover {
+  background: var(--color-surface-hover);
+  color: var(--color-accent-hover);
+}
+
+.home-about-action.ant-btn:disabled {
+  color: var(--color-text-disabled);
+}
+
+.home-about-fact-value[data-health="ready"] { color: var(--color-positive); }
+.home-about-fact-value[data-health="failed"] { color: var(--color-danger); }
+.home-about-fact-value[data-health="update"] { color: var(--color-warning); }
+
 .home-about-facts dt {
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
 }
 
-.home-about-facts dd {
+.home-about-fact-value {
   overflow: hidden;
   color: var(--color-text);
   font-size: var(--font-size-small);
@@ -259,6 +290,17 @@
 .runtime-preferences-sections {
   display: grid;
   gap: 22px;
+}
+
+.runtime-baseline-resources {
+  align-items: start;
+}
+
+.runtime-baseline-options {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
 }
 
 .runtime-preferences-section {

@@ -1,6 +1,9 @@
 package subscription
 
-import "jeemi/internal/config/fallbackoverride"
+import (
+	"jeemi/internal/config/fallbackoverride"
+	"jeemi/internal/subscriptionformat"
+)
 
 type SourceKind string
 
@@ -47,11 +50,13 @@ type RemoteProfile struct {
 }
 
 type CompositionSummary struct {
-	Status             string `json:"status"`
-	ProxyCount         int    `json:"proxyCount"`
-	SelectorCount      int    `json:"selectorCount"`
-	ProxyProviderCount int    `json:"proxyProviderCount"`
-	RuleProviderCount  int    `json:"ruleProviderCount"`
+	Normalization      *subscriptionformat.Report     `json:"normalization,omitempty"`
+	NormalizationError *subscriptionformat.Diagnostic `json:"normalizationError,omitempty"`
+	Status             string                         `json:"status"`
+	ProxyCount         int                            `json:"proxyCount"`
+	SelectorCount      int                            `json:"selectorCount"`
+	ProxyProviderCount int                            `json:"proxyProviderCount"`
+	RuleProviderCount  int                            `json:"ruleProviderCount"`
 }
 
 type Summary struct {
@@ -143,6 +148,7 @@ type RuleProvider struct {
 // Projection is an offline view of subscription + local configuration
 // composition. It is not a mihomo-validated or active runtime generation.
 type Projection struct {
+	NormalizationFingerprint     string                 `json:"normalizationFingerprint"`
 	Fallback                     fallbackoverride.State `json:"fallback"`
 	SubscriptionID               string                 `json:"subscriptionId"`
 	RevisionID                   string                 `json:"revisionId"`

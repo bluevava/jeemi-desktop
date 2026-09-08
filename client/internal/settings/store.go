@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"jeemi/internal/dnsquery"
 	"jeemi/internal/geodata"
 	"jeemi/internal/runtimeconfig"
 )
@@ -54,6 +55,7 @@ type Document struct {
 	Subscriptions SubscriptionSettings      `json:"subscriptions"`
 	Runtime       runtimeconfig.Preferences `json:"runtime"`
 	GeoData       geodata.Preferences       `json:"geoData"`
+	DNSQuery      *dnsquery.Preferences     `json:"dnsQuery,omitempty"`
 }
 
 // Store owns Jeemi's Go-side settings document. Callers edit a full document
@@ -236,6 +238,10 @@ func normalizeDocument(document *Document) {
 	}
 	document.Runtime = runtimeconfig.Normalize(document.Runtime)
 	document.GeoData = geodata.Normalize(document.GeoData)
+	if document.DNSQuery == nil {
+		preferences := dnsquery.DefaultPreferences()
+		document.DNSQuery = &preferences
+	}
 }
 
 func validSelectorDensity(density string) bool {

@@ -398,7 +398,8 @@ func (s *Service) buildRuntimeCandidate() (runtimeCandidate, error) {
 		return runtimeCandidate{}, err
 	}
 	input := configresolved.Input{
-		SubscriptionID: selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
+		NormalizationFingerprint: composed.Normalization.Fingerprint,
+		SubscriptionID:           selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
 		LocalConfigID: selected.LocalConfigID, LocalConfigRevision: composed.LocalConfigRevision,
 		LocalScriptID: selected.LocalScriptID, LocalScriptRevision: composed.LocalScriptRevision,
 		RuleProviderOverrideRevision: selected.RuleProviderOverrideRevision,
@@ -416,7 +417,8 @@ func (s *Service) buildRuntimeCandidate() (runtimeCandidate, error) {
 			ExecutablePath: installed.ExecutablePath, CoreVersion: installed.Version,
 			Configuration: safeConfiguration, Preferences: document.Runtime,
 			Source: mihomoruntime.Source{
-				SubscriptionID: selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
+				NormalizationFingerprint: composed.Normalization.Fingerprint,
+				SubscriptionID:           selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
 				LocalConfigID: selected.LocalConfigID, LocalConfigRevision: composed.LocalConfigRevision,
 				LocalScriptID: selected.LocalScriptID, LocalScriptRevision: composed.LocalScriptRevision,
 				RuleProviderOverrideRevision: selected.RuleProviderOverrideRevision,
@@ -442,7 +444,8 @@ func onlyOutboundModeChanged(previous, next runtimeconfig.Preferences) bool {
 }
 
 func sameRuntimeSource(left, right mihomoruntime.Source) bool {
-	return left.SubscriptionID == right.SubscriptionID &&
+	return left.NormalizationFingerprint == right.NormalizationFingerprint &&
+		left.SubscriptionID == right.SubscriptionID &&
 		left.SubscriptionRevision == right.SubscriptionRevision &&
 		left.LocalConfigID == right.LocalConfigID &&
 		left.LocalConfigRevision == right.LocalConfigRevision &&

@@ -89,6 +89,10 @@ func healthyHTTPClient() *http.Client {
 			status = http.StatusOK
 			body = `{"mode":"rule"}`
 		}
+		if request.Method == http.MethodGet && request.URL.Path == "/proxies" {
+			status = http.StatusOK
+			body = `{"proxies":{"Main":{"type":"Selector","now":"Node A","all":["Node A","Node B"]}}}`
+		}
 		return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: make(http.Header)}, nil
 	})}
 }

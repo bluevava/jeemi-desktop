@@ -5,12 +5,27 @@ import (
 	"fmt"
 	"time"
 
+	"jeemi/internal/config/fallbackoverride"
 	configinspect "jeemi/internal/config/inspect"
 	configresources "jeemi/internal/config/resources"
 	"jeemi/internal/config/runtimecontrol"
 	"jeemi/internal/localscript"
 	"jeemi/internal/subscription"
+	"jeemi/internal/subscriptionformat"
 )
+
+// Converted imports must survive the same final composition as refreshes,
+// before any raw revision is committed. Native import semantics stay unchanged.
+func (s *Service) validateImportedSubscription(ctx context.Context, contents []byte) error {
+	normalized, err := subscriptionformat.Normalize(contents)
+	if err != nil || normalized.Report.Format == "mihomo" {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	defer cancel()
+	_, err = s.validateSubscriptionCandidate(ctx, subscription.Summary{Fallback: fallbackoverride.Selection{Mode: fallbackoverride.ModeNone}}, compositionCandidate{source: contents})
+	return err
+}
 
 func (s *Service) validateSubscriptionCandidate(ctx context.Context, summary subscription.Summary, candidate compositionCandidate) (localscript.TestResult, error) {
 	if err := ctx.Err(); err != nil {

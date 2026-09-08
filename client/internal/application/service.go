@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"jeemi/internal/appupdate"
 	configresolved "jeemi/internal/config/resolved"
 	configresources "jeemi/internal/config/resources"
 	configschema "jeemi/internal/config/schema"
@@ -80,6 +81,7 @@ type Service struct {
 	pendingRefresh      *pendingSubscriptionRefresh
 	pendingPackage      *pendingLocalPackage
 	shuttingDown        bool
+	jeemiUpdater        *appupdate.Manager
 }
 
 func NewService(dataDirectory string) (*Service, error) {
@@ -120,7 +122,13 @@ func NewService(dataDirectory string) (*Service, error) {
 	if _, err := configResources.State(); err != nil {
 		return nil, err
 	}
-	subscriptions, err := subscription.NewManager(subscription.ManagerOptions{DataDirectory: dataDirectory})
+	var service *Service
+	subscriptions, err := subscription.NewManager(subscription.ManagerOptions{
+		DataDirectory: dataDirectory,
+		ValidateImport: func(ctx context.Context, contents []byte) error {
+			return service.validateImportedSubscription(ctx, contents)
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +151,7 @@ func NewService(dataDirectory string) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	service := &Service{
+	service = &Service{
 		runtime: RuntimeStatus{
 			Platform:         platform.Current(),
 			Core:             core.InitialStatus(),
@@ -164,6 +172,7 @@ func NewService(dataDirectory string) (*Service, error) {
 		delayCache:      delayCache,
 		uiDiagnostics:   uidiagnostics.New(dataDirectory, appVersion),
 		authorizeCore:   coreauth.Authorize,
+		jeemiUpdater:    appupdate.NewManager(dataDirectory, appVersion),
 	}
 	service.refreshCoreStatus()
 	return service, nil
@@ -470,6 +479,7 @@ func (s *Service) DeleteSubscription(id string) (subscription.State, error) {
 		return subscription.State{}, err
 	}
 	_ = s.delayCache.Delete(id)
+	_ = s.runtimeManager.ForgetProxySelections(id)
 	_ = s.reconcileSelectedWithTimeoutLocked(reconcileTriggerSubscription, nil, reconcileAutomatic)
 	return s.SubscriptionState()
 }
@@ -633,6 +643,9 @@ func (s *Service) Startup(ctx context.Context) {
 }
 
 func (s *Service) Shutdown(ctx context.Context) error {
+	if s.jeemiUpdater != nil {
+		s.jeemiUpdater.Cancel()
+	}
 	s.mu.Lock()
 	s.shuttingDown = true
 	cancel := s.coreOperationCancel

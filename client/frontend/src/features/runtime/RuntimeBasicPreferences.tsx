@@ -2,6 +2,7 @@ import { InputNumber, Select, Switch } from "antd";
 import { useTranslation } from "react-i18next";
 
 import type {
+  FindProcessMode,
   ListenerType,
   LogLevel,
   RuntimePreferences,
@@ -126,26 +127,46 @@ export function RuntimeBasicPreferences({
         </RuntimePreferenceItem>
       </div>
 
-      <RuntimeYamlResourceEditor
-        enabled={draft.tunRouteExcludeAddressEnabled}
-        field="tun.route-exclude-address"
-        helpTopic="runtimeTunRouteExclude"
-        label={t("home.runtimePreferences.tunRouteExcludeAddress")}
-        mergeMode={draft.tunRouteExcludeAddressMerge}
-        onCommit={(result) =>
-          updateDraft({ tunRouteExcludeAddress: result.values })
-        }
-        onEnabledChange={(tunRouteExcludeAddressEnabled) =>
-          updateDraft({ tunRouteExcludeAddressEnabled })
-        }
-        onMergeModeChange={(tunRouteExcludeAddressMerge) =>
-          updateDraft({ tunRouteExcludeAddressMerge })
-        }
-        placeholder={t(
-          "home.runtimePreferences.tunRouteExcludeAddressPlaceholder",
-        )}
-        sourceText={formatYamlStringSequence(draft.tunRouteExcludeAddress)}
-      />
+      <div className="runtime-preferences-grid runtime-baseline-resources">
+        <RuntimeYamlResourceEditor
+          enabled={draft.tunRouteExcludeAddressEnabled}
+          field="tun.route-exclude-address"
+          helpTopic="runtimeTunRouteExclude"
+          label={t("home.runtimePreferences.tunRouteExcludeAddress")}
+          mergeMode={draft.tunRouteExcludeAddressMerge}
+          onCommit={(result) =>
+            updateDraft({ tunRouteExcludeAddress: result.values })
+          }
+          onEnabledChange={(tunRouteExcludeAddressEnabled) =>
+            updateDraft({ tunRouteExcludeAddressEnabled })
+          }
+          onMergeModeChange={(tunRouteExcludeAddressMerge) =>
+            updateDraft({ tunRouteExcludeAddressMerge })
+          }
+          placeholder={t(
+            "home.runtimePreferences.tunRouteExcludeAddressPlaceholder",
+          )}
+          sourceText={formatYamlStringSequence(draft.tunRouteExcludeAddress)}
+        />
+        <div className="runtime-baseline-options">
+          <RuntimePreferenceItem
+            helpTopic="runtimeFindProcess"
+            title={t("home.runtimePreferences.findProcessMode")}
+          >
+            <Select
+              aria-label={t("home.runtimePreferences.findProcessMode")}
+              onChange={(findProcessMode: FindProcessMode) =>
+                updateDraft({ findProcessMode })
+              }
+              options={(["always", "strict", "off"] as const).map((value) => ({
+                label: value,
+                value,
+              }))}
+              value={draft.findProcessMode}
+            />
+          </RuntimePreferenceItem>
+        </div>
+      </div>
     </RuntimePreferenceSection>
   );
 }

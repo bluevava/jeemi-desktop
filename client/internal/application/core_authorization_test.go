@@ -56,6 +56,9 @@ func authorizationServiceWithProxy(t *testing.T, mode string, proxy mihomoruntim
 	driver := &authorizationDriver{}
 	client := &http.Client{Transport: fallbackTestTransport(func(r *http.Request) (*http.Response, error) {
 		body := `{"version":"v1.19.30","mode":"rule","tun":{"enable":true,"device":"JeemiTun"}}`
+		if r.Method == http.MethodGet && r.URL.Path == "/proxies" {
+			body = `{"proxies":{}}`
+		}
 		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body))}, nil
 	})}
 	s.runtimeManager, err = mihomoruntime.NewManager(mihomoruntime.Options{DataDirectory: root, Driver: driver, SystemProxy: proxy, HTTPClient: client, GOOS: "linux", ObserveTUN: func(context.Context, string) error { return nil }})

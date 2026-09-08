@@ -8,8 +8,13 @@ import trayLabels from "../tray-labels.json";
 import recoveryLabels from "../recovery-labels.json";
 import { zhLocalConfigFieldHelp } from "./local-config-field-help";
 import { zhRuleSetEntry } from "./rule-set-entry";
+import { zhSubscriptionNormalization } from "./subscription-normalization";
+import { zhDNSQuery, zhDNSQueryHelp } from "./dns-query";
+import { zhAppUpdate } from "./app-update";
 
 export const zhCN = {
+  appUpdate: zhAppUpdate,
+  dnsQuery: zhDNSQuery,
   ruleSetEntry: zhRuleSetEntry,
   app: {
     name: "Jeemi",
@@ -156,15 +161,19 @@ export const zhCN = {
         },
       },
     },
-    version: "Jeemi 版本",
-    platform: "运行平台",
-    coreVersion: "mihomo 版本",
+    version: "Jeemi",
+    platform: "当前平台",
+    coreVersion: "Mihomo",
     notAvailable: "尚不可用",
     about: {
       title: "关于Jeemi",
       repository: "开源仓库",
       repositoryError: "无法打开开源仓库，请稍后重试。",
       description: "一个Mihomo内核管理客户端",
+      manageCore: "管理版本",
+      helper: "授权助手",
+      removeHelper: "卸载助手",
+      helperStates: { ready: "正常", failed: "异常", update: "待更新", not_installed: "未安装" },
     },
     runtimeActionError:
       "代理操作失败。请确认已选择并校验 mihomo 版本、已选择订阅配置，并检查当前状态中的错误；失败不会替换上一份可用 generation。",
@@ -222,6 +231,7 @@ export const zhCN = {
       listenPort: "外部代理监听端口",
       allowLan: "允许局域网连接",
       logLevel: "mihomo 日志级别",
+      findProcessMode: "查找进程",
       logLevels: {
         silent: "静默",
         error: "错误",
@@ -413,6 +423,7 @@ export const zhCN = {
     },
   },
   subscription: {
+    normalization: zhSubscriptionNormalization,
     fallback: {
       title: "漏网之鱼",
       preserve: "不覆写（{{target}}）",
@@ -437,7 +448,7 @@ export const zhCN = {
       urlTitle: "从 URL 拉取订阅",
       confirmURL: "拉取并保存",
       fileDialogTitle: "选择订阅配置文件",
-      fileFilter: "YAML、JSON 或 TXT 配置",
+      fileFilter: "YAML、JSON、TXT 或 Surge CONF 订阅",
       qrImageDialogTitle: "选择二维码图片",
       qrImageFilter: "PNG、JPEG 或 GIF 图片",
     },
@@ -467,9 +478,10 @@ export const zhCN = {
       subscriptionTools: "当前订阅快捷工具",
       selectorTools: "代理选择器快捷工具",
       speedTest: "测速全部节点",
+      speedTestMatched: "测速搜索结果中的节点",
       speedTestBusy: "已有测速队列正在执行，请等待完成",
       speedTestRequiresCore: "当前订阅必须由运行中的 mihomo 加载后才能测速",
-      speedTestEmpty: "当前选择器没有可测速节点",
+      speedTestEmpty: "当前范围没有可测速节点",
       showHiddenSelectors: "显示标记为 hidden 的选择器",
       hideHiddenSelectors: "隐藏标记为 hidden 的选择器",
     },
@@ -532,6 +544,7 @@ export const zhCN = {
       failed: "无法生成最终配置预览",
       status: {
         source_unavailable: "当前订阅原文不可用，请检查受管修订文件。",
+        normalization_failed: "订阅格式转换失败，请检查转换详情或所选核心版本。",
         local_config_unavailable:
           "关联的本地配置不存在或不可读取，请重新关联。",
         local_script_unavailable:
@@ -637,7 +650,7 @@ export const zhCN = {
       urlImport:
         "URL 拉取失败；请检查地址、网络、文件大小和配置格式。未保存任何不完整内容。",
       fileImport:
-        "文件导入失败；只支持 .yaml、.json 和 .txt，且内容必须是完整的 mihomo 配置映射。",
+        "文件导入失败；支持 .yaml、.json、.txt 和 .conf，内容可以是 mihomo、Surge 或受支持的 URI 订阅。",
       qrImport:
         "二维码图片导入失败；请确认图片清晰，并且二维码内容是 http/https 订阅 URL。",
       screenImport: "二维码订阅导入失败；请检查二维码中的订阅地址及网络连接。",
@@ -665,6 +678,8 @@ export const zhCN = {
         "保存规则提供者开关失败；订阅原文和当前生效配置均未被直接改写。",
       proxySelection:
         "切换代理节点失败；当前选择没有改变，请检查 mihomo 控制 API 和节点名称。",
+      proxySelectionSave:
+        "节点已切换，但未能保存选择；重启后可能恢复旧选择，请稍后重试。",
       connectionReset:
         "节点已切换，但重置关联链接失败；新链接会使用新节点，现有链接可能继续走旧链路。",
       outboundMode:
@@ -1560,13 +1575,24 @@ export const zhCN = {
       runtimeBaseline: {
         title: "安全运行基线",
         description:
-          "统一控制日志、IPv6、代理监听、局域网访问，以及 TUN 自动路由、接口检测和路由排除网段。",
+          "统一控制日志、进程查找、IPv6、代理监听、局域网访问，以及 TUN 自动路由、接口检测和路由排除网段。",
         purpose:
           "补齐不完整订阅中的必要值，并保证系统代理或 TUN 始终由 Jeemi 的单一设置来源管理。",
         scenarios:
           "遇到监听端口冲突、需要局域网共享，或当前平台需要调整 TUN 路由行为时使用。",
         cautions:
           "允许局域网会扩大监听范围；关闭自动路由或接口检测可能需要自行维护路由。排除的网段会绕过 TUN，范围过大会造成流量绕过代理。",
+      },
+      runtimeFindProcess: {
+        title: "查找进程",
+        description:
+          "控制 mihomo 是否查找连接所属的进程，默认 strict。always 始终查找，strict 由核心判断是否需要，off 关闭查找。",
+        purpose:
+          "为进程规则和连接信息提供来源进程；主页的选择会注入最终运行配置。",
+        scenarios:
+          "使用 PROCESS-NAME、PROCESS-PATH 等规则或排查应用连接时调整；通常保留 strict 即可。",
+        cautions:
+          "查找结果受平台和权限影响；off 会影响依赖进程信息的规则。该字段在本地配置中锁定，订阅或脚本中的同名值会被主页设置覆盖。",
       },
       runtimeTunRouteExclude: {
         title: "Tun排除网段",
@@ -1749,6 +1775,7 @@ export const zhCN = {
         cautions:
           "查询与解锁测试会向外部服务发起请求并可能暴露出口 IP 或查询域名；必须展示数据来源、超时和失败状态。",
       },
+      dnsQuery: zhDNSQueryHelp,
       homeSettings: {
         title: "主页设置",
         description:
@@ -1777,11 +1804,11 @@ export const zhCN = {
       },
       appUpdate: {
         title: "Jeemi 更新检查",
-        description: "查询 Jeemi 可用版本、更新说明与平台匹配的发布产物。",
+        description: "与 bluevava/jeemi-desktop 开源仓库的最新正式发布版本比较，有更新时询问是否自动下载并更新。",
         purpose: "帮助用户获知安全修复和新功能。",
-        scenarios: "手动检查或未来按设置周期检查客户端更新。",
+        scenarios: "在关于卡片或主页设置中手动检查；没有新版本时提示当前已经是最新版本。",
         cautions:
-          "下载、签名校验和安装必须分阶段显示；当前基础框架尚未接入更新后端。",
+          "确认后会下载匹配系统与架构的发布包，校验摘要，停止代理并自动替换、重启客户端。下载和校验阶段可取消，替换失败会尝试恢复旧文件。安装位置须可写；配套授权助手更新仍通过既有授权流程完成。",
       },
       coreVersion: {
         title: "mihomo 版本",
@@ -1823,13 +1850,13 @@ export const zhCN = {
       subscriptionDelayTest: {
         title: "节点测速并发",
         description:
-          "控制“测速全部节点”同时向 mihomo 提交的 delay 请求数量，Jeemi 会把剩余节点保留在同一队列中。",
+          "控制批量测速同时向 mihomo 提交的 delay 请求数量。有快速搜索时只测试搜索结果中的节点，搜索为空时测试全部节点；剩余节点保留在同一队列中。",
         purpose:
           "在测速速度与本机、网络及代理服务商压力之间取得平衡，并阻止重复点击创建重叠队列。",
         scenarios:
           "节点数量很多、设备性能较弱或服务商限制并发时调低；希望更快完成时适度调高。",
         cautions:
-          "范围固定为 1–50，默认 8。测速会产生真实外部请求；存在队列时全量和单节点入口都会暂时锁定。",
+          "范围固定为 1–50，默认 8。命中选择器名称会测试该组内全部真实节点，重复节点只测试一次，没有匹配节点时不可启动。测速会产生真实外部请求；队列按点击时的搜索结果执行，修改搜索不改变已开始的队列，执行期间批量和单节点入口暂时锁定。",
       },
       subscriptionConnectionReset: {
         title: "切换重置链接",
@@ -1844,13 +1871,13 @@ export const zhCN = {
       subscriptionImport: {
         title: "订阅导入",
         description:
-          "通过 http/https URL、配置文件或二维码导入一份完整订阅配置原文。",
+          "通过 http/https URL、配置文件或二维码导入 mihomo、Surge 或通用 URI 订阅，保存原始文本。",
         purpose:
           "把不同来源统一保存为可追踪、不可变的订阅修订，为后续组合与运行校验提供可靠输入。",
         scenarios:
-          "首次添加订阅、从已有 YAML/JSON/TXT 迁移，或扫描服务商提供的订阅二维码时使用。",
+          "首次添加订阅、导入 YAML/JSON/TXT/CONF 文件，或扫描服务商提供的订阅二维码时使用。",
         cautions:
-          "单份配置有大小和 YAML 安全限制；只有拉取、解析和原子写入全部成功后才会切换修订，失败不会覆盖当前内容。",
+          "Surge/URI 会先转换节点和 DNS，再经过本地配置或脚本及运行参数。来源规则不转换；不支持的节点会显示原因。原文不可变，转换或校验失败不会覆盖当前修订。",
       },
       subscriptionQRCode: {
         title: "二维码订阅导入",
@@ -1930,7 +1957,7 @@ export const zhCN = {
         purpose:
           "在保留当前订阅流量、到期和更新时间的同时集中节点搜索，并让展开和收起都不移动下方代理选择器。",
         scenarios:
-          "切换或编辑订阅时展开；浏览节点时收起，直接搜索选择器或使用刷新、规则提供者、测速和 hidden 选择器按钮。",
+          "切换或编辑订阅时展开；浏览节点时收起，直接搜索选择器或使用刷新、规则提供者、测速和 hidden 选择器按钮。测速只处理当前搜索结果，搜索为空时测试全部节点。",
         cautions:
           "流量和名称可能缺失或过期；测速只在当前投影对应的 mihomo 控制会话健康时启用，显示 hidden 只改变当前界面过滤，不改变订阅配置或运行核心。",
       },

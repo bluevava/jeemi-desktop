@@ -1,0 +1,32 @@
+.tools-panels { background: transparent; border: 0; }
+.tools-panels > .ant-collapse-item { margin-bottom: 14px; overflow: hidden; border: 1px solid var(--color-border) !important; border-radius: var(--radius-card) !important; background: var(--color-surface); }
+.tools-panels > .ant-collapse-item > .ant-collapse-header { align-items: center; font-size: var(--font-size-body); font-weight: 600; }
+.tools-panels .ant-collapse-content { background: var(--color-surface); }
+.dns-query-panel { display: grid; gap: 20px; }
+.dns-query-domain { display: flex; gap: 12px; }
+.dns-query-domain > .ant-input { flex: 1; min-width: 0; }
+.dns-query-servers, .dns-query-results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.dns-server-field { display: grid; gap: 8px; min-width: 0; }
+.dns-server-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 24px; }
+.dns-server-label label { font-size: var(--font-size-body); }
+.dns-server-field .ant-select { width: 100%; }
+.dns-result-card { min-width: 0; padding: 18px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-muted); }
+.dns-result-heading, .dns-result-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dns-result-heading { margin-bottom: 14px; }
+.dns-result-heading h3, .dns-result-family h4 { margin: 0; font-size: var(--font-size-body); font-weight: 600; }
+.dns-result-route, .dns-result-status, .dns-result-server, .dns-result-node, .dns-query-stamp { font-size: var(--font-size-caption); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.dns-result-server, .dns-result-node { margin-bottom: 8px; }
+.dns-result-status { padding-bottom: 10px; border-bottom: 1px solid var(--color-border); }
+.dns-result-status[data-status="success"] { color: var(--color-positive); }
+.dns-result-status[data-status="partial"] { color: var(--color-warning); }
+.dns-result-status[data-status="error"], .dns-query-error { color: var(--color-danger); }
+.dns-result-family { margin-top: 16px; }
+.dns-result-family ul { padding: 0; margin: 8px 0 0; list-style: none; }
+.dns-result-family li { margin-top: 6px; overflow-wrap: anywhere; user-select: text; }
+.dns-result-family code { font-size: var(--font-size-body); }
+.dns-result-empty, .dns-query-error { margin: 8px 0 0; font-size: var(--font-size-body); overflow-wrap: anywhere; }
+.dns-result-empty { color: var(--color-text-secondary); }
+.dns-query-stamp { margin: 0; }
+@media (max-width: 760px) {
+  .dns-query-servers, .dns-query-results { grid-template-columns: minmax(0, 1fr); }
+}

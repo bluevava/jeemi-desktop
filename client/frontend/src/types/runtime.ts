@@ -120,6 +120,7 @@ export interface MihomoRuntimeStatus {
   generationId: string;
   subscriptionId: string;
   source: {
+    normalizationFingerprint: string;
     subscriptionId: string;
     subscriptionRevision: string;
     localConfigId: string;
@@ -155,6 +156,7 @@ export type ProxyMode = "system_proxy" | "tun";
 export type ListenerType = "http" | "socks" | "mixed";
 export type TunStack = "system" | "gvisor" | "mixed";
 export type LogLevel = "silent" | "error" | "warning" | "info" | "debug";
+export type FindProcessMode = "always" | "strict" | "off";
 export type DnsEnhancedMode = "fake-ip" | "redir-host";
 export type RuntimeMergeMode = "append" | "override";
 export type RuntimeYamlField =
@@ -195,6 +197,7 @@ export interface RuntimePreferences {
   allowLan: boolean;
   tunStack: TunStack;
   logLevel: LogLevel;
+  findProcessMode: FindProcessMode;
   ipv6: boolean;
   dnsEnabled: boolean;
   dnsListen: string;

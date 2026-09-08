@@ -146,6 +146,7 @@ func TestStorePersistsRuntimePreferencesAtomically(t *testing.T) {
 	preferences.TUNRouteExcludeAddressEnabled = true
 	preferences.TUNRouteExcludeAddressMerge = runtimeconfig.MergeModeOverride
 	preferences.LogLevel = runtimeconfig.LogLevelDebug
+	preferences.FindProcessMode = runtimeconfig.FindProcessModeAlways
 	preferences.DNSListen = "127.0.0.1:5353"
 	preferences.DNSIPv6 = true
 	preferences.DNSUseHosts = true
@@ -205,6 +206,43 @@ func TestStoreDefaultsMissingRuntimePreferences(t *testing.T) {
 	}
 	if !reflect.DeepEqual(document.GeoData, geodata.DefaultPreferences()) {
 		t.Fatalf("missing GEO data preferences were not defaulted: %+v", document.GeoData)
+	}
+}
+
+func TestStorePreservesProxyAndProcessChoicesWithoutRewritingOnLoad(t *testing.T) {
+	for _, test := range []struct {
+		name, runtimeJSON, proxyMode, processMode string
+	}{
+		{"defaults", `{}`, runtimeconfig.ProxyModeTUN, runtimeconfig.FindProcessModeStrict},
+		{"saved system proxy", `{"proxyMode":"system_proxy"}`, runtimeconfig.ProxyModeSystemProxy, runtimeconfig.FindProcessModeStrict},
+		{"always", `{"proxyMode":"tun","findProcessMode":"always"}`, runtimeconfig.ProxyModeTUN, runtimeconfig.FindProcessModeAlways},
+		{"off", `{"proxyMode":"system_proxy","findProcessMode":"off"}`, runtimeconfig.ProxyModeSystemProxy, runtimeconfig.FindProcessModeOff},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "settings.json")
+			contents := `{"runtime":` + test.runtimeJSON + `}`
+			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			store, err := NewStore(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			document, err := store.Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if document.Runtime.ProxyMode != test.proxyMode || document.Runtime.FindProcessMode != test.processMode {
+				t.Fatalf("unexpected runtime choices: %+v", document.Runtime)
+			}
+			after, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(after) != contents {
+				t.Fatal("loading runtime choices rewrote settings")
+			}
+		})
 	}
 }
 

@@ -36,12 +36,13 @@ var (
 )
 
 type Scope struct {
-	SubscriptionID       string `json:"subscriptionId"`
-	SubscriptionRevision string `json:"subscriptionRevision"`
-	LocalConfigID        string `json:"localConfigId"`
-	LocalConfigRevision  int    `json:"localConfigRevision"`
-	LocalScriptID        string `json:"localScriptId"`
-	LocalScriptRevision  int    `json:"localScriptRevision"`
+	NormalizationFingerprint string `json:"normalizationFingerprint"`
+	SubscriptionID           string `json:"subscriptionId"`
+	SubscriptionRevision     string `json:"subscriptionRevision"`
+	LocalConfigID            string `json:"localConfigId"`
+	LocalConfigRevision      int    `json:"localConfigRevision"`
+	LocalScriptID            string `json:"localScriptId"`
+	LocalScriptRevision      int    `json:"localScriptRevision"`
 }
 
 type Entry struct {
@@ -255,6 +256,9 @@ func (s *Store) filePath(subscriptionID string) string {
 }
 
 func validateScope(scope Scope) error {
+	if scope.NormalizationFingerprint != "" && !revisionIDPattern.MatchString(scope.NormalizationFingerprint) {
+		return fmt.Errorf("subscription normalization fingerprint is invalid")
+	}
 	if !subscriptionIDPattern.MatchString(strings.TrimSpace(scope.SubscriptionID)) {
 		return fmt.Errorf("subscription id is invalid")
 	}

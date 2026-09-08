@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"runtime"
 
+	"jeemi/internal/appupdate"
 	platformdesktop "jeemi/internal/platform/desktop"
 	"jeemi/internal/platform/processguard"
 
@@ -32,6 +33,9 @@ func (r Resources) trayIcon() []byte {
 
 // Run assembles the desktop host and starts Wails. Bindings builds only expose method metadata.
 func Run(resources Resources) error {
+	if handled, err := appupdate.RunIfRequested(); handled {
+		return err
+	}
 	if runLocalNetworkStatus() {
 		return nil
 	}

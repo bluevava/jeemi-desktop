@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	"jeemi/internal/config/document"
 	configresources "jeemi/internal/config/resources"
 	"jeemi/internal/platform/paths"
+	"jeemi/internal/subscriptionformat"
 )
 
 const (
@@ -720,14 +720,11 @@ func validateContents(format Format, contents []byte) error {
 	if len(contents) == 0 || len(contents) > maxSubscriptionBytes {
 		return fmt.Errorf("subscription configuration must contain 1 to %d bytes", maxSubscriptionBytes)
 	}
-	validationContents := bytes.TrimPrefix(contents, []byte{0xef, 0xbb, 0xbf})
-	if format == FormatJSON && !json.Valid(validationContents) {
+	normalized, err := subscriptionformat.Normalize(contents)
+	if err == nil && normalized.Report.Format == "mihomo" && format == FormatJSON && !json.Valid(bytes.TrimPrefix(contents, []byte{0xef, 0xbb, 0xbf})) {
 		return fmt.Errorf("subscription JSON is invalid")
 	}
-	if _, err := document.Parse(validationContents); err != nil {
-		return fmt.Errorf("subscription configuration is invalid: %w", err)
-	}
-	return nil
+	return err
 }
 
 func validateStoredMetadata(metadata metadataDocument, id string) error {

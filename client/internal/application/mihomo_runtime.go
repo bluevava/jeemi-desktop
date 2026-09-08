@@ -47,6 +47,12 @@ func (s *Service) SelectRuntimeProxy(group, proxy string) error {
 	return s.runtimeManager.SelectProxy(ctx, group, proxy)
 }
 
+func (s *Service) RememberRuntimeProxySelection(sessionID, subscriptionID, group, proxy string) error {
+	ctx, cancel := s.operationContext(8 * time.Second)
+	defer cancel()
+	return s.runtimeManager.RememberProxySelection(ctx, sessionID, subscriptionID, group, proxy)
+}
+
 func (s *Service) UpdateRuntimeRuleProvider(name string) error {
 	ctx, cancel := s.operationContext(35 * time.Second)
 	defer cancel()

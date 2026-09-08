@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 
 	"jeemi/internal/config/compose"
@@ -17,9 +18,11 @@ import (
 	"jeemi/internal/profile"
 	"jeemi/internal/runtimeconfig"
 	"jeemi/internal/subscription"
+	"jeemi/internal/subscriptionformat"
 )
 
 type composedSubscription struct {
+	Normalization          subscriptionformat.Report
 	Fallback               fallbackoverride.State
 	Contents               []byte
 	LocalConfigRevision    int
@@ -30,6 +33,7 @@ type composedSubscription struct {
 const (
 	projectionReady                  = "ready"
 	projectionSourceUnavailable      = "source_unavailable"
+	projectionNormalizationFailed    = "normalization_failed"
 	projectionLocalConfigUnavailable = "local_config_unavailable"
 	projectionLocalScriptUnavailable = "local_script_unavailable"
 	projectionScriptExecutionFailed  = "script_execution_failed"
@@ -100,7 +104,15 @@ func (s *Service) subscriptionProjection(summary subscription.Summary, runtimePr
 		Warnings:                     []string{},
 	}
 	composed, status, err := s.composeSubscription(summary, runtimePreferences, geoDataPreferences)
+	if composed.Normalization.Format != "" {
+		projection.Summary.Normalization = &composed.Normalization
+		projection.NormalizationFingerprint = composed.Normalization.Fingerprint
+	}
 	if err != nil {
+		var normalizationError *subscriptionformat.Error
+		if errors.As(err, &normalizationError) {
+			projection.Summary.NormalizationError = &subscriptionformat.Diagnostic{Code: normalizationError.Code, Line: normalizationError.Line, Field: normalizationError.Field}
+		}
 		projection.Status = status
 		projection.Summary.Status = projection.Status
 		return projection
@@ -143,6 +155,7 @@ func (s *Service) subscriptionProjection(summary subscription.Summary, runtimePr
 		})
 	}
 	projection.Summary = subscription.CompositionSummary{
+		Normalization:      &composed.Normalization,
 		Status:             projectionReady,
 		ProxyCount:         inspected.ProxyCount,
 		SelectorCount:      len(inspected.Selectors),
@@ -181,9 +194,23 @@ func (s *Service) composeSubscriptionCandidate(summary subscription.Summary, run
 		}
 		contents = []byte(text.Contents)
 	}
-	var err error
+	normalized, err := subscriptionformat.Normalize(contents)
+	if err != nil {
+		return composedSubscription{}, projectionNormalizationFailed, err
+	}
 	override := candidate.script
-	result := composedSubscription{Contents: contents}
+	result := composedSubscription{Contents: normalized.Contents, Normalization: normalized.Report}
+	if normalized.RequiredCore != "" {
+		settings, loadErr := s.settingsStore.Load()
+		if loadErr != nil {
+			return result, projectionNormalizationFailed, loadErr
+		}
+		if settings.Mihomo.SelectedVersion != "" {
+			if err := normalized.CheckCore(settings.Mihomo.SelectedVersion); err != nil {
+				return result, projectionNormalizationFailed, err
+			}
+		}
+	}
 	if override == nil && summary.LocalConfigID != "" {
 		local := candidate.local
 		if local == nil {

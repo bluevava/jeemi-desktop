@@ -22,6 +22,14 @@ func (s *Service) GetProxyAuthorization() (authorization.Status, error) {
 	return authorization.Inspect(ctx, s.authorizationTarget(), s.versionManager.CoreDirectory())
 }
 
+// Helper health is independent of the selected core and whether the proxy is
+// running. Inspect without a target to avoid reporting core permissions here.
+func (s *Service) GetAuthorizationHelperStatus() (authorization.Status, error) {
+	ctx, cancel := s.operationContext(8 * time.Second)
+	defer cancel()
+	return authorization.Inspect(ctx, nil, s.versionManager.CoreDirectory())
+}
+
 func (s *Service) SetupProxyAuthorization() (authorization.Status, error) {
 	ctx, cancel := s.operationContext(3 * time.Minute)
 	defer cancel()

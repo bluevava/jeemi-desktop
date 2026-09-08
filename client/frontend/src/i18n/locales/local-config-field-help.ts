@@ -89,10 +89,10 @@ export const zhLocalConfigFieldHelp = {
   ),
   "find-process-mode": help(
     "find-process-mode",
-    "控制 mihomo 为连接查找来源进程的策略。",
+    "由主页“基础与监听”中的“查找进程”统一注入，本地配置中锁定。默认 strict，可选 always、strict、off。",
     "使 PROCESS-NAME、PROCESS-PATH 等规则能够获得进程信息。",
-    "规则依赖应用进程，或排查某个程序的连接时使用。",
-    "进程查询有平台差异和权限成本；off 会让进程规则无法正常匹配。",
+    "规则依赖应用进程，或排查某个程序的连接时，在主页调整。",
+    "进程查询受平台和权限影响；off 会影响进程规则。订阅或脚本中的同名值会被主页设置覆盖。",
   ),
   profile: help(
     "profile",
@@ -632,7 +632,7 @@ export const enLocalConfigFieldHelp = {
   "keep-alive-interval": help("keep-alive-interval", "Sets the interval between TCP keep-alive probes.", "Detect dead long-lived connections and maintain sessions that require keep-alive.", "Adjust it when network devices aggressively remove idle sessions.", "Very short intervals add traffic and wakeups; evaluate it together with keep-alive-idle."),
   "keep-alive-idle": help("keep-alive-idle", "Sets how long a TCP connection stays idle before keep-alive probing begins.", "Control when long-lived connections enter liveness detection.", "Adjust it on mobile networks or NATs that reclaim idle sessions quickly.", "Too short adds needless probes; too long delays detection of dead connections."),
   "disable-keep-alive": help("disable-keep-alive", "Disables keep-alive on mihomo outbound TCP connections.", "Provide strict short-connection behavior for exceptional networks or services.", "Enable it only after identifying keep-alive as the compatibility problem.", "Long-lived connections may be reclaimed more easily by NAT or firewalls, so this is rarely a good default."),
-  "find-process-mode": help("find-process-mode", "Controls how mihomo looks up the process that owns a connection.", "Supply process information to PROCESS-NAME and PROCESS-PATH rules.", "Use it for application-based routing or connection diagnostics.", "Process lookup has platform and permission costs; off prevents process rules from matching correctly."),
+  "find-process-mode": help("find-process-mode", "Managed by Process lookup in Home's Basic and listeners section and locked here. Defaults to strict; accepts always, strict, and off.", "Supply process information to PROCESS-NAME and PROCESS-PATH rules.", "Adjust it on Home for application-based routing or connection diagnostics.", "Process lookup depends on platform support and permissions; off affects process rules. Home overrides subscription or script values."),
   profile: help("profile", "Configures persistence of selector choices, Fake-IP mappings, and related mihomo state.", "Restore selected nodes or DNS mappings after a core restart.", "Use it when selections and Fake-IP state should survive mihomo restarts.", "Persistent files must stay under jeemi_data; disabling storage changes post-restart behavior."),
   "unified-delay": help("unified-delay", "Uses a unified connection-establishment basis for delay measurements.", "Reduce protocol-specific handshake bias when comparing nodes.", "Enable it for fairer comparisons across different proxy protocols.", "Results still depend on the test URL, caches, and current network and do not represent throughput."),
   "tcp-concurrent": help("tcp-concurrent", "Allows concurrent TCP attempts to multiple IPs returned by DNS.", "Reach the first viable target faster when one address is slow or unreachable.", "Enable it for dual-stack or multi-address targets with inconsistent paths.", "It creates short bursts of parallel dials and may not suit resource-constrained or concurrency-sensitive environments."),

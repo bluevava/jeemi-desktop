@@ -28,6 +28,7 @@ var (
 )
 
 type Input struct {
+	NormalizationFingerprint     string
 	SubscriptionID               string
 	SubscriptionRevision         string
 	LocalConfigID                string
@@ -45,6 +46,7 @@ type Input struct {
 }
 
 type Manifest struct {
+	NormalizationFingerprint     string                    `json:"normalizationFingerprint"`
 	Version                      int                       `json:"version"`
 	Fingerprint                  string                    `json:"fingerprint"`
 	GeneratedAt                  string                    `json:"generatedAt"`
@@ -104,7 +106,8 @@ func (s *Store) Save(input Input) (Snapshot, error) {
 		return Snapshot{}, fmt.Errorf("create resolved runtime root: %w", err)
 	}
 	manifest := Manifest{
-		Version: manifestVersion, Fingerprint: fingerprint,
+		NormalizationFingerprint: input.NormalizationFingerprint,
+		Version:                  manifestVersion, Fingerprint: fingerprint,
 		GeneratedAt:    s.now().UTC().Format(time.RFC3339Nano),
 		SubscriptionID: input.SubscriptionID, SubscriptionRevision: input.SubscriptionRevision,
 		LocalConfigID: input.LocalConfigID, LocalConfigRevision: input.LocalConfigRevision,
@@ -189,6 +192,7 @@ func Fingerprint(input Input) (string, string, error) {
 	digest := sha256.Sum256(input.Configuration)
 	configurationDigest := hex.EncodeToString(digest[:])
 	identity := struct {
+		NormalizationFingerprint     string                    `json:"normalizationFingerprint"`
 		SubscriptionID               string                    `json:"subscriptionId"`
 		SubscriptionRevision         string                    `json:"subscriptionRevision"`
 		LocalConfigID                string                    `json:"localConfigId"`
@@ -202,7 +206,8 @@ func Fingerprint(input Input) (string, string, error) {
 		GeoDataFingerprint           string                    `json:"geoDataFingerprint"`
 		ConfigurationSHA256          string                    `json:"configurationSha256"`
 	}{
-		SubscriptionID: input.SubscriptionID, SubscriptionRevision: input.SubscriptionRevision,
+		NormalizationFingerprint: input.NormalizationFingerprint,
+		SubscriptionID:           input.SubscriptionID, SubscriptionRevision: input.SubscriptionRevision,
 		LocalConfigID: input.LocalConfigID, LocalConfigRevision: input.LocalConfigRevision,
 		LocalScriptID: input.LocalScriptID, LocalScriptRevision: input.LocalScriptRevision,
 		RuleProviderOverrideRevision: input.RuleProviderOverrideRevision,
@@ -220,6 +225,9 @@ func Fingerprint(input Input) (string, string, error) {
 }
 
 func validateInput(input Input) error {
+	if input.NormalizationFingerprint != "" && !sha256Pattern.MatchString(input.NormalizationFingerprint) {
+		return fmt.Errorf("subscription normalization fingerprint is invalid")
+	}
 	if input.FallbackOverrideRevision < 0 {
 		return fmt.Errorf("fallback override revision is invalid")
 	}

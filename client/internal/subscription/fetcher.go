@@ -1,16 +1,18 @@
 package subscription
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"jeemi/internal/subscriptionformat"
 )
 
 const (
@@ -112,22 +114,19 @@ func validateRemoteURL(value string) (*url.URL, error) {
 }
 
 func detectRemoteFormat(contentType string, sourceURL *url.URL, contents []byte) Format {
-	mediaType, _, _ := mime.ParseMediaType(contentType)
-	if mediaType == "application/json" || mediaType == "text/json" {
+	// Storage suffixes describe the actual body. A server's MIME type or URL
+	// extension is not evidence of the subscription's syntax.
+	if result, err := subscriptionformat.Normalize(contents); err == nil && result.Report.Format != "mihomo" {
+		return FormatText
+	}
+	trimmed := bytes.TrimSpace(bytes.TrimPrefix(contents, []byte{0xef, 0xbb, 0xbf}))
+	if bytes.HasPrefix(trimmed, []byte("{")) && json.Valid(trimmed) {
 		return FormatJSON
 	}
 	extension := strings.ToLower(filepath.Ext(sourceURL.Path))
 	switch extension {
-	case ".json":
-		return FormatJSON
-	case ".txt":
+	case ".txt", ".conf":
 		return FormatText
-	case ".yaml", ".yml":
-		return FormatYAML
-	}
-	trimmed := strings.TrimSpace(string(contents))
-	if strings.HasPrefix(trimmed, "{") && json.Valid(contents) {
-		return FormatJSON
 	}
 	return FormatYAML
 }

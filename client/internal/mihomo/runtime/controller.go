@@ -75,9 +75,7 @@ func (c *controllerClient) SetMode(ctx context.Context, mode string) error {
 }
 
 func (c *controllerClient) SelectProxy(ctx context.Context, group, proxy string) error {
-	group = strings.TrimSpace(group)
-	proxy = strings.TrimSpace(proxy)
-	if group == "" || proxy == "" {
+	if strings.TrimSpace(group) == "" || strings.TrimSpace(proxy) == "" {
 		return fmt.Errorf("proxy group and proxy names are required")
 	}
 	return c.doJSON(ctx, http.MethodPut, "/proxies/"+url.PathEscape(group), map[string]string{"name": proxy}, nil)

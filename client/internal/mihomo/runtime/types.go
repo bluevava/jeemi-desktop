@@ -1,6 +1,9 @@
 package runtime
 
-import "jeemi/internal/runtimeconfig"
+import (
+	"jeemi/internal/config/dnstool"
+	"jeemi/internal/runtimeconfig"
+)
 
 type State string
 
@@ -49,6 +52,7 @@ type Status struct {
 }
 
 type Source struct {
+	NormalizationFingerprint     string `json:"normalizationFingerprint"`
 	SubscriptionID               string `json:"subscriptionId"`
 	SubscriptionRevision         string `json:"subscriptionRevision"`
 	LocalConfigID                string `json:"localConfigId"`
@@ -69,6 +73,7 @@ type StartRequest struct {
 }
 
 type Generation struct {
+	DNS            dnstool.Session
 	ID             string
 	Directory      string
 	ConfigPath     string

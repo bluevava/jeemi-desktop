@@ -22,7 +22,12 @@ interface ProxyOverviewValue {
   subscriptionState: SubscriptionState | null;
   proxyRuntime: MihomoProxyRuntimeState | null;
   syncSubscriptionState: (state: SubscriptionState) => void;
-  commitProxySelection: (group: string, proxy: string) => void;
+  commitProxySelection: (
+    group: string,
+    proxy: string,
+    sessionId: string,
+    subscriptionId: string,
+  ) => void;
   refreshProxyRuntime: () => Promise<void>;
 }
 
@@ -46,8 +51,10 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
   );
   const liveDataAllowedRef = useRef(liveDataAllowed);
   const sessionIDRef = useRef(session?.id ?? "");
+  const subscriptionIDRef = useRef(runtime?.mihomo.subscriptionId ?? "");
   liveDataAllowedRef.current = liveDataAllowed;
   sessionIDRef.current = session?.id ?? "";
+  subscriptionIDRef.current = runtime?.mihomo.subscriptionId ?? "";
   const subscriptionSourceKey = [
     runtime?.configuration.subscriptionId ?? "",
     runtime?.configuration.subscriptionRevision ?? "",
@@ -117,16 +124,26 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
     setSubscriptionState(state);
   }, []);
 
-  const commitProxySelection = useCallback((group: string, proxy: string) => {
-    setProxyRuntime((current) =>
-      current
-        ? {
-            ...current,
-            selections: { ...current.selections, [group]: proxy },
-          }
-        : current,
-    );
-  }, []);
+  const commitProxySelection = useCallback(
+    (group: string, proxy: string, sessionId: string, subscriptionId: string) => {
+      if (
+        !liveDataAllowedRef.current ||
+        sessionIDRef.current !== sessionId ||
+        subscriptionIDRef.current !== subscriptionId
+      ) {
+        return;
+      }
+      setProxyRuntime((current) =>
+        current
+          ? {
+              ...current,
+              selections: { ...current.selections, [group]: proxy },
+            }
+          : current,
+      );
+    },
+    [],
+  );
 
   const value = useMemo<ProxyOverviewValue>(
     () => ({

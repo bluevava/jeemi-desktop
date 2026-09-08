@@ -178,6 +178,16 @@ func MihomoProxyDelayCacheDirectoryFromRoot(dataRoot string) (string, error) {
 	return filepath.Join(clean, "cache", "mihomo", "proxy-delays"), nil
 }
 
+// ProxySelectionsDirectoryFromRoot keeps user choices outside disposable
+// core sessions and the snapshots copied into privileged helpers.
+func ProxySelectionsDirectoryFromRoot(dataRoot string) (string, error) {
+	clean, err := validateDataRoot(dataRoot)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(clean, "state", "mihomo", "proxy-selections"), nil
+}
+
 // SettingsFileFromRoot returns Jeemi's Go-owned settings document.
 func SettingsFileFromRoot(dataRoot string) (string, error) {
 	clean, err := validateDataRoot(dataRoot)

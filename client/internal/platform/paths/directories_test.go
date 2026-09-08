@@ -121,9 +121,16 @@ func TestManagedDataPathsStayBelowJeemiData(t *testing.T) {
 	if want := filepath.Join(dataRoot, "settings.json"); settings != want {
 		t.Fatalf("SettingsFileFromRoot() = %q, want %q", settings, want)
 	}
+	selections, err := ProxySelectionsDirectoryFromRoot(dataRoot)
+	if err != nil || selections != filepath.Join(dataRoot, "state", "mihomo", "proxy-selections") {
+		t.Fatalf("proxy selections directory = %q, %v", selections, err)
+	}
 }
 
 func TestManagedDataPathsRejectRelativeRoot(t *testing.T) {
+	if _, err := ProxySelectionsDirectoryFromRoot("jeemi_data"); err == nil {
+		t.Fatal("ProxySelectionsDirectoryFromRoot() accepted a relative data root")
+	}
 	if _, err := MihomoDirectoryFromRoot("jeemi_data"); err == nil {
 		t.Fatal("MihomoDirectoryFromRoot() accepted a relative data root")
 	}

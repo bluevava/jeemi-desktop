@@ -20,3 +20,22 @@ export function filterSelectorsByName(
     return members.length > 0 ? [{ ...selector, members }] : [];
   });
 }
+
+export function delayTargetsForSearch(
+  allTargets: string[],
+  visibleSelectors: SubscriptionSelector[],
+  query: string,
+): string[] {
+  if (!query.trim()) return allTargets;
+  return Array.from(
+    new Set(
+      visibleSelectors.flatMap((selector) =>
+        selector.members
+          .filter(
+            (member) => member.source === "proxy" || member.source === "provider",
+          )
+          .map((member) => member.name),
+      ),
+    ),
+  );
+}

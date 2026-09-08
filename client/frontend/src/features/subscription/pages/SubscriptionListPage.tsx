@@ -12,6 +12,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Alert, App, Button, Input, Modal, Select, Spin, Tag } from "antd";
+import { normalizationErrorKey } from "../normalization";
 import type { MenuProps } from "antd";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +27,6 @@ import {
   closeConnections,
   getConnections,
   getRuleProviderRuntimeState,
-  selectProxy as selectMihomoProxy,
 } from "../../../lib/mihomo/client";
 import type { MihomoRuleProviderRuntimeState } from "../../../lib/mihomo/client";
 import {
@@ -67,6 +67,7 @@ import type {
   SubscriptionDetail,
   SubscriptionIconKind,
   SubscriptionState,
+  SubscriptionSelector,
   SubscriptionSelectorMember,
   SubscriptionSummary,
   SubscriptionTextView,
@@ -80,6 +81,9 @@ import { RuntimeConfigurationViewer } from "../../runtime/RuntimeConfigurationVi
 import { connectionIDsForNodeSwitch } from "../connectionReset";
 import { useProxyDelayQueue } from "../useProxyDelayQueue";
 import { screenImportErrorKey } from "../screenImport";
+import { selectAndRememberProxy } from "../proxySelection";
+import { delayTargetsForSearch, filterSelectorsByName } from "../selectorSearch";
+import { shouldDisplaySelector } from "../selectorPresentation";
 
 const noLocalHandlerValue = "__none__";
 const emptySelections: Record<string, string> = {};
@@ -227,6 +231,7 @@ export function SubscriptionListPage({
     runtime?.mihomo.controllerReady === true &&
     controllerSession !== null &&
     runtime.mihomo.subscriptionId === state?.selectedSubscriptionId &&
+    runtime.mihomo.source.normalizationFingerprint === state?.projection?.normalizationFingerprint &&
     runtime.mihomo.source.subscriptionRevision ===
       state?.projection?.revisionId &&
     runtime.mihomo.source.localConfigId === state?.projection?.localConfigId &&
@@ -273,10 +278,54 @@ export function SubscriptionListPage({
         : (state?.projection?.proxies ?? []),
     [proxyRuntime?.allProxies, runtimeInteractive, state?.projection?.proxies],
   );
+  const outboundMode =
+    runtimePreferences?.outboundMode || runtime?.mihomo.outboundMode || "rule";
+  const visibleSelectors = useMemo<SubscriptionSelector[]>(() => {
+    if (outboundMode === "direct") return [];
+    const modeSelectors: SubscriptionSelector[] =
+      outboundMode === "global"
+        ? [
+            {
+              name: `🌐 ${t("subscription.selector.globalProxy")}`,
+              icon: "",
+              hidden: false,
+              type: "select",
+              defaultSelection:
+                (runtimeInteractive && activeSelections.GLOBAL) ||
+                globalMembers[0]?.name ||
+                "",
+              members: globalMembers,
+              providerNames: [],
+              unresolvedProviderNames: [],
+              referencedByRules: true,
+            },
+          ]
+        : state?.projection?.selectors ?? [];
+    return filterSelectorsByName(
+      modeSelectors.filter((selector) =>
+        shouldDisplaySelector(selector.hidden, showHiddenSelectors),
+      ),
+      selectorQuery,
+    );
+  }, [
+    activeSelections.GLOBAL,
+    globalMembers,
+    outboundMode,
+    runtimeInteractive,
+    selectorQuery,
+    showHiddenSelectors,
+    state?.projection?.selectors,
+    t,
+  ]);
+  const batchDelayTargets = useMemo(
+    () => delayTargetsForSearch(delayTargets, visibleSelectors, selectorQuery),
+    [delayTargets, visibleSelectors, selectorQuery],
+  );
   const delayCacheScope = useMemo<ProxyDelayCacheScope | null>(() => {
     const projection = state?.projection;
     if (!projection?.subscriptionId || !projection.revisionId) return null;
     return {
+      normalizationFingerprint: projection.normalizationFingerprint,
       subscriptionId: projection.subscriptionId,
       subscriptionRevision: projection.revisionId,
       localConfigId: projection.localConfigId,
@@ -287,6 +336,7 @@ export function SubscriptionListPage({
   }, [state?.projection]);
   const delayCacheScopeKey = delayCacheScope
     ? [
+        delayCacheScope.normalizationFingerprint,
         delayCacheScope.subscriptionId,
         delayCacheScope.subscriptionRevision,
         delayCacheScope.localConfigId,
@@ -462,8 +512,8 @@ export function SubscriptionListPage({
         filterName: t("subscription.import.fileFilter"),
       });
       if (!result.cancelled) setState(result.state);
-    } catch {
-      setOperationError("subscription.errors.fileImport");
+    } catch (cause) {
+      setOperationError(normalizationErrorKey(cause, "subscription.errors.fileImport"));
     } finally {
       setBusyAction(null);
     }
@@ -478,8 +528,8 @@ export function SubscriptionListPage({
         filterName: t("subscription.import.qrImageFilter"),
       });
       if (!result.cancelled) setState(result.state);
-    } catch {
-      setOperationError("subscription.errors.qrImport");
+    } catch (cause) {
+      setOperationError(normalizationErrorKey(cause, "subscription.errors.qrImport"));
     } finally {
       setBusyAction(null);
     }
@@ -521,8 +571,8 @@ export function SubscriptionListPage({
       setURLModalOpen(false);
       setURLDraft(emptyDraft);
       setIconFeedback("");
-    } catch {
-      setOperationError("subscription.errors.urlImport");
+    } catch (cause) {
+      setOperationError(normalizationErrorKey(cause, "subscription.errors.urlImport"));
     } finally {
       setBusyAction(null);
     }
@@ -537,7 +587,7 @@ export function SubscriptionListPage({
       setRefreshError("");
       setRefreshConflict(result.conflict);
     } catch (cause) {
-      setOperationError("subscription.errors.refresh");
+      setOperationError(normalizationErrorKey(cause, "subscription.errors.refresh"));
       setRefreshError(errorText(cause, t("subscription.errors.refresh")));
     } finally {
       setBusyAction(null);
@@ -619,8 +669,8 @@ export function SubscriptionListPage({
         }),
       );
       setEditing(null);
-    } catch {
-      setOperationError("subscription.errors.edit");
+    } catch (cause) {
+      setOperationError(normalizationErrorKey(cause, "subscription.errors.edit"));
     } finally {
       setBusyAction(null);
     }
@@ -781,13 +831,22 @@ export function SubscriptionListPage({
   };
 
   const switchProxy = async (group: string, proxy: string) => {
-    if (!runtimeInteractive || !controllerSession) return;
+    const subscriptionId = runtime?.mihomo.subscriptionId;
+    if (!runtimeInteractive || !controllerSession || !subscriptionId) return;
     setBusySelection(group);
     setErrorKey(null);
     try {
-      await selectMihomoProxy(controllerSession, group, proxy);
-      commitProxySelection(group, proxy);
-      void refreshProxyRuntime().catch(() => undefined);
+      const remembered = await selectAndRememberProxy(
+        controllerSession,
+        subscriptionId,
+        group,
+        proxy,
+        () => {
+          commitProxySelection(group, proxy, controllerSession.id, subscriptionId);
+          void refreshProxyRuntime().catch(() => undefined);
+        },
+      );
+      if (!remembered) setOperationError("subscription.errors.proxySelectionSave");
       const resetMode = state?.preferences.connectionResetMode ?? "selector";
       if (resetMode !== "off") {
         try {
@@ -1025,11 +1084,11 @@ export function SubscriptionListPage({
       onSelect={(subscription) => void select(subscription)}
       onSelectorQueryChange={setSelectorQuery}
       onShowHiddenSelectorsChange={setShowHiddenSelectors}
-      onSpeedTest={() => void delayQueue.testAll(delayTargets)}
+      onSpeedTest={() => void delayQueue.testAll(batchDelayTargets)}
       runtimeReady={runtimeInteractive}
       selectorQuery={selectorQuery}
       showHiddenSelectors={showHiddenSelectors}
-      speedTestAvailable={delayTargets.length > 0}
+      speedTestAvailable={batchDelayTargets.length > 0}
       speedTestBusy={delayQueue.queueActive}
       state={state}
     />
@@ -1072,12 +1131,8 @@ export function SubscriptionListPage({
           delayQueueActive={delayQueue.queueActive}
           delayResults={delayQueue.results}
           displayPreferencesBusy={selectorDisplayPreferencesBusy}
-          globalMembers={globalMembers}
-          outboundMode={
-            runtimePreferences?.outboundMode ||
-            runtime?.mihomo.outboundMode ||
-            "rule"
-          }
+          selectors={visibleSelectors}
+          outboundMode={outboundMode}
           outboundModeBusy={preferencesBusy || runtimePreferences === null}
           onOutboundModeChange={switchOutboundMode}
           onDensityChange={saveSelectorDensity}
@@ -1098,7 +1153,6 @@ export function SubscriptionListPage({
           projection={state.projection}
           query={selectorQuery}
           runtimeReady={runtimeInteractive}
-          showHiddenSelectors={showHiddenSelectors}
           sortMode={state.preferences.selectorSortMode}
           viewMode={state.preferences.selectorViewMode}
         />

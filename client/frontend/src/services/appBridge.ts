@@ -1,5 +1,6 @@
 import type { MacNetworkAuthorizationStatus } from "../types/macNetwork";
 import type { ProxyAuthorizationStatus } from "../types/authorization";
+import type { JeemiUpdateResult, JeemiUpdateState } from "../types/appUpdate";
 import type {
   BootstrapState,
   RuntimeConfigurationText,
@@ -67,13 +68,24 @@ import type {
   UpdateSubscriptionInput,
 } from "../types/subscription";
 
+import type { DNSQueryPreferences, DNSQueryRequest, DNSQueryResponse } from "../types/dnsQuery";
+
 declare global {
   interface Window {
     go?: {
       desktop?: {
         App?: {
           GetBootstrapState: () => Promise<BootstrapState>;
+          GetDNSQueryPreferences: () => Promise<DNSQueryPreferences>;
+          QueryDNS: (input: DNSQueryRequest) => Promise<DNSQueryResponse>;
+          CancelDNSQuery: (id: string) => Promise<void>;
           OpenJeemiRepository: () => Promise<void>;
+          CheckJeemiUpdates: () => Promise<JeemiUpdateResult>;
+          GetJeemiUpdateState: () => Promise<JeemiUpdateState>;
+          InstallJeemiUpdate: (version: string) => Promise<void>;
+          CancelJeemiUpdate: () => Promise<void>;
+          DismissJeemiUpdateResult: (id: string) => Promise<void>;
+          OpenJeemiReleases: () => Promise<void>;
           OpenRuleDocumentation: () => Promise<void>;
           PreviewRuleSetEntry: (input: RuleSetEntryInput) => Promise<RuleSetEntryPreview>;
           SaveRuleSetEntry: (input: RuleSetEntryInput) => Promise<LocalConfigResourceState>;
@@ -84,6 +96,7 @@ declare global {
           StartProxy: () => Promise<RuntimeStatus>;
           CancelCoreAuthorization: () => Promise<void>;
           GetProxyAuthorization: () => Promise<ProxyAuthorizationStatus>;
+          GetAuthorizationHelperStatus: () => Promise<ProxyAuthorizationStatus>;
           SetupProxyAuthorization: () => Promise<ProxyAuthorizationStatus>;
           RemoveAuthorizationHelper: () => Promise<ProxyAuthorizationStatus>;
           OpenProxyAuthorizationSettings: () => Promise<void>;
@@ -96,6 +109,12 @@ declare global {
           RestartProxy: () => Promise<RuntimeStatus>;
           GetRuntimeConfigurationText: () => Promise<RuntimeConfigurationText>;
           SelectRuntimeProxy: (group: string, proxy: string) => Promise<void>;
+          RememberRuntimeProxySelection: (
+            sessionId: string,
+            subscriptionId: string,
+            group: string,
+            proxy: string,
+          ) => Promise<void>;
           UpdateRuntimeRuleProvider: (name: string) => Promise<void>;
           UpdateRuntimeProxyProvider: (name: string) => Promise<void>;
           GetRuntimePreferences: () => Promise<RuntimePreferences>;
@@ -281,6 +300,7 @@ const browserFallback: BootstrapState = {
       generationId: "",
       subscriptionId: "",
       source: {
+        normalizationFingerprint: "",
         subscriptionId: "",
         subscriptionRevision: "",
         localConfigId: "",
@@ -349,12 +369,13 @@ const browserMihomoFallback: MihomoVersionManagerState = {
 
 const browserRuntimePreferencesFallback: RuntimePreferences = {
   outboundMode: "rule",
-  proxyMode: "system_proxy",
+  proxyMode: "tun",
   listenerType: "mixed",
   listenPort: 7890,
   allowLan: false,
   tunStack: "mixed",
   logLevel: "silent",
+  findProcessMode: "strict",
   ipv6: true,
   dnsEnabled: true,
   dnsListen: "127.0.0.1:1053",
@@ -495,6 +516,20 @@ export async function selectRuntimeProxy(
   return requireAppBinding().SelectRuntimeProxy(group, proxy);
 }
 
+export async function rememberRuntimeProxySelection(
+  sessionId: string,
+  subscriptionId: string,
+  group: string,
+  proxy: string,
+): Promise<void> {
+  return requireAppBinding().RememberRuntimeProxySelection(
+    sessionId,
+    subscriptionId,
+    group,
+    proxy,
+  );
+}
+
 export async function updateRuntimeRuleProvider(name: string): Promise<void> {
   return requireAppBinding().UpdateRuntimeRuleProvider(name);
 }
@@ -554,6 +589,30 @@ export async function importMihomoCore(
 
 export async function openJeemiRepository(): Promise<void> {
   return requireAppBinding().OpenJeemiRepository();
+}
+
+export async function checkJeemiUpdates(): Promise<JeemiUpdateResult> {
+  return requireAppBinding().CheckJeemiUpdates();
+}
+
+export async function getJeemiUpdateState(): Promise<JeemiUpdateState> {
+  return requireAppBinding().GetJeemiUpdateState();
+}
+
+export async function installJeemiUpdate(version: string): Promise<void> {
+  return requireAppBinding().InstallJeemiUpdate(version);
+}
+
+export async function cancelJeemiUpdate(): Promise<void> {
+  return requireAppBinding().CancelJeemiUpdate();
+}
+
+export async function dismissJeemiUpdateResult(id: string): Promise<void> {
+  return requireAppBinding().DismissJeemiUpdateResult(id);
+}
+
+export async function openJeemiReleases(): Promise<void> {
+  return requireAppBinding().OpenJeemiReleases();
 }
 
 export async function openRuleDocumentation(): Promise<void> {
@@ -899,6 +958,9 @@ function requireAppBinding(): NonNullable<ReturnType<typeof appBinding>> {
 
 export function getProxyAuthorization(): Promise<ProxyAuthorizationStatus> {
   return requireAppBinding().GetProxyAuthorization();
+}
+export function getAuthorizationHelperStatus(): Promise<ProxyAuthorizationStatus> {
+  return requireAppBinding().GetAuthorizationHelperStatus();
 }
 export function setupProxyAuthorization(): Promise<ProxyAuthorizationStatus> {
   return requireAppBinding().SetupProxyAuthorization();

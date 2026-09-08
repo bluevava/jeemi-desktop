@@ -30,11 +30,29 @@ export interface SubscriptionRemoteProfile {
 }
 
 export interface SubscriptionCompositionSummary {
+  normalization?: SubscriptionNormalizationReport;
+  normalizationError?: SubscriptionNormalizationDiagnostic;
   status: string;
   proxyCount: number;
   selectorCount: number;
   proxyProviderCount: number;
   ruleProviderCount: number;
+}
+
+export interface SubscriptionNormalizationDiagnostic {
+  code: string;
+  line: number;
+  field: string;
+}
+
+export interface SubscriptionNormalizationReport {
+  format: string;
+  encoding: string;
+  fingerprint: string;
+  requiredCore?: string;
+  proxyCount: number;
+  skippedNodes: number;
+  diagnostics: SubscriptionNormalizationDiagnostic[];
 }
 
 export interface SubscriptionSummary {
@@ -133,6 +151,7 @@ export interface SubscriptionRuleProvider {
 }
 
 export interface SubscriptionProjection {
+  normalizationFingerprint: string;
   fallback: FallbackState;
   subscriptionId: string;
   revisionId: string;
@@ -201,6 +220,7 @@ export interface SubscriptionScreenImportResult {
 }
 
 export interface ProxyDelayCacheScope {
+  normalizationFingerprint: string;
   subscriptionId: string;
   subscriptionRevision: string;
   localConfigId: string;

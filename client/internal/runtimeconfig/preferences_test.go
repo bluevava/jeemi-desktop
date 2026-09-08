@@ -12,12 +12,13 @@ func TestDefaultPreferencesAreValid(t *testing.T) {
 		t.Fatalf("Validate(DefaultPreferences()) error = %v", err)
 	}
 	if preferences.OutboundMode != OutboundModeRule ||
-		preferences.ProxyMode != ProxyModeSystemProxy ||
+		preferences.ProxyMode != ProxyModeTUN ||
 		preferences.ListenerType != ListenerTypeMixed ||
 		preferences.ListenPort != DefaultListenPort ||
 		preferences.AllowLAN ||
 		preferences.TUNStack != TUNStackMixed ||
 		preferences.LogLevel != LogLevelSilent ||
+		preferences.FindProcessMode != FindProcessModeStrict ||
 		!preferences.IPv6 ||
 		!preferences.DNSEnabled ||
 		preferences.DNSListen != DefaultDNSListen ||
@@ -70,6 +71,8 @@ func TestValidateRejectsEachInvalidRuntimePreference(t *testing.T) {
 		{name: "listen port", mutate: func(value *Preferences) { value.ListenPort = 0 }},
 		{name: "TUN stack", mutate: func(value *Preferences) { value.TUNStack = "invalid" }},
 		{name: "log level", mutate: func(value *Preferences) { value.LogLevel = "verbose" }},
+		{name: "find process mode", mutate: func(value *Preferences) { value.FindProcessMode = "auto" }},
+		{name: "empty find process mode", mutate: func(value *Preferences) { value.FindProcessMode = "" }},
 		{name: "DNS listen", mutate: func(value *Preferences) { value.DNSListen = "0.0.0.0" }},
 		{name: "DNS listen conflicts with proxy", mutate: func(value *Preferences) { value.DNSListen = "127.0.0.1:7890" }},
 		{name: "DNS enhanced mode", mutate: func(value *Preferences) { value.DNSEnhancedMode = "normal" }},
@@ -110,6 +113,7 @@ func TestNormalizeRecoversMissingAndInvalidStoredValues(t *testing.T) {
 		normalized.ListenerType != defaults.ListenerType ||
 		normalized.ListenPort != defaults.ListenPort ||
 		normalized.TUNStack != defaults.TUNStack ||
+		normalized.FindProcessMode != FindProcessModeStrict ||
 		!normalized.AllowLAN {
 		t.Fatalf("Normalize() = %+v", normalized)
 	}
@@ -132,7 +136,7 @@ func TestPreferencesJSONDefaultsOmittedFieldsWithoutOverwritingExplicitFalse(t *
 	if preferences.IPv6 || preferences.TUNAutoRoute {
 		t.Fatalf("explicit false values were overwritten: %+v", preferences)
 	}
-	if preferences.LogLevel != LogLevelSilent || !preferences.DNSEnabled || preferences.DNSListen != DefaultDNSListen {
+	if preferences.LogLevel != LogLevelSilent || preferences.FindProcessMode != FindProcessModeStrict || !preferences.DNSEnabled || preferences.DNSListen != DefaultDNSListen {
 		t.Fatalf("missing fields did not receive defaults: %+v", preferences)
 	}
 	if !reflect.DeepEqual(preferences.DNSNameservers, defaultDNSNameservers) {

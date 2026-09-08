@@ -15,5 +15,4 @@
 .authorization-footer, .authorization-footer > div { display: flex; align-items: center; gap: 8px; }
 .authorization-footer { justify-content: space-between; flex-wrap: wrap; margin-top: 20px; }
 .authorization-footer > div { margin-left: auto; }
-.home-about-cleanup { margin-top: 12px; }
 @media (max-width: 420px) { .authorization-footer > div { flex-wrap: wrap; } }

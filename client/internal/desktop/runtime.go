@@ -37,6 +37,10 @@ func (a *App) SelectRuntimeProxy(group, proxy string) error {
 	return a.service.SelectRuntimeProxy(group, proxy)
 }
 
+func (a *App) RememberRuntimeProxySelection(sessionID, subscriptionID, group, proxy string) error {
+	return a.service.RememberRuntimeProxySelection(sessionID, subscriptionID, group, proxy)
+}
+
 func (a *App) UpdateRuntimeRuleProvider(name string) error {
 	return a.service.UpdateRuntimeRuleProvider(name)
 }

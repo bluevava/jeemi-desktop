@@ -10,7 +10,7 @@ import {
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import { Alert, Empty, Segmented, Tabs, Tooltip } from "antd";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
@@ -29,12 +29,9 @@ import {
   setSelectorExpanded,
   useSubscriptionPageStateField,
 } from "../SubscriptionPageStateContext";
-import {
-  selectorPresentation,
-  shouldDisplaySelector,
-} from "../selectorPresentation";
+import { selectorPresentation } from "../selectorPresentation";
 import { FallbackControl } from "./FallbackControl";
-import { filterSelectorsByName } from "../selectorSearch";
+import { NormalizationNotice } from "./NormalizationNotice";
 import { sortSelectorMembers } from "../selectorSort";
 import type { ProxyDelayResult } from "../useProxyDelayQueue";
 
@@ -49,7 +46,7 @@ interface SelectorWorkspaceProps {
   delayResults: Readonly<Record<string, ProxyDelayResult>>;
   density: SelectorDensity;
   displayPreferencesBusy: boolean;
-  globalMembers: SubscriptionSelectorMember[];
+  selectors: SubscriptionSelector[];
   outboundMode: OutboundMode;
   outboundModeBusy: boolean;
   onOutboundModeChange: (mode: OutboundMode) => Promise<void>;
@@ -61,7 +58,6 @@ interface SelectorWorkspaceProps {
   projection: SubscriptionProjection | null;
   query: string;
   runtimeReady: boolean;
-  showHiddenSelectors: boolean;
   sortMode: SelectorSortMode;
   viewMode: SelectorViewMode;
 }
@@ -75,7 +71,7 @@ export function SelectorWorkspace({
   delayResults,
   density,
   displayPreferencesBusy,
-  globalMembers,
+  selectors,
   outboundMode,
   outboundModeBusy,
   onOutboundModeChange,
@@ -87,7 +83,6 @@ export function SelectorWorkspace({
   projection,
   query,
   runtimeReady,
-  showHiddenSelectors,
   sortMode,
   viewMode,
 }: SelectorWorkspaceProps) {
@@ -101,42 +96,6 @@ export function SelectorWorkspace({
   const expandedSelectors =
     expandedSelectorsByWorkspace[workspaceKey] ?? [];
   const normalisedQuery = query.trim().toLocaleLowerCase();
-  const modeSelectors = useMemo<SubscriptionSelector[]>(() => {
-    if (outboundMode === "direct") return [];
-    if (outboundMode === "global") {
-      return [
-        {
-          name: `🌐 ${t("subscription.selector.globalProxy")}`,
-          icon: "",
-          hidden: false,
-          type: "select",
-          defaultSelection:
-            activeSelections.GLOBAL || globalMembers[0]?.name || "",
-          members: globalMembers,
-          providerNames: [],
-          unresolvedProviderNames: [],
-          referencedByRules: true,
-        },
-      ];
-    }
-    return projection?.selectors ?? [];
-  }, [
-    activeSelections.GLOBAL,
-    globalMembers,
-    outboundMode,
-    projection?.selectors,
-    t,
-  ]);
-  const selectors = useMemo(
-    () =>
-      filterSelectorsByName(
-        modeSelectors.filter((selector) =>
-          shouldDisplaySelector(selector.hidden, showHiddenSelectors),
-        ),
-        query,
-      ),
-    [modeSelectors, query, showHiddenSelectors],
-  );
 
   const toolbar = (
     <div className="selector-toolbar">
@@ -274,6 +233,7 @@ export function SelectorWorkspace({
     return (
       <section className={`selector-workspace density-${density}`}>
         {toolbar}
+        <NormalizationNotice summary={projection.summary} />
         <Alert
           description={t(`subscription.projection.status.${projection.status}`)}
           message={t("subscription.projection.failed")}
@@ -323,6 +283,7 @@ export function SelectorWorkspace({
   return (
     <section className={`selector-workspace density-${density}`}>
       {toolbar}
+      <NormalizationNotice summary={projection.summary} />
       {outboundMode === "rule" && projection.warnings.includes(
         "selector_dynamic_filter_not_evaluated",
       ) ? (
@@ -345,8 +306,7 @@ export function SelectorWorkspace({
               ? "subscription.selector.noSearchResults"
               : outboundMode === "global"
                 ? "subscription.selector.globalEmpty"
-                : !showHiddenSelectors &&
-                    modeSelectors.some((selector) => selector.hidden)
+                : projection.selectors.some((selector) => selector.hidden)
                   ? "subscription.selector.hiddenOnly"
                   : "subscription.selector.empty",
           )}

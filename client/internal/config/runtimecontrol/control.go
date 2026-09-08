@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"jeemi/internal/config/dnstool"
 	"jeemi/internal/config/document"
 
 	"gopkg.in/yaml.v3"
@@ -58,6 +59,7 @@ func StripSessionFields(configurationYAML []byte) ([]byte, error) {
 		return nil, fmt.Errorf("parse resolved runtime configuration: %w", err)
 	}
 	root := document.Root(configuration)
+	dnstool.Strip(root)
 	for _, path := range managedPaths {
 		if err := document.DeleteMappingPath(root, path); err != nil {
 			return nil, fmt.Errorf("remove managed control field %s: %w", path, err)

@@ -93,6 +93,7 @@ func TestLocalConfigStoreRejectsRuntimeOwnedAndWrongTypeFields(t *testing.T) {
 		{Path: "/tun/auto-route", ValueYAML: "false", Strategy: compose.StrategyReplace},
 		{Path: "/tun/route-exclude-address", ValueYAML: "- 192.168.0.0/16", Strategy: compose.StrategyAppend},
 		{Path: "/log-level", ValueYAML: "info", Strategy: compose.StrategyReplace},
+		{Path: "/find-process-mode", ValueYAML: "always", Strategy: compose.StrategyReplace},
 		{Path: "/dns/enable", ValueYAML: "true", Strategy: compose.StrategyReplace},
 		{Path: "/dns/nameserver", ValueYAML: "- 1.1.1.1", Strategy: compose.StrategyAppend},
 		{Path: "/dns/fallback", ValueYAML: "1.1.1.1", Strategy: compose.StrategyAppend},

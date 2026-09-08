@@ -8,8 +8,13 @@ import trayLabels from "../tray-labels.json";
 import recoveryLabels from "../recovery-labels.json";
 import { enLocalConfigFieldHelp } from "./local-config-field-help";
 import { enRuleSetEntry } from "./rule-set-entry";
+import { enSubscriptionNormalization } from "./subscription-normalization";
+import { enDNSQuery, enDNSQueryHelp } from "./dns-query";
+import { enAppUpdate } from "./app-update";
 
 export const enUS = {
+  appUpdate: enAppUpdate,
+  dnsQuery: enDNSQuery,
   ruleSetEntry: enRuleSetEntry,
   app: {
     name: "Jeemi",
@@ -165,9 +170,9 @@ export const enUS = {
         },
       },
     },
-    version: "Jeemi version",
+    version: "Jeemi",
     platform: "Platform",
-    coreVersion: "mihomo version",
+    coreVersion: "Mihomo",
     notAvailable: "Not available yet",
     about: {
       title: "About Jeemi",
@@ -176,6 +181,10 @@ export const enUS = {
         "Could not open the source repository. Please try again.",
       description:
         "A configuration management client powered by the Mihomo core",
+      manageCore: "Manage",
+      helper: "Helper",
+      removeHelper: "Uninstall",
+      helperStates: { ready: "Normal", failed: "Abnormal", update: "Update needed", not_installed: "Not installed" },
     },
     runtimeActionError:
       "The proxy operation failed. Confirm that a verified mihomo version and subscription are selected, then review the current error state. A failure never replaces the last usable generation.",
@@ -234,6 +243,7 @@ export const enUS = {
       listenPort: "External proxy listen port",
       allowLan: "Allow LAN connections",
       logLevel: "mihomo log level",
+      findProcessMode: "Process lookup",
       logLevels: {
         silent: "Silent",
         error: "Error",
@@ -431,6 +441,7 @@ export const enUS = {
     },
   },
   subscription: {
+    normalization: enSubscriptionNormalization,
     fallback: {
       title: "Fallback traffic",
       preserve: "No override ( {{target}})",
@@ -458,7 +469,7 @@ export const enUS = {
       urlTitle: "Fetch subscription from URL",
       confirmURL: "Fetch and save",
       fileDialogTitle: "Choose a subscription configuration",
-      fileFilter: "YAML, JSON, or TXT configuration",
+      fileFilter: "YAML, JSON, TXT or Surge CONF subscription",
       qrImageDialogTitle: "Choose a QR code image",
       qrImageFilter: "PNG, JPEG, or GIF image",
     },
@@ -490,11 +501,12 @@ export const enUS = {
       subscriptionTools: "Current-subscription shortcuts",
       selectorTools: "Proxy-selector shortcuts",
       speedTest: "Test all nodes",
+      speedTestMatched: "Test nodes in search results",
       speedTestBusy:
         "A delay-test queue is already running; wait for it to finish",
       speedTestRequiresCore:
         "The current subscription must be loaded by a running mihomo before testing",
-      speedTestEmpty: "The current selectors contain no testable node",
+      speedTestEmpty: "There are no testable nodes in the current scope",
       showHiddenSelectors: "Show selectors marked hidden",
       hideHiddenSelectors: "Hide selectors marked hidden",
     },
@@ -563,6 +575,7 @@ export const enUS = {
       status: {
         source_unavailable:
           "The saved subscription source is unavailable. Check the managed revision files.",
+        normalization_failed: "Subscription conversion failed. Check conversion details or the selected core version.",
         local_config_unavailable:
           "The associated local configuration is missing or unreadable. Associate it again.",
         local_script_unavailable:
@@ -678,7 +691,7 @@ export const enUS = {
       urlImport:
         "URL fetching failed. Check the address, network, file size, and configuration format. No incomplete content was saved.",
       fileImport:
-        "File import failed. Only .yaml, .json, and .txt are supported, and the content must be a complete mihomo configuration mapping.",
+        "File import failed. Supported extensions are .yaml, .json, .txt and .conf, containing mihomo, Surge or supported URI subscriptions.",
       qrImport:
         "QR image import failed. Make sure the image is clear and the QR content is an http/https subscription URL.",
       screenImport:
@@ -714,6 +727,8 @@ export const enUS = {
         "Could not save the rule-provider switch. The subscription source and active configuration were not directly rewritten.",
       proxySelection:
         "Could not switch the proxy node. The current selection was not changed; check the mihomo control API and node name.",
+      proxySelectionSave:
+        "The node changed, but the choice could not be saved. Restarting may restore the previous choice; please try again later.",
       connectionReset:
         "The node changed, but its related connections could not be reset. New connections use the new node while existing ones may remain on the old path.",
       outboundMode:
@@ -1726,13 +1741,24 @@ export const enUS = {
       runtimeBaseline: {
         title: "Safe runtime baseline",
         description:
-          "Controls logging, IPv6, proxy listening, LAN access, TUN automatic routes, interface detection, and route-exclusion ranges in one place.",
+          "Controls logging, process lookup, IPv6, proxy listening, LAN access, TUN automatic routes, interface detection, and route-exclusion ranges in one place.",
         purpose:
           "Completes missing subscription values and keeps system proxy and TUN behavior under one Jeemi-managed source.",
         scenarios:
           "Use it for listener port conflicts, trusted LAN sharing, or platform-specific TUN routing behavior.",
         cautions:
           "LAN access widens the listener boundary. Disabling automatic routes or interface detection can require manual route maintenance. Excluded ranges bypass TUN, so broad exclusions can bypass the proxy.",
+      },
+      runtimeFindProcess: {
+        title: "Process lookup",
+        description:
+          "Controls whether mihomo looks up the process that owns a connection. The default is strict: the core decides when lookup is needed. always forces lookup; off disables it.",
+        purpose:
+          "Provides the originating process for process rules and connection details. The Home selection is injected into the final runtime configuration.",
+        scenarios:
+          "Adjust it for PROCESS-NAME or PROCESS-PATH rules, or when diagnosing application connections. Usually keep strict.",
+        cautions:
+          "Results depend on platform support and permissions. off affects rules that need process information. This field is locked in local configurations; Home overrides any subscription or script value.",
       },
       runtimeTunRouteExclude: {
         title: "TUN excluded subnets",
@@ -1932,6 +1958,7 @@ export const enUS = {
         cautions:
           "Lookups and unlock tests contact external services and may disclose the egress IP or queried domain. Data source, timeout, and failure state must be visible.",
       },
+      dnsQuery: enDNSQueryHelp,
       homeSettings: {
         title: "Home settings",
         description:
@@ -1968,12 +1995,12 @@ export const enUS = {
       appUpdate: {
         title: "Jeemi update checks",
         description:
-          "Queries available Jeemi versions, release notes, and platform-matched artifacts.",
+          "Compares against the latest stable release in bluevava/jeemi-desktop and asks before downloading and updating.",
         purpose: "Keeps users informed about security fixes and new features.",
         scenarios:
-          "Use it for manual checks or a future configured update interval.",
+          "Check manually from the About card or Home settings. If no newer release exists, Jeemi reports that you are up to date.",
         cautions:
-          "Download, signature verification, and installation must remain separate visible stages. The update backend is not connected yet.",
+          "After confirmation, Jeemi downloads the matching package, verifies its digest, stops the proxy, replaces the client, and restarts. Download and verification can be cancelled; replacement failures trigger restoration of previous files. The installation must be writable. Installed authorization helpers still use the existing authorization flow for upgrades.",
       },
       coreVersion: {
         title: "mihomo version",
@@ -2021,13 +2048,13 @@ export const enUS = {
       subscriptionDelayTest: {
         title: "Node-test concurrency",
         description:
-          "Controls how many delay requests “Test all nodes” submits to mihomo at once while the remaining nodes stay in one Jeemi queue.",
+          "Controls concurrent mihomo delay requests during batch testing. With a quick search, only nodes in the search results are tested; an empty search tests all nodes. Remaining nodes stay in one Jeemi queue.",
         purpose:
           "Balances completion speed against local, network, and provider load while preventing repeated clicks from creating overlapping queues.",
         scenarios:
           "Lower it for large node lists, slower devices, or provider concurrency limits; raise it moderately for faster completion.",
         cautions:
-          "The allowed range is 1–50 and the default is 8. Tests make real outbound requests; all-node and per-node entries are temporarily locked while a queue exists.",
+          "The allowed range is 1–50 and the default is 8. Matching a selector name includes all its real nodes; duplicates are tested once and no matches disables testing. Tests make real outbound requests. The queue uses the search results at the time of the click; editing the search does not change an active queue. Batch and per-node entries stay locked until completion.",
       },
       subscriptionConnectionReset: {
         title: "Reset connections on switch",
@@ -2043,13 +2070,13 @@ export const enUS = {
       subscriptionImport: {
         title: "Subscription import",
         description:
-          "Imports the complete subscription source from an http/https URL, configuration file, or QR code.",
+          "Imports mihomo, Surge or universal URI subscriptions from an http/https URL, file or QR code and preserves the original text.",
         purpose:
           "Normalises different sources into traceable, immutable subscription revisions for later composition and runtime validation.",
         scenarios:
-          "Use it for a first subscription, migration from an existing YAML/JSON/TXT file, or a provider-supplied subscription QR code.",
+          "Use it for a first subscription, a YAML/JSON/TXT/CONF file, or a provider-supplied subscription QR code.",
         cautions:
-          "Each configuration has size and YAML-safety limits. A revision changes only after fetching, parsing, and atomic storage all succeed; failures never replace current content.",
+          "Surge/URI nodes and DNS are converted before local processing and runtime preferences. Source routing rules are omitted; unsupported nodes have explanations. Source text is immutable and conversion or validation failures preserve the current revision.",
       },
       subscriptionQRCode: {
         title: "QR subscription import",
@@ -2135,7 +2162,7 @@ export const enUS = {
         purpose:
           "Keeps traffic, expiry, update age, and node search together without moving proxy selectors when the shelf expands or collapses.",
         scenarios:
-          "Expand it to switch or edit subscriptions; collapse it to search selectors or use refresh, rule-provider, speed-test, and hidden-selector actions.",
+          "Expand it to switch or edit subscriptions; collapse it to search selectors or use refresh, rule-provider, speed-test, and hidden-selector actions. Batch testing follows the current search results; an empty search tests all nodes.",
         cautions:
           "Traffic and names may be absent or stale. Testing is enabled only for a healthy mihomo session matching the current projection, and showing hidden groups changes only this view, not the subscription or running core.",
       },

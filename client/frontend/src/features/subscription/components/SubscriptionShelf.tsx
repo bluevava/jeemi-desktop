@@ -77,6 +77,11 @@ export function SubscriptionShelf({
   state,
 }: SubscriptionShelfProps) {
   const { t } = useTranslation();
+  const speedTestLabel = t(
+    selectorQuery.trim()
+      ? "subscription.shelf.speedTestMatched"
+      : "subscription.shelf.speedTest",
+  );
   const selected = state.subscriptions.find(
     (item) => item.id === state.selectedSubscriptionId,
   );
@@ -191,19 +196,19 @@ export function SubscriptionShelf({
             className="subscription-shelf-actions subscription-shelf-actions-right"
           >
             <Tooltip
-              title={t(
+              title={
                 speedTestBusy
-                  ? "subscription.shelf.speedTestBusy"
+                  ? t("subscription.shelf.speedTestBusy")
                   : !runtimeReady
-                    ? "subscription.shelf.speedTestRequiresCore"
+                    ? t("subscription.shelf.speedTestRequiresCore")
                     : !speedTestAvailable
-                      ? "subscription.shelf.speedTestEmpty"
-                      : "subscription.shelf.speedTest",
-              )}
+                      ? t("subscription.shelf.speedTestEmpty")
+                      : speedTestLabel
+              }
             >
               <span>
                 <Button
-                  aria-label={t("subscription.shelf.speedTest")}
+                  aria-label={speedTestLabel}
                   disabled={!runtimeReady || speedTestBusy || !speedTestAvailable}
                   icon={
                     speedTestBusy ? (

@@ -16,6 +16,7 @@ import "./styles/logs.css";
 import "./styles/local-config.css";
 import "./styles/subscription.css";
 import "./styles/recovery.css";
+import "./styles/tools.css";
 
 const uninstallErrorReporting = installUIErrorReporting();
 import.meta.hot?.dispose(uninstallErrorReporting);

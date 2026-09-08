@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"jeemi/internal/config/dnstool"
 	"jeemi/internal/config/document"
 	"jeemi/internal/runtimeconfig"
 
@@ -65,6 +66,21 @@ func TestGenerationInjectsPrivateControllerAndUsesTUNBootstrap(t *testing.T) {
 	assertRuntimeValue(t, bootstrapConfig, "/tun/enable", "false")
 	assertRuntimeValue(t, finalConfig, "/external-controller", strings.TrimPrefix(generation.Session.BaseURL, "http://"))
 	assertRuntimeValue(t, finalConfig, "/secret", generation.Session.Secret)
+	for _, configuration := range []*yaml.Node{finalConfig, bootstrapConfig} {
+		var generated struct {
+			Listeners []struct{ Name, Proxy string }
+			Groups    []struct{ Name string } `yaml:"proxy-groups"`
+		}
+		if err := document.Root(configuration).Decode(&generated); err != nil {
+			t.Fatal(err)
+		}
+		if len(generated.Listeners) != 2 || generated.Listeners[0].Name != dnstool.Prefix+"proxy" || generated.Listeners[0].Proxy != dnstool.Group || generated.Listeners[1].Name != dnstool.Prefix+"direct" || generated.Listeners[1].Proxy != "DIRECT" {
+			t.Fatal("generated configuration lost a DNS tool route")
+		}
+		if len(generated.Groups) != 1 || generated.Groups[0].Name != dnstool.Group {
+			t.Fatal("generated configuration lost the private DNS selector")
+		}
+	}
 	manifest, err := os.ReadFile(filepath.Join(generation.Directory, "generation.json"))
 	if err != nil {
 		t.Fatal(err)

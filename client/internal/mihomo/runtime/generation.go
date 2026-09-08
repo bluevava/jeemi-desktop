@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"jeemi/internal/config/dnstool"
 	"jeemi/internal/config/document"
 	"jeemi/internal/config/runtimecontrol"
 	"jeemi/internal/platform/paths"
@@ -82,6 +83,10 @@ func (s *generationStore) Prepare(ctx context.Context, request StartRequest, exi
 	if err != nil {
 		return Generation{}, err
 	}
+	controlled, dnsSession, err := dnstool.Prepare(controlled, session.Secret)
+	if err != nil {
+		return Generation{}, err
+	}
 	bootstrap, err := bootstrapConfiguration(controlled)
 	if err != nil {
 		return Generation{}, err
@@ -139,7 +144,7 @@ func (s *generationStore) Prepare(ctx context.Context, request StartRequest, exi
 		ID: id, Directory: target,
 		ConfigPath: filepath.Join(target, "config.yaml"), BootstrapPath: filepath.Join(target, "bootstrap.yaml"),
 		CoreVersion: request.CoreVersion, ExecutablePath: request.ExecutablePath,
-		Preferences: request.Preferences, Source: request.Source, Session: session,
+		Preferences: request.Preferences, Source: request.Source, Session: session, DNS: dnsSession,
 	}, nil
 }
 

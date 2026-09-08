@@ -269,6 +269,7 @@ func TestServicePersistsRuntimePreferencesWithoutChangingLiveStatus(t *testing.T
 	preferences.ListenPort = 7897
 	preferences.AllowLAN = true
 	preferences.TUNStack = runtimeconfig.TUNStackSystem
+	preferences.FindProcessMode = runtimeconfig.FindProcessModeOff
 	saved, err := service.SaveRuntimePreferences(preferences)
 	if err != nil {
 		t.Fatal(err)

@@ -32,6 +32,10 @@ const (
 	LogLevelInfo    = "info"
 	LogLevelDebug   = "debug"
 
+	FindProcessModeAlways = "always"
+	FindProcessModeStrict = "strict"
+	FindProcessModeOff    = "off"
+
 	DNSEnhancedModeFakeIP        = "fake-ip"
 	DNSEnhancedModeRedirHost     = "redir-host"
 	DNSFakeIPFilterModeBlacklist = "blacklist"
@@ -126,6 +130,7 @@ type Preferences struct {
 	TUNStack     string `json:"tunStack"`
 
 	LogLevel                      string   `json:"logLevel"`
+	FindProcessMode               string   `json:"findProcessMode"`
 	IPv6                          bool     `json:"ipv6"`
 	DNSEnabled                    bool     `json:"dnsEnabled"`
 	DNSListen                     string   `json:"dnsListen"`
@@ -163,13 +168,14 @@ type Preferences struct {
 func DefaultPreferences() Preferences {
 	return Preferences{
 		OutboundMode: OutboundModeRule,
-		ProxyMode:    ProxyModeSystemProxy,
+		ProxyMode:    ProxyModeTUN,
 		ListenerType: ListenerTypeMixed,
 		ListenPort:   DefaultListenPort,
 		AllowLAN:     false,
 		TUNStack:     TUNStackMixed,
 
 		LogLevel:                      LogLevelSilent,
+		FindProcessMode:               FindProcessModeStrict,
 		IPv6:                          true,
 		DNSEnabled:                    true,
 		DNSListen:                     DefaultDNSListen,
@@ -240,6 +246,9 @@ func Normalize(preferences Preferences) Preferences {
 	}
 	if !validLogLevel(preferences.LogLevel) {
 		preferences.LogLevel = defaults.LogLevel
+	}
+	if !validFindProcessMode(preferences.FindProcessMode) {
+		preferences.FindProcessMode = defaults.FindProcessMode
 	}
 	if err := validateListenAddress(preferences.DNSListen, preferences.ListenPort, preferences.DNSEnabled); err != nil {
 		preferences.DNSListen = defaults.DNSListen
@@ -315,6 +324,9 @@ func Validate(preferences Preferences) error {
 	}
 	if !validLogLevel(preferences.LogLevel) {
 		return fmt.Errorf("log level is invalid")
+	}
+	if !validFindProcessMode(preferences.FindProcessMode) {
+		return fmt.Errorf("find process mode is invalid")
 	}
 	if err := validateListenAddress(preferences.DNSListen, preferences.ListenPort, preferences.DNSEnabled); err != nil {
 		return err
@@ -404,6 +416,10 @@ func validTUNStack(value string) bool {
 
 func validLogLevel(value string) bool {
 	return value == LogLevelSilent || value == LogLevelError || value == LogLevelWarning || value == LogLevelInfo || value == LogLevelDebug
+}
+
+func validFindProcessMode(value string) bool {
+	return value == FindProcessModeAlways || value == FindProcessModeStrict || value == FindProcessModeOff
 }
 
 func validDNSEnhancedMode(value string) bool {

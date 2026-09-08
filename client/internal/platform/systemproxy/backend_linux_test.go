@@ -77,6 +77,7 @@ func TestGnomeModesAndCrashRecovery(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "recovery.json")
 			manager := newManager(path, b)
 			preferences := runtimeconfig.DefaultPreferences()
+			preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
 			preferences.ListenerType = listener
 			if err := manager.Apply(context.Background(), preferences); err != nil {
 				t.Fatal(err)
@@ -133,7 +134,9 @@ func TestGnomeFailedWriteRollsBackAndSilentPersistenceFailureIsDetected(t *testi
 	original, _ := b.Capture(context.Background())
 	settings.fail = "https/port"
 	manager := newManager(filepath.Join(t.TempDir(), "recovery.json"), b)
-	if err := manager.Apply(context.Background(), runtimeconfig.DefaultPreferences()); err == nil {
+	preferences := runtimeconfig.DefaultPreferences()
+	preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
+	if err := manager.Apply(context.Background(), preferences); err == nil {
 		t.Fatal("write failure was ignored")
 	}
 	if !reflect.DeepEqual(original.DesktopValues, settings.values) {

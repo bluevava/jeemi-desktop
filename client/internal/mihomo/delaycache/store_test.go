@@ -82,6 +82,12 @@ func TestStoreDoesNotReuseResultsAcrossProjectionRevisions(t *testing.T) {
 	if len(loaded.Results) != 0 || loaded.Scope != changed {
 		t.Fatalf("stale cache escaped its projection scope: %+v", loaded)
 	}
+	changed = scope
+	changed.NormalizationFingerprint = strings.Repeat("e", 64)
+	loaded, err = store.Load(changed)
+	if err != nil || len(loaded.Results) != 0 {
+		t.Fatal("changed normalization reused old delay observations", err)
+	}
 }
 
 func TestStoreRejectsInvalidInputAndDeletesCache(t *testing.T) {

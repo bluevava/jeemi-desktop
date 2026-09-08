@@ -44,6 +44,7 @@ func (a *App) startup(ctx context.Context) {
 	a.runtimeMu.Unlock()
 	a.startSessionWatch(ctx)
 	a.service.Startup(ctx)
+	a.service.AcknowledgeJeemiRestart()
 	if a.tray != nil {
 		a.tray.Start(
 			func() {

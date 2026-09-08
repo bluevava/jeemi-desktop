@@ -50,7 +50,7 @@ func TestControllerClientUsesBearerAndOfficialMutationShapes(t *testing.T) {
 	if err := client.SetMode(context.Background(), "global"); err != nil {
 		t.Fatal(err)
 	}
-	if err := client.SelectProxy(context.Background(), "Main Group", "Node A"); err != nil {
+	if err := client.SelectProxy(context.Background(), " Main Group ", " Node A "); err != nil {
 		t.Fatal(err)
 	}
 	if len(calls) != 6 {
@@ -70,7 +70,10 @@ func TestControllerClientUsesBearerAndOfficialMutationShapes(t *testing.T) {
 	if calls[4]["method"] != http.MethodPatch {
 		t.Fatalf("mode call = %#v", calls[4])
 	}
-	if calls[5]["path"] != "/proxies/Main Group" {
+	if calls[5]["path"] != "/proxies/ Main Group " {
 		t.Fatalf("proxy call = %#v", calls[5])
+	}
+	if payload := calls[5]["payload"].(map[string]any); payload["name"] != " Node A " {
+		t.Fatalf("proxy name lost significant whitespace: %#v", payload)
 	}
 }

@@ -98,6 +98,8 @@ func TestFallbackSwitchResetsConnectionsOnlyAfterAppliedUsingSavedPreference(t *
 					status, body = http.StatusOK, `{"version":"v1.19.30"}`
 				case r.Method == http.MethodGet && r.URL.Path == "/configs":
 					status, body = http.StatusOK, `{"mode":"rule"}`
+				case r.Method == http.MethodGet && r.URL.Path == "/proxies":
+					status, body = http.StatusOK, `{"proxies":{}}`
 				case r.Method == http.MethodGet && r.URL.Path == "/connections":
 					if s.runtimeConfigurationStatus().State != RuntimeConfigurationApplied {
 						t.Error("connection snapshot was read before successful application")

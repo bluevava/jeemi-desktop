@@ -44,6 +44,7 @@ future-option: kept
 	}
 	assertValue(t, configuration, "/mode", "global")
 	assertValue(t, configuration, "/log-level", "silent")
+	assertValue(t, configuration, "/find-process-mode", "strict")
 	assertValue(t, configuration, "/ipv6", "true")
 	assertValue(t, configuration, "/allow-lan", "true")
 	assertValue(t, configuration, "/bind-address", "*")
@@ -65,6 +66,30 @@ future-option: kept
 		if _, found, findErr := document.Find(document.Root(configuration), path); findErr != nil || found {
 			t.Fatalf("inactive listener %s remains: found=%v err=%v\n%s", path, found, findErr, result)
 		}
+	}
+}
+
+func TestApplyOverridesSourceFindProcessMode(t *testing.T) {
+	for _, mode := range []string{
+		runtimeconfig.FindProcessModeAlways,
+		runtimeconfig.FindProcessModeStrict,
+		runtimeconfig.FindProcessModeOff,
+	} {
+		t.Run(mode, func(t *testing.T) {
+			preferences := runtimeconfig.DefaultPreferences()
+			preferences.FindProcessMode = mode
+			for _, sourceMode := range []string{"always", "strict", "off"} {
+				result, err := Apply([]byte("find-process-mode: "+sourceMode+"\n"), preferences)
+				if err != nil {
+					t.Fatal(err)
+				}
+				configuration, err := document.Parse(result)
+				if err != nil {
+					t.Fatal(err)
+				}
+				assertValue(t, configuration, "/find-process-mode", mode)
+			}
+		})
 	}
 }
 
@@ -335,6 +360,7 @@ func TestApplyUsesPlatformSafeTUNDeviceNames(t *testing.T) {
 
 func TestApplyUsesLoopbackAndDisablesTUNForSystemProxy(t *testing.T) {
 	preferences := runtimeconfig.DefaultPreferences()
+	preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
 	preferences.ListenerType = runtimeconfig.ListenerTypeHTTP
 	result, err := Apply([]byte("proxies: []\n"), preferences)
 	if err != nil {

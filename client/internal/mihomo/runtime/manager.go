@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"jeemi/internal/platform/paths"
 	"jeemi/internal/platform/requirements"
 	"jeemi/internal/runtimeconfig"
 )
@@ -32,24 +33,30 @@ type Options struct {
 }
 
 type Manager struct {
-	operationMu sync.Mutex
-	mu          sync.RWMutex
+	operationMu  sync.Mutex
+	mu           sync.RWMutex
+	dnsMu        sync.Mutex
+	dnsID        string
+	dnsCancel    context.CancelFunc
+	dnsCancelled map[string]bool
 
-	store           *generationStore
-	driver          Driver
-	systemProxy     SystemProxyController
-	httpClient      *http.Client
-	now             func() time.Time
-	goos            string
-	restartDelays   []time.Duration
-	observeTUN      func(context.Context, string) error
-	status          Status
-	process         Process
-	recoveryBlocked Process
-	active          *Generation
-	client          *controllerClient
-	shutdown        chan struct{}
-	shutdownOnce    sync.Once
+	store                  *generationStore
+	selections             selectionStore
+	forgottenSubscriptions map[string]bool
+	driver                 Driver
+	systemProxy            SystemProxyController
+	httpClient             *http.Client
+	now                    func() time.Time
+	goos                   string
+	restartDelays          []time.Duration
+	observeTUN             func(context.Context, string) error
+	status                 Status
+	process                Process
+	recoveryBlocked        Process
+	active                 *Generation
+	client                 *controllerClient
+	shutdown               chan struct{}
+	shutdownOnce           sync.Once
 
 	startupFailure              error
 	startupAuthorizationPending bool
@@ -65,6 +72,10 @@ func NewManager(options Options) (*Manager, error) {
 		now = time.Now
 	}
 	store, err := newGenerationStore(options.DataDirectory, driver, now)
+	if err != nil {
+		return nil, err
+	}
+	selectionRoot, err := paths.ProxySelectionsDirectoryFromRoot(options.DataDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +97,9 @@ func NewManager(options Options) (*Manager, error) {
 	}
 	return &Manager{
 		store: store, driver: driver, systemProxy: proxy, httpClient: options.HTTPClient,
-		now: now, goos: goos, restartDelays: restartDelays, observeTUN: observer,
+		selections:             selectionStore{root: selectionRoot},
+		forgottenSubscriptions: map[string]bool{},
+		now:                    now, goos: goos, restartDelays: restartDelays, observeTUN: observer,
 		status: Status{State: StateStopped, ProxyMode: "off"}, shutdown: make(chan struct{}),
 	}, nil
 }
@@ -150,6 +163,7 @@ func (m *Manager) recoverSystemProxyLocked(ctx context.Context) error {
 }
 
 func (m *Manager) Start(ctx context.Context, request StartRequest) (Status, error) {
+	m.cancelActiveDNSQuery()
 	if err := validateStartRequest(request); err != nil {
 		m.mu.RLock()
 		status := cloneStatus(m.status)
@@ -246,6 +260,7 @@ func (m *Manager) Start(ctx context.Context, request StartRequest) (Status, erro
 }
 
 func (m *Manager) Stop(ctx context.Context) (Status, error) {
+	m.cancelActiveDNSQuery()
 	m.operationMu.Lock()
 	defer m.operationMu.Unlock()
 	m.mu.Lock()
@@ -290,7 +305,10 @@ func (m *Manager) SelectProxy(ctx context.Context, group, proxy string) error {
 	if err != nil {
 		return err
 	}
-	return client.SelectProxy(ctx, group, proxy)
+	if err := client.SelectProxy(ctx, group, proxy); err != nil {
+		return err
+	}
+	return m.rememberProxySelection(ctx, client, group, proxy)
 }
 
 func (m *Manager) UpdateRuleProvider(ctx context.Context, name string) error {
@@ -320,6 +338,9 @@ func (m *Manager) reloadLocked(ctx context.Context, request StartRequest) (Statu
 	m.mu.RUnlock()
 	if active == nil || client == nil {
 		return m.fail("session_unavailable", "reload", fmt.Errorf("mihomo controller session is unavailable"))
+	}
+	if err := m.captureProxySelections(ctx, client, *active); err != nil {
+		return m.failRunning("proxy_selection_save_failed", "reload", err)
 	}
 	m.setState(StateValidating)
 	generation, err := m.store.Prepare(ctx, request, &active.Session)
@@ -372,13 +393,8 @@ func (m *Manager) reloadLocked(ctx context.Context, request StartRequest) (Statu
 			modeCancel()
 		}
 		if rollbackErr == nil {
-			if _, ok := m.driver.(managedNetwork); ok {
-				rollbackErr = m.activateNetwork(context.Background(), *active, client, true)
-			} else if active.Preferences.ProxyMode == runtimeconfig.ProxyModeSystemProxy {
-				rollbackErr = m.systemProxy.Apply(context.Background(), active.Preferences)
-			}
+			rollbackErr = m.activateNetwork(context.Background(), *active, client, true)
 		}
-		m.setState(StateRunning)
 		if cleanupErr := m.store.EraseGenerationSessionFiles(generation); cleanupErr != nil {
 			err = fmt.Errorf("%v; erase failed runtime session: %w", err, cleanupErr)
 		}
@@ -394,6 +410,7 @@ func (m *Manager) reloadLocked(ctx context.Context, request StartRequest) (Statu
 			}
 			return m.fail("reload_rollback_failed", "rollback", fmt.Errorf("reload failed and rollback failed"))
 		}
+		m.setState(StateRunning)
 		return m.failRunning("reload_failed", "reload", err)
 	}
 	m.mu.Lock()
@@ -512,6 +529,9 @@ func (m *Manager) activateNetwork(ctx context.Context, generation Generation, cl
 		if err != nil {
 			return err
 		}
+		if err := m.restoreProxySelections(ctx, client, generation); err != nil {
+			return err
+		}
 		if network, ok := m.driver.(managedNetwork); ok {
 			if err := network.ActivateTUN(ctx, generation.Preferences); err != nil {
 				return err
@@ -528,6 +548,9 @@ func (m *Manager) activateNetwork(ctx context.Context, generation Generation, cl
 		}
 		return nil
 	}
+	if err := m.restoreProxySelections(ctx, client, generation); err != nil {
+		return err
+	}
 	if err := m.systemProxy.Apply(ctx, generation.Preferences); err != nil {
 		return fmt.Errorf("enable system proxy: %w", err)
 	}
@@ -539,6 +562,7 @@ func (m *Manager) stopCurrentLocked(ctx context.Context, reportStopped bool) err
 	process := m.process
 	client := m.client
 	active := m.active
+	captureSelections := m.status.State == StateRunning
 	m.mu.RUnlock()
 	if process == nil {
 		if err := m.systemProxy.Restore(ctx); err != nil {
@@ -579,6 +603,13 @@ func (m *Manager) stopCurrentLocked(ctx context.Context, reportStopped bool) err
 	}
 	if err := m.systemProxy.Restore(ctx); err != nil && firstErr == nil {
 		firstErr = err
+	}
+	// A failed reload/rollback may leave a different configuration in the
+	// core. Never save those unconfirmed choices under the previous source.
+	if captureSelections && active != nil && client != nil && !processExited(process) && ctx.Err() == nil {
+		if err := m.captureProxySelections(ctx, client, *active); err != nil && firstErr == nil {
+			firstErr = err
+		}
 	}
 	stopCtx, cancel := context.WithTimeout(ctx, 6*time.Second)
 	if err := process.Stop(stopCtx); err != nil && firstErr == nil {

@@ -6,6 +6,9 @@ import { RuntimeStatusProvider } from "./runtime/RuntimeStatusContext";
 import { TrafficProvider } from "./runtime/TrafficContext";
 import { WindowActivityProvider } from "./runtime/WindowActivityContext";
 import { SubscriptionPageStateProvider } from "../features/subscription/SubscriptionPageStateContext";
+import { DNSQueryPreferencesProvider } from "../features/tools/DNSQueryPreferencesContext";
+import { ToolsPageStateProvider } from "../features/tools/ToolsPageStateContext";
+import { JeemiUpdateProvider } from "../features/update/JeemiUpdateProvider";
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -14,7 +17,11 @@ export function AppProviders({ children }: PropsWithChildren) {
         <WindowActivityProvider>
           <RuntimeStatusProvider>
             <TrafficProvider>
-              <ProxyOverviewProvider>{children}</ProxyOverviewProvider>
+              <ProxyOverviewProvider>
+                <DNSQueryPreferencesProvider>
+                  <ToolsPageStateProvider><JeemiUpdateProvider>{children}</JeemiUpdateProvider></ToolsPageStateProvider>
+                </DNSQueryPreferencesProvider>
+              </ProxyOverviewProvider>
             </TrafficProvider>
           </RuntimeStatusProvider>
         </WindowActivityProvider>

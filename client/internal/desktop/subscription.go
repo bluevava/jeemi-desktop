@@ -36,7 +36,7 @@ func (a *App) ImportSubscriptionFile(labels subscription.DialogLabels) (subscrip
 		Title: labels.Title,
 		Filters: []wailsRuntime.FileFilter{{
 			DisplayName: labels.FilterName,
-			Pattern:     "*.yaml;*.json;*.txt",
+			Pattern:     "*.yaml;*.json;*.txt;*.conf",
 		}},
 	})
 	if err != nil {

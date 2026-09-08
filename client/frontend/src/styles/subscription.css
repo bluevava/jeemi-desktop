@@ -1202,3 +1202,21 @@
   }
 
 }
+.subscription-normalization {
+  padding: 8px 0;
+}
+
+.subscription-normalization-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subscription-normalization details > summary {
+  cursor: pointer;
+}
+
+.subscription-normalization ul {
+  max-height: 240px;
+  overflow-y: auto;
+}

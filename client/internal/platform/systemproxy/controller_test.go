@@ -46,7 +46,9 @@ func TestManagerRetainsRecoveryUntilRestoreAndNotifySucceed(t *testing.T) {
 		platform := &fakeBackend{failApply: !notify, failRestore: !notify, failNotify: notify}
 		path := filepath.Join(t.TempDir(), "recovery.json")
 		manager := newManager(path, platform)
-		if err := manager.Apply(context.Background(), runtimeconfig.DefaultPreferences()); err == nil {
+		preferences := runtimeconfig.DefaultPreferences()
+		preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
+		if err := manager.Apply(context.Background(), preferences); err == nil {
 			t.Fatal("expected apply failure")
 		}
 		if _, err := os.Stat(path); err != nil {
@@ -70,6 +72,7 @@ func TestManagerPersistsOriginalStateOnceAndRestoresIt(t *testing.T) {
 	}}
 	manager := newManager(path, platform)
 	preferences := runtimeconfig.DefaultPreferences()
+	preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
 	preferences.ListenPort = 7897
 	if err := manager.Apply(context.Background(), preferences); err != nil {
 		t.Fatal(err)
@@ -96,7 +99,9 @@ func TestManagerRollsBackWhenApplyFails(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "recovery.json")
 	platform := &fakeBackend{captured: snapshot{ProxyEnableExists: true}, failApply: true}
 	manager := newManager(path, platform)
-	if err := manager.Apply(context.Background(), runtimeconfig.DefaultPreferences()); err == nil {
+	preferences := runtimeconfig.DefaultPreferences()
+	preferences.ProxyMode = runtimeconfig.ProxyModeSystemProxy
+	if err := manager.Apply(context.Background(), preferences); err == nil {
 		t.Fatal("Apply() succeeded")
 	}
 	if len(platform.restored) != 1 {

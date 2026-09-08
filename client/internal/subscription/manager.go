@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"jeemi/internal/subscriptionformat"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,20 +13,22 @@ import (
 )
 
 type ManagerOptions struct {
-	DataDirectory string
-	Store         *Store
-	Fetcher       Fetcher
-	IconDetector  IconDetector
-	QRDecoder     QRDecoder
-	Screen        platformscreen.Capturer
+	DataDirectory  string
+	Store          *Store
+	Fetcher        Fetcher
+	IconDetector   IconDetector
+	QRDecoder      QRDecoder
+	Screen         platformscreen.Capturer
+	ValidateImport func(context.Context, []byte) error
 }
 
 type Manager struct {
-	store     *Store
-	fetcher   Fetcher
-	icons     IconDetector
-	qrDecoder QRDecoder
-	screen    platformscreen.Capturer
+	store          *Store
+	fetcher        Fetcher
+	icons          IconDetector
+	qrDecoder      QRDecoder
+	screen         platformscreen.Capturer
+	validateImport func(context.Context, []byte) error
 }
 
 func NewManager(options ManagerOptions) (*Manager, error) {
@@ -58,7 +61,7 @@ func NewManager(options ManagerOptions) (*Manager, error) {
 	if screenCapturer == nil {
 		screenCapturer = platformscreen.DesktopCapturer{}
 	}
-	return &Manager{store: store, fetcher: fetcher, icons: icons, qrDecoder: decoder, screen: screenCapturer}, nil
+	return &Manager{store: store, fetcher: fetcher, icons: icons, qrDecoder: decoder, screen: screenCapturer, validateImport: options.ValidateImport}, nil
 }
 
 func (m *Manager) State() (State, error) {
@@ -90,6 +93,11 @@ func (m *Manager) ImportURL(ctx context.Context, input ImportURLInput) (State, e
 		return State{}, err
 	}
 	name := chooseImportedName(input.Name, fetched.SuggestedName, input.SourceURL)
+	if m.validateImport != nil {
+		if err := m.validateImport(ctx, fetched.Contents); err != nil {
+			return State{}, err
+		}
+	}
 	if icon == "" {
 		iconKind, icon = m.detectIconBestEffort(ctx, input.SourceURL)
 	}
@@ -127,7 +135,17 @@ func (m *Manager) ImportFile(path string) (State, error) {
 	if err != nil {
 		return State{}, fmt.Errorf("read subscription file")
 	}
+	if normalized, err := subscriptionformat.Normalize(contents); err != nil {
+		return State{}, err
+	} else if normalized.Report.Format != "mihomo" {
+		format = FormatText
+	}
 	base := filepath.Base(path)
+	if m.validateImport != nil {
+		if err := m.validateImport(context.Background(), contents); err != nil {
+			return State{}, err
+		}
+	}
 	name := strings.TrimSpace(strings.TrimSuffix(base, filepath.Ext(base)))
 	if name == "" {
 		name = "Subscription"
@@ -407,9 +425,9 @@ func formatForImportedFile(path string) (Format, error) {
 		return FormatYAML, nil
 	case ".json":
 		return FormatJSON, nil
-	case ".txt":
+	case ".txt", ".conf":
 		return FormatText, nil
 	default:
-		return "", fmt.Errorf("subscription file must use .yaml, .json, or .txt")
+		return "", fmt.Errorf("subscription file must use .yaml, .json, .txt, or .conf")
 	}
 }
