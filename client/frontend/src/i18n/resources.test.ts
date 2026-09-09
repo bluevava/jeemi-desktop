@@ -8,6 +8,7 @@ import ts from "typescript";
 
 import { flattenTranslationKeys, resources } from "./resources";
 import { resolveLanguage } from "./preferenceLanguage";
+import { isHelpContent } from "../components/help/helpContent";
 
 describe("translation resources", () => {
   it("keeps Simplified Chinese and English keys in parity", () => {
@@ -22,26 +23,23 @@ describe("translation resources", () => {
   });
 
   it("keeps every feature-help topic complete", () => {
-    const requiredFields = [
-      "title",
-      "description",
-      "purpose",
-      "scenarios",
-      "cautions",
-    ].sort();
-
     for (const locale of Object.values(resources)) {
-      const helpCollections = [
-        locale.translation.help.topics,
-        locale.translation.localConfig.fieldHelp,
-        locale.translation.localConfig.resources.groups.help,
-        locale.translation.localConfig.resources.ruleSets.help,
-        locale.translation.ruleSetEntry.help,
-      ];
-      for (const collection of helpCollections) {
-        for (const topic of Object.values(collection)) {
-          expect(Object.keys(topic).sort()).toEqual(requiredFields);
-        }
+      const topics = helpTopics(locale.translation);
+      // Include nested and imported help, not only page topics and field descriptions.
+      expect(topics.map(([key]) => key)).toEqual(expect.arrayContaining([
+        "help.topics.subscriptionNodeSearch",
+        "localConfig.fieldHelp.generic",
+        "localConfig.resources.groups.help.namePatterns",
+        "localConfig.resources.ruleSets.help.payload",
+        "localConfig.editorResources.help.activation",
+        "ruleSetEntry.help.processPath",
+        "subscription.normalization.help",
+      ]));
+      for (const [key, topic] of topics) {
+        expect(isHelpContent(topic), key).toBe(true);
+        expect(Object.keys(topic).filter((field) =>
+          !["title", "purpose", "scenarios", "cautions", "example"].includes(field),
+        ), key).toEqual([]);
       }
     }
   });
@@ -123,6 +121,17 @@ describe("translation resources", () => {
     }
   });
 });
+
+function helpTopics(root: unknown, prefix = ""): [string, Record<string, unknown>][] {
+  if (!root || typeof root !== "object" || prefix === "help.section") return [];
+  const value = root as Record<string, unknown>;
+  if (["purpose", "scenarios", "cautions", "example"].some((key) => key in value)) {
+    return [[prefix, value]];
+  }
+  return Object.entries(value).flatMap(([key, child]) =>
+    helpTopics(child, prefix ? `${prefix}.${key}` : key),
+  );
+}
 
 function translationAt(root: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((value, key) =>

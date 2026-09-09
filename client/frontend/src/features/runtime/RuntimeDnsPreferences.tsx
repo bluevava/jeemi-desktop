@@ -41,6 +41,8 @@ const commonFakeIPFilterOptions = [
   "+.home.arpa",
   "+.localdomain",
   "+.localhost",
+  "+.msftconnecttest.com",
+  "+.msftncsi.com",
 ].map((value) => ({ label: value, value }));
 
 export function RuntimeDnsPreferences({

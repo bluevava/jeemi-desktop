@@ -9,7 +9,15 @@
     "reloadTooltip": "界面白屏或显示异常时重新加载 Jeemi 界面",
     "reloadMessage": "重新加载界面会丢弃未保存的编辑，并返回主页。mihomo 会保持运行，已保存的配置不受影响。是否继续？",
     "reloadConfirm": "重新加载",
-    "reloadCancel": "取消"
+    "reloadCancel": "取消",
+    "startProxy": "启动代理",
+    "startProxyTooltip": "使用当前订阅和运行配置启动代理",
+    "stopProxy": "停止代理",
+    "stopProxyTooltip": "恢复网络设置并停止代理",
+    "restartProxy": "重启代理",
+    "restartProxyTooltip": "按当前配置完整重启代理",
+    "proxyFailure": "代理操作未完成，请在主页查看运行状态。若授权助手尚未安装、需要更新或修复，请在主页点击启动代理进行处理。",
+    "close": "关闭"
   },
   "en-US": {
     "tooltip": "Jeemi",
@@ -21,6 +29,14 @@
     "reloadTooltip": "Reload the Jeemi interface if it is blank or displays incorrectly",
     "reloadMessage": "Reloading discards unsaved edits and returns to home. mihomo will keep running and saved configuration is unchanged. Continue?",
     "reloadConfirm": "Reload",
-    "reloadCancel": "Cancel"
+    "reloadCancel": "Cancel",
+    "startProxy": "Start proxy",
+    "startProxyTooltip": "Start the proxy with the current subscription and runtime configuration",
+    "stopProxy": "Stop proxy",
+    "stopProxyTooltip": "Restore network settings and stop the proxy",
+    "restartProxy": "Restart proxy",
+    "restartProxyTooltip": "Fully restart the proxy with the current configuration",
+    "proxyFailure": "The proxy action could not be completed. Check the runtime status on Home. If the authorization helper needs installation, an update or repair, click Start proxy on Home to continue.",
+    "close": "Close"
   }
 }

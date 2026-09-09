@@ -1,7 +1,7 @@
 import {
   BulbOutlined,
+  CodeOutlined,
   CompassOutlined,
-  InfoCircleOutlined,
   QuestionCircleOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
@@ -9,6 +9,7 @@ import { Button, Popover } from "antd";
 import { useEffect, useRef, useState, type ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { zhCN } from "../../i18n/locales/zh-CN";
+import { helpSections, resolveHelpContent } from "./helpContent";
 
 export type HelpTopic = keyof typeof zhCN.help.topics;
 
@@ -20,12 +21,13 @@ interface FeatureHelpProps {
   compact?: boolean;
 }
 
-const sections = [
-  { key: "description", icon: <InfoCircleOutlined /> },
-  { key: "purpose", icon: <BulbOutlined /> },
-  { key: "scenarios", icon: <CompassOutlined /> },
-  { key: "cautions", icon: <WarningOutlined /> },
-] as const;
+const sectionIcons = {
+  purpose: <BulbOutlined />,
+  scenarios: <CompassOutlined />,
+  cautions: <WarningOutlined />,
+  example: <CodeOutlined />,
+  cautionsAndExample: <WarningOutlined />,
+};
 
 export function FeatureHelp({
   topic,
@@ -52,23 +54,22 @@ export function FeatureHelp({
   const base =
     translationBase ??
     (topic ? `help.topics.${topic}` : fallbackBase ?? "help.topics.localConfigField");
-  const translate = (key: string) =>
-    t(`${base}.${key}`, {
-      ...values,
-      defaultValue: fallbackBase
-        ? t(`${fallbackBase}.${key}`, values)
-        : t(`help.topics.localConfigField.${key}`, values),
-    });
+  const topicContent = resolveHelpContent(t, base, fallbackBase, values);
 
   const content = (
     <div className="feature-help-content">
-      {sections.map((section) => (
-        <section className="feature-help-section" key={section.key}>
+      {helpSections(topicContent).map((section) => (
+        <section
+          className={`feature-help-section${section.caution ? " feature-help-caution" : ""}`}
+          key={section.key}
+        >
           <div className="feature-help-section-title">
-            {section.icon}
+            {sectionIcons[section.key]}
             <span>{t(`help.section.${section.key}`)}</span>
           </div>
-          <p>{translate(section.key)}</p>
+          {section.paragraphs.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
         </section>
       ))}
     </div>
@@ -81,12 +82,12 @@ export function FeatureHelp({
       onOpenChange={setOpen}
       open={open}
       placement="bottom"
-      title={translate("title")}
+      title={topicContent.title}
       trigger="click"
     >
       <Button
         aria-expanded={open}
-        aria-label={`${t("common.learnMore")}: ${translate("title")}`}
+        aria-label={`${t("common.learnMore")}: ${topicContent.title}`}
         className={compact ? "feature-help-button compact" : "feature-help-button"}
         icon={<QuestionCircleOutlined />}
         ref={triggerRef}

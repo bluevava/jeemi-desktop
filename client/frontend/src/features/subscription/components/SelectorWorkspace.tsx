@@ -30,6 +30,7 @@ import {
   useSubscriptionPageStateField,
 } from "../SubscriptionPageStateContext";
 import { selectorPresentation } from "../selectorPresentation";
+import { hasNodeNameSearch } from "../selectorSearch";
 import { FallbackControl } from "./FallbackControl";
 import { NormalizationNotice } from "./NormalizationNotice";
 import { sortSelectorMembers } from "../selectorSort";
@@ -95,7 +96,7 @@ export function SelectorWorkspace({
   const activeTab = activeTabByWorkspace[workspaceKey] ?? "";
   const expandedSelectors =
     expandedSelectorsByWorkspace[workspaceKey] ?? [];
-  const normalisedQuery = query.trim().toLocaleLowerCase();
+  const searchingNodes = hasNodeNameSearch(query);
 
   const toolbar = (
     <div className="selector-toolbar">
@@ -302,7 +303,7 @@ export function SelectorWorkspace({
       ) : selectors.length === 0 ? (
         <Empty
           description={t(
-            normalisedQuery
+            searchingNodes
               ? "subscription.selector.noSearchResults"
               : outboundMode === "global"
                 ? "subscription.selector.globalEmpty"

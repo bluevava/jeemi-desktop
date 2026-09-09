@@ -88,16 +88,16 @@ export const enDNSQuery = {
 
 export const zhDNSQueryHelp = {
   title: "DNS 查询",
-  description: "一次分别查询代理、直连和自定义 DNS，展示本次响应中的全部 A（IPv4）和 AAAA（IPv6）地址，跟随 CNAME 并去重。",
-  purpose: "比较同一域名在不同 DNS 服务器和出口下的真实解析结果。域名框可粘贴 HTTP/HTTPS URL，自动去掉协议、端口、路径、查询参数和片段。三个地址框共用纯 IP 与 HTTPS DoH 预设，也可直接输入；自定义默认走代理。切换导航会保留输入、开关、面板展开状态和上次结果，返回不自动查询。点击查询时将自定义 DNS 地址保存到本地，客户端下次打开自动恢复；其它查询内容只保留在本次客户端会话中。",
-  scenarios: "排查解析差异、节点连接失败或某一类型记录缺失。代理查询固定到当前已生效配置中首条 MATCH/FINAL 选择器的当前节点，与全局/直连模式按钮无关。",
-  cautions: "点击查询会将域名发送给所选服务器。纯 IP 使用 TCP 53，DoH 使用 HTTPS；不会修改主页 DNS 设置或返回 Jeemi Fake-IP。代理失败不回退直连，MATCH 为 DIRECT/REJECT 或没有单一节点时显示代理无效。TUN 运行时本地查询经核心 DIRECT 出站，不经过代理节点；核心停止时本机直接查询。DoH 服务器域名仍需引导解析。每次最多 12 秒，取消、离开页面或隐藏窗口会停止查询；结果只代表本次 DNS 返回，不能枚举域名在全球的全部 IP。",
+  purpose: "比较代理、直连和自定义 DNS 返回的全部 A（IPv4）与 AAAA（IPv6）地址，跟随 CNAME 并去重。地址框可选预设或输入纯 IP、HTTPS DoH，自定义默认走代理。代理查询使用当前已生效配置首条 MATCH/FINAL 选择器的当前节点；本地查询不经过代理节点。",
+  scenarios: "同一域名在本地和代理下解析不同、访问失败或缺少某类记录时使用。切换导航保留本次会话的输入、开关、展开状态与结果；点击查询还会保存自定义 DNS 地址，供下次打开客户端恢复。",
+  cautions: "域名会发送给所选服务器。纯 IP 使用 TCP 53，DoH 使用 HTTPS 且其主机名仍需引导解析；不会修改主页 DNS 或返回 Jeemi Fake-IP。代理查询与全局/直连模式按钮无关，失败不回退直连；MATCH 为 DIRECT/REJECT 或无法固定单一节点时不可用。TUN 运行时本地查询使用核心 DIRECT，停核时使用本机连接。最长 12 秒，取消、离开页面或隐藏窗口会停止查询；结果只代表本次响应，不能枚举全球全部 IP。",
+  example: "粘贴 https://example.com:443/path?q=1#top，会自动提取 example.com；协议、端口、路径、参数和片段均不参与查询。",
 };
 
 export const enDNSQueryHelp = {
   title: "DNS lookup",
-  description: "Query proxy, direct, and custom DNS together. Show all A (IPv4) and AAAA (IPv6) addresses in these responses, following CNAMEs and removing duplicates.",
-  purpose: "Compare real answers for a domain across DNS servers and egress routes. Paste an HTTP/HTTPS URL to extract its domain, discarding the scheme, port, path, query, and fragment. All three server fields share plain IP and HTTPS DoH presets and accept typed addresses. Custom DNS defaults to proxy routing. Navigation preserves inputs, the routing switch, expanded panels, and the last results without querying again. Clicking Query saves the custom DNS address for the next client launch; other query content stays only in this client session.",
-  scenarios: "Investigate differing answers, failed proxy connections, or missing record types. Proxy queries pin the node currently selected by the first active MATCH/FINAL target, independently of the global/direct mode buttons.",
-  cautions: "Query sends the domain to the selected servers. Plain IPs use TCP 53 and DoH uses HTTPS, without changing Home DNS settings or returning Jeemi Fake-IP. Proxy failures never fall back to direct; DIRECT/REJECT or groups without a single node are unavailable. With TUN running, local queries use the core's DIRECT egress without a proxy node; with the core stopped they use local sockets. DoH hostnames still need bootstrap resolution. Queries last at most 12 seconds and stop on cancellation, navigation, or window hiding. Answers describe this lookup, not every IP used by a domain worldwide.",
+  purpose: "Compare all A (IPv4) and AAAA (IPv6) addresses returned by proxy, direct, and custom DNS, following CNAMEs and removing duplicates. Choose presets or enter a plain IP or HTTPS DoH URL; custom DNS defaults to proxy routing. Proxy queries use the current node of the first active MATCH/FINAL selector; local queries bypass proxy nodes.",
+  scenarios: "Use when local and proxy DNS disagree, access fails, or a record type is missing. Navigation preserves this session’s inputs, switches, expanded panels, and results. Clicking Query also saves the custom DNS address for the next launch.",
+  cautions: "Domains are sent to the selected servers. Plain IP uses TCP 53; DoH uses HTTPS and its hostname still needs bootstrap DNS. Home DNS settings are unchanged and no Jeemi Fake-IP is returned. Proxy queries are independent of the global/direct mode buttons and never fall back to direct on failure; DIRECT/REJECT or a target without one fixed node is unavailable. Local queries use core DIRECT while TUN runs and local sockets when stopped. Queries stop after 12 seconds, cancellation, navigation, or window hiding. Answers describe this response, not all IPs worldwide.",
+  example: "Paste https://example.com:443/path?q=1#top to query example.com. The scheme, port, path, query, and fragment are discarded.",
 };

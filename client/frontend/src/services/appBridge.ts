@@ -399,6 +399,8 @@ const browserRuntimePreferencesFallback: RuntimePreferences = {
     "+.home.arpa",
     "+.localdomain",
     "+.localhost",
+    "+.msftconnecttest.com",
+    "+.msftncsi.com",
   ],
   dnsFakeIpFilterEnabled: true,
   dnsFakeIpFilterMerge: "override",

@@ -14,22 +14,32 @@ const (
 )
 
 type Labels struct {
-	Tooltip       string `json:"tooltip"`
-	Show          string `json:"show"`
-	ShowTooltip   string `json:"showTooltip"`
-	Quit          string `json:"quit"`
-	QuitTooltip   string `json:"quitTooltip"`
-	Reload        string `json:"reload"`
-	ReloadTooltip string `json:"reloadTooltip"`
-	ReloadMessage string `json:"reloadMessage"`
-	ReloadConfirm string `json:"reloadConfirm"`
-	ReloadCancel  string `json:"reloadCancel"`
+	Tooltip        string `json:"tooltip"`
+	Show           string `json:"show"`
+	ShowTooltip    string `json:"showTooltip"`
+	Quit           string `json:"quit"`
+	QuitTooltip    string `json:"quitTooltip"`
+	Reload         string `json:"reload"`
+	ReloadTooltip  string `json:"reloadTooltip"`
+	ReloadMessage  string `json:"reloadMessage"`
+	ReloadConfirm  string `json:"reloadConfirm"`
+	ReloadCancel   string `json:"reloadCancel"`
+	StartProxy     string `json:"startProxy"`
+	StartTooltip   string `json:"startProxyTooltip"`
+	StopProxy      string `json:"stopProxy"`
+	StopTooltip    string `json:"stopProxyTooltip"`
+	RestartProxy   string `json:"restartProxy"`
+	RestartTooltip string `json:"restartProxyTooltip"`
+	ProxyFailure   string `json:"proxyFailure"`
+	Close          string `json:"close"`
 }
 
 type menuItem interface {
 	Click(func())
 	SetTitle(string)
 	SetTooltip(string)
+	Enable()
+	Disable()
 }
 
 type backend interface {
@@ -47,23 +57,28 @@ type backend interface {
 // Controller owns the native tray lifecycle while keeping Wails window actions
 // behind the callbacks supplied by the application layer.
 type Controller struct {
-	mu sync.Mutex
+	mu           sync.Mutex
+	menuUpdateMu sync.Mutex
 
 	backend  backend
 	icon     []byte
 	labels   map[string]Labels
 	language string
 
-	showWindow func()
-	reloadUI   func()
-	quitApp    func()
-	showItem   menuItem
-	reloadItem menuItem
-	quitItem   menuItem
-	end        func()
-	stopped    chan struct{}
-	started    bool
-	ready      bool
+	showWindow   func()
+	reloadUI     func()
+	quitApp      func()
+	showItem     menuItem
+	reloadItem   menuItem
+	quitItem     menuItem
+	end          func()
+	stopped      chan struct{}
+	started      bool
+	ready        bool
+	proxy        ProxyControls
+	proxyItems   [3]menuItem
+	proxyEnabled [3]bool
+	proxyBusy    bool
 }
 
 func New(icon, labelsJSON []byte) (*Controller, error) {
@@ -98,13 +113,15 @@ func newController(icon []byte, labels map[string]Labels, native backend) *Contr
 
 func validateLabels(language string, labels Labels) error {
 	if labels.Tooltip == "" || labels.Show == "" || labels.ShowTooltip == "" || labels.Quit == "" || labels.QuitTooltip == "" ||
-		labels.Reload == "" || labels.ReloadTooltip == "" || labels.ReloadMessage == "" || labels.ReloadConfirm == "" || labels.ReloadCancel == "" {
+		labels.Reload == "" || labels.ReloadTooltip == "" || labels.ReloadMessage == "" || labels.ReloadConfirm == "" || labels.ReloadCancel == "" ||
+		labels.StartProxy == "" || labels.StartTooltip == "" || labels.StopProxy == "" || labels.StopTooltip == "" ||
+		labels.RestartProxy == "" || labels.RestartTooltip == "" || labels.ProxyFailure == "" || labels.Close == "" {
 		return fmt.Errorf("tray labels for %s are incomplete", language)
 	}
 	return nil
 }
 
-func (c *Controller) Start(showWindow, reloadUI, quitApp func()) {
+func (c *Controller) Start(showWindow, reloadUI, quitApp func(), proxy ProxyControls) {
 	c.mu.Lock()
 	if c.started {
 		c.mu.Unlock()
@@ -126,6 +143,7 @@ func (c *Controller) Start(showWindow, reloadUI, quitApp func()) {
 	c.showWindow = showWindow
 	c.reloadUI = reloadUI
 	c.quitApp = quitApp
+	c.proxy = proxy
 	c.mu.Unlock()
 
 	if native, ok := c.backend.(interface{ SetOnUnavailable(func()) }); ok {
@@ -192,11 +210,12 @@ func (c *Controller) SetLanguage(language string) {
 	showItem := c.showItem
 	reloadItem := c.reloadItem
 	quitItem := c.quitItem
+	proxyItems := c.proxyItems
 	ready := c.ready
 	c.mu.Unlock()
 
 	if ready {
-		c.applyLabels(labels, showItem, reloadItem, quitItem)
+		c.applyLabels(labels, showItem, reloadItem, quitItem, proxyItems)
 	}
 }
 
@@ -229,6 +248,16 @@ func (c *Controller) onReady() {
 	reloadItem := c.backend.AddMenuItem(labels.Reload, labels.ReloadTooltip)
 	reloadItem.Click(reloadUI)
 	c.backend.AddSeparator()
+	proxyItems := [3]menuItem{
+		c.backend.AddMenuItem(labels.StartProxy, labels.StartTooltip),
+		c.backend.AddMenuItem(labels.StopProxy, labels.StopTooltip),
+		c.backend.AddMenuItem(labels.RestartProxy, labels.RestartTooltip),
+	}
+	for index, item := range proxyItems {
+		item.Disable()
+		item.Click(func() { go c.runProxyAction(index) })
+	}
+	c.backend.AddSeparator()
 	quitItem := c.backend.AddMenuItem(labels.Quit, labels.QuitTooltip)
 	quitItem.Click(quitApp)
 
@@ -244,13 +273,18 @@ func (c *Controller) onReady() {
 	c.showItem = showItem
 	c.reloadItem = reloadItem
 	c.quitItem = quitItem
+	c.proxyItems = proxyItems
+	c.proxyEnabled = [3]bool{}
 	c.ready = true
 	latestLabels := c.labels[c.language]
+	stopped := c.stopped
 	c.mu.Unlock()
 
 	if latestLabels != labels {
-		c.applyLabels(latestLabels, showItem, reloadItem, quitItem)
+		c.applyLabels(latestLabels, showItem, reloadItem, quitItem, proxyItems)
 	}
+	c.refreshProxy()
+	go c.watchProxy(stopped)
 }
 
 func (c *Controller) onUnavailable() {
@@ -284,7 +318,9 @@ func (c *Controller) onExit(stopped chan struct{}, exitOnce *sync.Once) {
 	}
 }
 
-func (c *Controller) applyLabels(labels Labels, showItem, reloadItem, quitItem menuItem) {
+func (c *Controller) applyLabels(labels Labels, showItem, reloadItem, quitItem menuItem, proxyItems [3]menuItem) {
+	c.menuUpdateMu.Lock()
+	defer c.menuUpdateMu.Unlock()
 	c.backend.SetTooltip(labels.Tooltip)
 	showItem.SetTitle(labels.Show)
 	showItem.SetTooltip(labels.ShowTooltip)
@@ -292,4 +328,8 @@ func (c *Controller) applyLabels(labels Labels, showItem, reloadItem, quitItem m
 	reloadItem.SetTooltip(labels.ReloadTooltip)
 	quitItem.SetTitle(labels.Quit)
 	quitItem.SetTooltip(labels.QuitTooltip)
+	for index, text := range [3][2]string{{labels.StartProxy, labels.StartTooltip}, {labels.StopProxy, labels.StopTooltip}, {labels.RestartProxy, labels.RestartTooltip}} {
+		proxyItems[index].SetTitle(text[0])
+		proxyItems[index].SetTooltip(text[1])
+	}
 }

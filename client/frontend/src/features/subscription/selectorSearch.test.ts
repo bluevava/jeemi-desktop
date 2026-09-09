@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import type { SubscriptionSelector } from "../../types/subscription";
-import { delayTargetsForSearch, filterSelectorsByName } from "./selectorSearch";
+import {
+  delayTargetsForSearch,
+  filterSelectorsByNodeName,
+  hasNodeNameSearch,
+} from "./selectorSearch";
 
 const selector: SubscriptionSelector = {
   name: "Primary group",
@@ -28,13 +32,13 @@ const selector: SubscriptionSelector = {
   referencedByRules: true,
 };
 
-describe("filterSelectorsByName", () => {
-  it("matches selector names and retains all of their nodes", () => {
-    expect(filterSelectorsByName([selector], "primary")).toEqual([selector]);
+describe("filterSelectorsByNodeName", () => {
+  it("does not match selector names", () => {
+    expect(filterSelectorsByNodeName([selector], "primary")).toEqual([]);
   });
 
   it("matches node names and keeps only matching nodes", () => {
-    const result = filterSelectorsByName([selector], "tokyo");
+    const result = filterSelectorsByNodeName([selector], "tokyo");
     expect(result).toHaveLength(1);
     expect(result[0].members.map((member) => member.name)).toEqual([
       "Tokyo node",
@@ -42,15 +46,94 @@ describe("filterSelectorsByName", () => {
   });
 
   it("does not match protocol types or provider names", () => {
-    expect(filterSelectorsByName([selector], "wireguard")).toEqual([]);
-    expect(filterSelectorsByName([selector], "provider-alpha")).toEqual([]);
+    expect(filterSelectorsByNodeName([selector], "wireguard")).toEqual([]);
+    expect(filterSelectorsByNodeName([selector], "provider-alpha")).toEqual([]);
+  });
+
+  it.each(["", " \n\t ", " | & ! "])(
+    "keeps the unfiltered view when there are no keywords (%j)",
+    (query) => {
+      const selectors = [selector];
+      expect(hasNodeNameSearch(query)).toBe(false);
+      expect(filterSelectorsByNodeName(selectors, query)).toBe(selectors);
+    },
+  );
+
+  it("does not include nested selectors or built-in actions in a node search", () => {
+    const mixed: SubscriptionSelector = {
+      ...selector,
+      members: [
+        ...selector.members,
+        { name: "Tokyo group", type: "select", source: "group", providerName: "" },
+        { name: "DIRECT", type: "direct", source: "builtin", providerName: "" },
+      ],
+    };
+    expect(filterSelectorsByNodeName([mixed], "group|DIRECT")).toEqual([]);
+    expect(
+      filterSelectorsByNodeName([mixed], "!missing")[0].members,
+    ).toEqual(selector.members);
+  });
+
+  it("preserves spaces inside a literal keyword", () => {
+    expect(filterSelectorsByNodeName([selector], "  TOKYO node  ")[0].members)
+      .toEqual([selector.members[0]]);
+    expect(filterSelectorsByNodeName([selector], "Tokyo     node")).toEqual([]);
+  });
+});
+
+const compoundSelector: SubscriptionSelector = {
+  ...selector,
+  name: "HK JP GM selector",
+  members: [
+    "HK GM 01",
+    "JP gm 02",
+    "HK GM EV 03",
+    "JP GM ev 04",
+    "HK 05",
+    "US GM 06",
+    "GM 07",
+  ].map((name) => ({ name, type: "ss", source: "proxy", providerName: "" })),
+};
+
+describe("node conditions: union, intersection, then exclusion", () => {
+  it.each([
+    " hk | jp & gm & !ev",
+    " hk& gm & !ev  | jp ",
+    "hk|jp&gm&!ev",
+    "hk     | jp         & gm  &   !   ev  ",
+    "hk!ev|jp&gm",
+    "hk!ev&gm|jp",
+    "hk&gm|jp!ev",
+    "hk|jp!ev&gm",
+    "&gm!ev|hk|jp",
+    "!ev&gm|jp|hk",
+  ])("keeps the same result when labelled conditions move (%j)", (query) => {
+    const result = filterSelectorsByNodeName([compoundSelector], query);
+    expect(result.flatMap((group) => group.members.map((node) => node.name)))
+      .toEqual(["HK GM 01", "JP gm 02"]);
+  });
+
+  it.each([
+    ["hk|jp", ["HK GM 01", "JP gm 02", "HK GM EV 03", "JP GM ev 04", "HK 05"]],
+    ["hk&gm", ["HK GM 01", "HK GM EV 03"]],
+    ["&gm&jp!ev", ["JP gm 02"]],
+    ["!ev!us", ["HK GM 01", "JP gm 02", "HK 05", "GM 07"]],
+    ["hk|jp&gm&01!ev", ["HK GM 01"]],
+    ["hk&gm!ev!01", []],
+    ["hk|hk&gm&gm!ev!ev", ["HK GM 01"]],
+    ["hk | ", ["HK GM 01", "HK GM EV 03", "HK 05"]],
+  ])("combines single and multiple conditions (%j)", (query, expected) => {
+    expect(
+      filterSelectorsByNodeName([compoundSelector], query)
+        .flatMap((group) => group.members.map((node) => node.name)),
+    ).toEqual(expected);
   });
 });
 
 describe("batch delay targets for quick search", () => {
   const allTargets = ["Tokyo node", "London node", "Unlisted node"];
 
-  it.each(["", " \n "])("tests all nodes for an empty search (%j)", (query) => {
+  it.each(["", " \n ", " | & ! "])("tests all nodes for an empty search (%j)", (query) => {
     expect(delayTargetsForSearch(allTargets, [], query)).toEqual(allTargets);
   });
 
@@ -59,14 +142,14 @@ describe("batch delay targets for quick search", () => {
     expect(
       delayTargetsForSearch(
         allTargets,
-        filterSelectorsByName([selector], query),
+        filterSelectorsByNodeName([selector], query),
         query,
       ),
     ).toEqual(["Tokyo node"]);
   });
 
-  it("tests a matched selector's real nodes once, excluding groups and built-ins", () => {
-    const query = "primary";
+  it("tests matched real nodes once, excluding groups and built-ins", () => {
+    const query = "!missing";
     const withExtraMembers: SubscriptionSelector = {
       ...selector,
       members: [
@@ -83,7 +166,7 @@ describe("batch delay targets for quick search", () => {
     expect(
       delayTargetsForSearch(
         allTargets,
-        filterSelectorsByName([withExtraMembers, selector], query),
+        filterSelectorsByNodeName([withExtraMembers, selector], query),
         query,
       ),
     ).toEqual(["Tokyo node", "London node"]);
@@ -94,7 +177,7 @@ describe("batch delay targets for quick search", () => {
     expect(
       delayTargetsForSearch(
         allTargets,
-        filterSelectorsByName([selector], query),
+        filterSelectorsByNodeName([selector], query),
         query,
       ),
     ).toEqual([]);
@@ -103,17 +186,27 @@ describe("batch delay targets for quick search", () => {
   it("keeps a started batch unchanged when the next search changes", () => {
     const started = delayTargetsForSearch(
       allTargets,
-      filterSelectorsByName([selector], "tokyo"),
+      filterSelectorsByNodeName([selector], "tokyo"),
       "tokyo",
     );
     expect(
       delayTargetsForSearch(
         allTargets,
-        filterSelectorsByName([selector], "london"),
+        filterSelectorsByNodeName([selector], "london"),
         "london",
       ),
     ).toEqual(["London node"]);
     expect(started).toEqual(["Tokyo node"]);
     expect(selector.members).toHaveLength(2);
+  });
+
+  it("uses the compound search result and never reintroduces excluded nodes", () => {
+    const query = "hk & gm & !ev | jp";
+    expect(delayTargetsForSearch(
+      compoundSelector.members.map((node) => node.name),
+      filterSelectorsByNodeName([compoundSelector, compoundSelector], query),
+      query,
+    )).toEqual(["HK GM 01", "JP gm 02"]);
+    expect(compoundSelector.members).toHaveLength(7);
   });
 });

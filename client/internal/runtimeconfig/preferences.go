@@ -71,6 +71,8 @@ var (
 		"+.home.arpa",
 		"+.localdomain",
 		"+.localhost",
+		"+.msftconnecttest.com",
+		"+.msftncsi.com",
 	}
 	defaultLANBypassRules = []string{
 		"DOMAIN,localhost,DIRECT",

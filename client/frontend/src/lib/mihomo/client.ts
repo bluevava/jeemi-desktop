@@ -248,10 +248,9 @@ export async function getRuleProviderRuntimeState(
 
 export async function getConnections(
   session: MihomoControllerSession,
+  signal?: AbortSignal,
 ): Promise<MihomoConnectionsSnapshot> {
-  const payload = await request<unknown>(session, "/connections", {
-    method: "GET",
-  });
+  const payload = await request<unknown>(session, "/connections", { method: "GET" }, { signal });
   return normaliseConnections(payload);
 }
 

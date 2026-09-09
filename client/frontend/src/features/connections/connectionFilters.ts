@@ -6,7 +6,6 @@ export type ConnectionRouteFilter = "all" | "direct" | "proxy";
 interface ConnectionFilterInput {
   query: string;
   route: ConnectionRouteFilter;
-  selectedSelectors: ReadonlySet<string> | null;
 }
 
 export function filterConnections(
@@ -18,13 +17,6 @@ export function filterConnections(
     const direct = isDirectConnection(connection);
     if (input.route === "direct" && !direct) return false;
     if (input.route === "proxy" && (direct || !connection.chains[0])) return false;
-    if (
-      input.route === "proxy" &&
-      input.selectedSelectors !== null &&
-      !connection.chains.some((name) => input.selectedSelectors?.has(name))
-    ) {
-      return false;
-    }
     return !query || connectionSearchText(connection).includes(query);
   });
 }

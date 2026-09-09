@@ -95,7 +95,7 @@ func (w *testWatcher) RegisterStatusNotifierItem(service string, sender dbus.Sen
 	if err := w.connection.Object(owner, menuPath).CallWithContext(ctx, "com.canonical.dbusmenu.GetLayout", 0, int32(0), int32(1), []string{}).Store(&revision, &layout); err != nil {
 		return dbus.MakeFailedError(err)
 	}
-	if len(layout.Children) != 4 {
+	if len(layout.Children) != 8 {
 		return dbus.NewError("org.jeemi.Test.IncompleteMenu", []interface{}{"full menu required before registration; no duplicates on reconnect"})
 	}
 	w.properties.SetMust(watcherName, "RegisteredStatusNotifierItems", []string{registered})
@@ -154,7 +154,7 @@ func TestLinuxTrayLifecycleOnPrivateBus(t *testing.T) {
 	}
 	labels := Labels{Tooltip: "Jeemi", Show: "show", ShowTooltip: "show", Reload: "reload", ReloadTooltip: "reload", Quit: "quit", QuitTooltip: "quit"}
 	waiting := newController(preparedIcon, map[string]Labels{LanguageChinese: labels, LanguageEnglish: labels}, newSystemBackend())
-	waiting.Start(nil, nil, nil)
+	waiting.Start(nil, nil, nil, ProxyControls{})
 	stopped := make(chan struct{})
 	go func() { waiting.Stop(); close(stopped) }()
 	select {
@@ -167,7 +167,7 @@ func TestLinuxTrayLifecycleOnPrivateBus(t *testing.T) {
 	controller := newController(preparedIcon, map[string]Labels{LanguageChinese: labels, LanguageEnglish: englishLabels}, newSystemBackend())
 	shown := make(chan struct{}, 8)
 	reloaded, quit := make(chan struct{}, 4), make(chan struct{}, 4)
-	controller.Start(func() { shown <- struct{}{} }, func() { reloaded <- struct{}{} }, func() { quit <- struct{}{} })
+	controller.Start(func() { shown <- struct{}{} }, func() { reloaded <- struct{}{} }, func() { quit <- struct{}{} }, ProxyControls{})
 	defer controller.Stop()
 	// Start while the host is absent. An extension enabled later must work
 	// without restarting Jeemi, and close must remain a normal exit until ready.

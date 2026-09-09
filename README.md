@@ -25,6 +25,10 @@ Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络�
 | -------------------------------------------------------------------- | ------------------------------------------------------------ |
 | ![Jeemi 订阅与代理选择器](assets/screenshots/subscriptions-dark.png) | ![Jeemi DNS 配置](assets/screenshots/dns-settings-light.png) |
 
+| 工具 · DNS查询                                                     | 实时链接                                                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| ![Jeemi DNS查询](assets/screenshots/tools-dns-query.png) | ![Jeemi DNS 配置](assets/screenshots/net-status.png) |
+
 ## 下载与使用
 
 从 [Releases](https://github.com/bluevava/jeemi-desktop/releases) 下载匹配系统与 CPU 的版本。发布目标为 Windows、Linux、macOS 各 amd64/arm64，共六种。

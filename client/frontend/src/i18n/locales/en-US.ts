@@ -372,10 +372,8 @@ export const enUS = {
   },
   connections: {
     title: "Live connections",
-    summary:
-      "{{count}} connections · {{upload}} uploaded · {{download}} downloaded",
-    summaryFiltered:
-      "Showing {{count}} of {{total}} connections · {{upload}} uploaded · {{download}} downloaded",
+    summary: "{{count}} connections",
+    summaryFiltered: "Showing {{count}} of {{total}} connections",
     search: "Search targets, processes, rules, or proxy chains",
     loading: "Connecting to the mihomo connection stream…",
     requiresCore:
@@ -420,8 +418,6 @@ export const enUS = {
       all: "All",
       direct: "Direct",
       proxy: "Proxy",
-      selectors: "Filter proxy selectors",
-      selectorsPlaceholder: "Choose proxy selectors",
     },
     closeAll: {
       button: "Close current results",
@@ -431,9 +427,6 @@ export const enUS = {
       confirm: "Close current results",
     },
     states: {
-      offline: "Core stopped",
-      connecting: "Connecting",
-      live: "Live",
       reconnecting: "Reconnecting",
       error: "Stream lost",
     },
@@ -515,7 +508,8 @@ export const enUS = {
     selector: {
       title: "Proxy selectors",
       tools: "Proxy-selector shortcut toolbar",
-      search: "Search selectors or nodes",
+      search: "Search node names",
+      searchPlaceholder: "Search nodes: hk | jp & gm & !ev",
       outboundMode: "Switch outbound mode",
       outboundModes: {
         rule: "Rule mode",
@@ -538,7 +532,7 @@ export const enUS = {
       empty: "The final configuration contains no proxy selector",
       hiddenOnly:
         "No selector is currently visible. Use the subscription bar to show hidden selectors.",
-      noSearchResults: "No selector or node matches",
+      noSearchResults: "No nodes match",
       unknownType: "Unknown type",
       nodeCount: "{{count}}",
       defaultSelection: "Config default",
@@ -890,58 +884,35 @@ export const enUS = {
         help: {
           inline: {
             title: "Inline rule output",
-            description:
-              "Choose whether this policy group references rule sets through RULE-SET or expands local payload items directly into top-level rules.",
-            purpose:
-              "Explicitly choose between independently updated rule providers and fixed local rules in the final rule order.",
-            scenarios:
-              "Leave it off by default; enable it only when rules edited in Jeemi should be written directly into the final rules list.",
-            cautions:
-              "It cannot be enabled while an HTTP rule set is referenced. Changing it alters the final runtime configuration and still requires composition and core validation.",
+            purpose: "Choose whether this policy group references rule sets through RULE-SET or expands local payload items directly into top-level rules.",
+            scenarios: "Leave it off by default; enable it only when rules edited in Jeemi should be written directly into the final rules list.",
+            cautions: "It cannot be enabled while an HTTP rule set is referenced. Changing it alters the final runtime configuration and still requires composition and core validation.",
           },
           policy: {
             title: "Rule target direction",
-            description:
-              "A rule group declares proxy, direct, or block routing without binding a concrete selector inside the shared resource.",
-            purpose:
-              "Reuse one rule group across local configurations while each configuration chooses its own proxy outbound.",
-            scenarios:
-              "Proxy rules use the local configuration's proxy rule target; direct and block emit DIRECT and REJECT.",
-            cautions:
-              "When Proxy is selected, every local configuration referencing this group must configure a proxy rule target in the Rules panel.",
+            purpose: "Choose proxy, direct, or reject for a rule group. Each referencing local configuration supplies its proxy selector, so the group can be reused.",
+            scenarios: "Use when several local configurations share rules but need different proxy selectors.",
+            cautions: "When Proxy is selected, every local configuration referencing this group must configure a proxy rule target in the Rules panel.",
+            example: "Proxy uses the local configuration’s proxy selector; direct emits DIRECT and reject emits REJECT.",
           },
           ruleSets: {
             title: "Policy-group rule sets",
-            description:
-              "Reference local rule sets in order; this order becomes the rule output order inside the policy group.",
-            purpose:
-              "Keep rule content and ordering together while the owning policy group defines one consistent target.",
-            scenarios:
-              "Add, remove, or drag rule sets to change their matching priority within this policy group.",
-            cautions:
-              "Each rule set can belong to only one policy group. Inline accepts local payload only; HTTP rule sets must use RULE-SET.",
+            purpose: "Reference local rule sets in order; this order becomes the rule output order inside the policy group.",
+            scenarios: "Add, remove, or drag rule sets to change their matching priority within this policy group.",
+            cautions: "Each rule set can belong to only one policy group. Inline accepts local payload only; HTTP rule sets must use RULE-SET.",
           },
           lazy: {
             title: "Lazy health test",
-            description:
-              "Make a non-select selector run its health check when the selector is actually used instead of checking continuously.",
-            purpose:
-              "Reduce periodic probe requests from selectors that are not currently in use.",
-            scenarios:
-              "Enable it when many selectors exist and unused groups should not keep testing nodes.",
-            cautions:
-              "This is mihomo selector configuration and does not guarantee current node availability; behavior also depends on the test URL and interval.",
+            purpose: "Make a non-select selector run its health check when the selector is actually used instead of checking continuously.",
+            scenarios: "Enable it when many selectors exist and unused groups should not keep testing nodes.",
+            cautions: "This is mihomo selector configuration and does not guarantee current node availability; behavior also depends on the test URL and interval.",
           },
           namePatterns: {
             title: "Proxy name conditions",
-            description:
-              "Enter one name fragment per line. Plain terms include matches; terms beginning with ! exclude matches.",
-            purpose:
-              "Start with all direct subscription proxies and filter by protocol and name. Use the flag tool to insert an Emoji into a name condition.",
-            scenarios:
-              "For example, keep names containing “AI”, then exclude test nodes with “!test”.",
-            cautions:
-              "Positive terms use OR and every exclusion is applied last. Protocol and name conditions use AND; leaving all filters empty includes all direct subscription proxies, deduplicated by name.",
+            purpose: "Filter subscription nodes by name fragments and protocol. Enter one name condition per line; prefix exclusions with !. The flag picker inserts Emoji found in node names.",
+            scenarios: "Populate a selector by region, route, or purpose while removing unwanted nodes.",
+            cautions: "Positive terms use OR and every exclusion is applied last. Protocol and name conditions use AND; leaving all filters empty includes all direct subscription proxies, deduplicated by name.",
+            example: "Enter one condition per line, for example:\nAI\n!test\nKeep names containing AI, then exclude names containing test. This field uses lines, not the subscription search box’s & and | expressions.",
           },
         },
       },
@@ -967,25 +938,16 @@ export const enUS = {
         help: {
           noResolve: {
             title: "no-resolve for ipcidr",
-            description:
-              "Controls whether generated ipcidr rules append no-resolve and skip extra DNS resolution for an IP target.",
-            purpose:
-              "Avoid sending targets that are already IP addresses or CIDRs through an unnecessary domain-resolution path.",
-            scenarios:
-              "Enable it only for ipcidr behavior when the rule does not need target-domain resolution.",
-            cautions:
-              "Domain behavior does not support this parameter. Classical content declares it on each applicable IP-CIDR or other target-IP payload item.",
+            purpose: "Controls whether generated ipcidr rules append no-resolve and skip extra DNS resolution for an IP target.",
+            scenarios: "Enable it only for ipcidr behavior when the rule does not need target-domain resolution.",
+            cautions: "Domain behavior does not support this parameter. Classical content declares it on each applicable IP-CIDR or other target-IP payload item.",
           },
           payload: {
             title: "Local rule-set YAML",
-            description:
-              "Edit one mihomo YAML document containing only a top-level payload whose value is a plain-text rule list.",
-            purpose:
-              "Preserve rule order and editing comments while Jeemi validates structure and basic semantics when saving.",
-            scenarios:
-              "Use it to maintain local domain, ipcidr, or classical rule content inside Jeemi.",
-            cautions:
-              "Anchors, aliases, extra top-level fields, and bare lists are rejected. In classical content, put no-resolve on each rule item that needs it.",
+            purpose: "Edit a mihomo YAML rule list containing only a top-level payload. Order and comments are preserved, with structure and basic semantics checked on save.",
+            scenarios: "Use it to maintain local domain, ipcidr, or classical rule content inside Jeemi.",
+            cautions: "Anchors, aliases, extra top-level fields, and bare lists are rejected. In classical content, put no-resolve on each rule item that needs it.",
+            example: "Example for a domain rule set:\npayload:\n  - \"+.example.com\"",
           },
         },
         sourceTypes: {
@@ -1031,36 +993,21 @@ export const enUS = {
       help: {
         localMatch: {
           title: "Local MATCH override",
-          description:
-            "Choose where unmatched traffic goes in the local result: keep the subscription target, use Direct, or select an included and enabled local selector.",
-          purpose:
-            "Define a fallback independently of targets assigned to matching rules.",
-          scenarios:
-            "Adjust fallback while merging a subscription, or choose a new fallback after reconstructing its routing.",
-          cautions:
-            "Complete reconstruction requires an explicit MATCH target and at least one enabled local selector. Turning off local rules skips local MATCH. Subscription Fallback traffic runs afterwards; Keep means retaining the locally processed result.",
+          purpose: "Choose where unmatched traffic goes in the local result: keep the subscription target, use Direct, or select an included and enabled local selector.",
+          scenarios: "Adjust fallback while merging a subscription, or choose a new fallback after reconstructing its routing.",
+          cautions: "Complete reconstruction requires an explicit MATCH target and at least one enabled local selector. Turning off local rules skips local MATCH. Subscription Fallback traffic runs afterwards; Keep means retaining the locally processed result.",
         },
         proxySelector: {
           title: "Proxy rule target",
-          description:
-            "Provides one concrete selector for every proxy-directed rule group in this local configuration.",
-          purpose:
-            "Separate a reusable rule group's direction from the proxy outbound chosen by each local configuration.",
-          scenarios:
-            "Choose it for proxy-directed rule groups. Selector groups already target themselves.",
-          cautions:
-            "This target handles matching proxy rules independently of local MATCH. Change the target or disable dependent rule groups before disabling their selector. Subscription Fallback traffic can override MATCH afterwards.",
+          purpose: "Provides one concrete selector for every proxy-directed rule group in this local configuration.",
+          scenarios: "Choose it for proxy-directed rule groups. Selector groups already target themselves.",
+          cautions: "This target handles matching proxy rules independently of local MATCH. Change the target or disable dependent rule groups before disabling their selector. Subscription Fallback traffic can override MATCH afterwards.",
         },
         activation: {
           title: "Local rule switches",
-          description:
-            "The main switch controls local selectors, rules and providers. Each reference switch controls that group only in this local configuration.",
-          purpose:
-            "Temporarily skip all or selected groups while keeping references, order and composition modes.",
-          scenarios:
-            "Compare original subscription routing with local rules, or enable groups one at a time to troubleshoot routing.",
-          cautions:
-            "Custom fields still apply when the main switch is off. Re-enabling and saving validates the final configuration. Packages preserve these switches; other configurations keep their own choices.",
+          purpose: "Temporarily disable all or selected local policy groups while preserving references, order, and composition settings. The master switch controls local selectors, rules, and providers; individual switches affect only this configuration.",
+          scenarios: "Compare original subscription routing with local rules, or enable groups one at a time to troubleshoot routing.",
+          cautions: "Custom fields still apply when the main switch is off. Re-enabling and saving validates the final configuration. Packages preserve these switches; other configurations keep their own choices.",
         },
       },
     },
@@ -1108,331 +1055,189 @@ export const enUS = {
       ...enLocalConfigFieldHelp,
       generic: {
         title: "{{field}} field",
-        description:
-          "{{field}} is a mihomo configuration field. When enabled, this local configuration contributes it to final runtime composition.",
-        purpose:
-          "Supplement or override the field without modifying the immutable subscription source.",
-        scenarios:
-          "Use it when subscriptions omit the capability or several subscriptions should reuse one client-side setting.",
-        cautions:
-          "Meanings and accepted values follow the current official mihomo documentation. Jeemi validates YAML shape on save and the real final configuration before activation.",
+        purpose: "Enable {{field}} to supply its local value during final configuration composition, adding or overriding the subscription field while preserving the original content.",
+        scenarios: "Use it when subscriptions omit the capability or several subscriptions should reuse one client-side setting.",
+        cautions: "Meanings and accepted values follow the current official mihomo documentation. Jeemi validates YAML shape on save and the real final configuration before activation.",
       },
       "log-level": {
         title: "log-level",
-        description:
-          "Sets the minimum mihomo log level: silent, error, warning, info, or debug.",
-        purpose:
-          "Balance operational visibility, troubleshooting detail, and log noise.",
-        scenarios:
-          "Use info for normal operation and temporarily use debug while diagnosing core or rule behavior.",
-        cautions:
-          "Debug produces more data and may expose destination domains. Avoid leaving it enabled or sharing logs without review.",
+        purpose: "Sets the minimum mihomo log level: silent, error, warning, info, or debug.",
+        scenarios: "Keep the default silent level for normal use; temporarily raise it on Home to investigate core, DNS, or rule issues.",
+        cautions: "Managed by Home and locked in local configurations. silent hides the Logs page; debug is verbose and may contain destination domains and other details, so review logs before sharing.",
       },
       ipv6: {
         title: "ipv6 master switch",
-        description:
-          "Controls whether mihomo resolves and handles IPv6 traffic.",
-        purpose:
-          "Allow IPv6-capable networks and proxy nodes to use IPv6 addresses.",
-        scenarios:
-          "Enable it when the local network, DNS path, and proxies all have reliable IPv6 connectivity.",
-        cautions:
-          "Enabling it without a working IPv6 route can add timeouts. It is distinct from dns.ipv6.",
+        purpose: "Controls whether mihomo resolves and handles IPv6 traffic.",
+        scenarios: "Enable it when the local network, DNS path, and proxies all have reliable IPv6 connectivity.",
+        cautions: "Enabling it without a working IPv6 route can add timeouts. It is distinct from dns.ipv6.",
       },
       "dns-ipv6": {
         title: "dns.ipv6",
-        description:
-          "Controls whether the mihomo DNS module returns AAAA (IPv6) answers.",
-        purpose:
-          "Decide whether applications receive IPv6 addresses from DNS queries handled by mihomo.",
-        scenarios:
-          "Enable it when local and proxy paths support IPv6 and applications should use it.",
-        cautions:
-          "Use care when the top-level ipv6 switch or real network lacks IPv6, or applications may receive unreachable addresses.",
+        purpose: "Controls whether the mihomo DNS module returns AAAA (IPv6) answers.",
+        scenarios: "Enable it when local and proxy paths support IPv6 and applications should use it.",
+        cautions: "Use care when the top-level ipv6 switch or real network lacks IPv6, or applications may receive unreachable addresses.",
       },
       "sniffer-enable": {
         title: "sniffer.enable",
-        description:
-          "Enables domain sniffing from HTTP, TLS, or QUIC handshake metadata.",
-        purpose:
-          "Recover a domain for IP-only connections so domain routing rules can still match.",
-        scenarios:
-          "Common with TUN, transparent proxying, or applications that bypass system DNS.",
-        cautions:
-          "Sniffing reads protocol handshake metadata; it does not decrypt payloads. Enable it according to privacy requirements.",
+        purpose: "Identify domains from HTTP, TLS, or QUIC handshakes so IP-only connections can match domain rules.",
+        scenarios: "Common with TUN, transparent proxying, or applications that bypass system DNS.",
+        cautions: "Sniffing reads protocol handshake metadata; it does not decrypt payloads. Enable it according to privacy requirements.",
       },
       "sniffer-force-dns-mapping": {
         title: "sniffer.force-dns-mapping",
-        description:
-          "Forces sniffing attempts for connections that already have a DNS mapping.",
-        purpose:
-          "Improve domain identification consistency when an address came from DNS mapping.",
-        scenarios:
-          "Useful with Fake-IP or transparent proxying where stable domain-rule matching is required.",
-        cautions:
-          "It broadens sniffing. Use skip-domain or address exclusions for incompatible applications.",
+        purpose: "Forces sniffing attempts for connections that already have a DNS mapping.",
+        scenarios: "Useful with Fake-IP or transparent proxying where stable domain-rule matching is required.",
+        cautions: "It broadens sniffing. Use skip-domain or address exclusions for incompatible applications.",
       },
       "sniffer-parse-pure-ip": {
         title: "sniffer.parse-pure-ip",
-        description:
-          "Allows domain sniffing on pure-IP connections that have no DNS mapping.",
-        purpose:
-          "Recognize traffic that connects to a hard-coded IP but still carries a hostname in its handshake.",
-        scenarios:
-          "Use it for applications with built-in DNS or hard-coded endpoints.",
-        cautions:
-          "Not every protocol can be recognized, and sniff failure must not be treated as connection failure.",
+        purpose: "Allows domain sniffing on pure-IP connections that have no DNS mapping.",
+        scenarios: "Use it for applications with built-in DNS or hard-coded endpoints.",
+        cautions: "Not every protocol can be recognized, and sniff failure must not be treated as connection failure.",
       },
       "sniffer-override-destination": {
         title: "sniffer.override-destination",
-        description:
-          "Replaces the connection destination with the sniffed domain for later resolution and routing.",
-        purpose:
-          "Make routing and outbound resolution use the recovered domain.",
-        scenarios:
-          "Use it when domain rules and proxy-side DNS should consistently apply.",
-        cautions:
-          "Certificate pinning, unusual SNI, or intentional IP semantics may be incompatible.",
+        purpose: "Replaces the connection destination with the sniffed domain for later resolution and routing.",
+        scenarios: "Use it when domain rules and proxy-side DNS should consistently apply.",
+        cautions: "Certificate pinning, unusual SNI, or intentional IP semantics may be incompatible.",
       },
       "sniffer-http-ports": {
         title: "sniffer.sniff.HTTP.ports",
-        description:
-          "Limits HTTP Host sniffing to selected ports or port ranges.",
-        purpose: "Parse Host only on ports expected to carry HTTP.",
-        scenarios:
-          "Add ports such as 8080 or 8880 when HTTP is used outside port 80.",
-        cautions:
-          "Broad ranges add useless probing, while narrow ranges can miss non-standard services.",
+        purpose: "Limits HTTP Host sniffing to selected ports or port ranges.",
+        scenarios: "Add ports such as 8080 or 8880 when HTTP is used outside port 80.",
+        cautions: "Broad ranges add useless probing, while narrow ranges can miss non-standard services.",
       },
       "sniffer-http-override-destination": {
         title: "sniffer.sniff.HTTP.override-destination",
-        description:
-          "Controls destination replacement specifically for HTTP sniff results.",
-        purpose: "Refine the global override behavior for HTTP traffic.",
-        scenarios:
-          "Use it when HTTP should use recovered domains but TLS or QUIC should keep original targets.",
-        cautions:
-          "Replacement may change where DNS is resolved; verify destination connectivity after changes.",
+        purpose: "Controls destination replacement specifically for HTTP sniff results.",
+        scenarios: "Use it when HTTP should use recovered domains but TLS or QUIC should keep original targets.",
+        cautions: "Replacement may change where DNS is resolved; verify destination connectivity after changes.",
       },
       "sniffer-tls-ports": {
         title: "sniffer.sniff.TLS.ports",
-        description:
-          "Limits SNI sniffing from TLS ClientHello to selected ports.",
-        purpose: "Recognize domains for HTTPS and other TLS connections.",
-        scenarios:
-          "Use it for 443, 8443, or custom TLS ports that need domain routing.",
-        cautions:
-          "Encrypted ClientHello and similar mechanisms can make the domain unavailable.",
+        purpose: "Limits SNI sniffing from TLS ClientHello to selected ports.",
+        scenarios: "Use it for 443, 8443, or custom TLS ports that need domain routing.",
+        cautions: "Encrypted ClientHello and similar mechanisms can make the domain unavailable.",
       },
       "sniffer-tls-override-destination": {
         title: "sniffer.sniff.TLS.override-destination",
-        description:
-          "Controls destination replacement specifically for TLS sniff results.",
-        purpose: "Refine target replacement for TLS traffic.",
-        scenarios:
-          "Enable it when SNI should participate in final connection resolution.",
-        cautions:
-          "Pinned certificates or applications relying on the original IP may need exclusions.",
+        purpose: "Controls destination replacement specifically for TLS sniff results.",
+        scenarios: "Enable it when SNI should participate in final connection resolution.",
+        cautions: "Pinned certificates or applications relying on the original IP may need exclusions.",
       },
       "sniffer-quic-ports": {
         title: "sniffer.sniff.QUIC.ports",
-        description:
-          "Limits domain sniffing from initial QUIC handshakes to selected UDP ports.",
-        purpose: "Recognize domains for HTTP/3 and other QUIC traffic.",
-        scenarios:
-          "Use it when 443/UDP or custom QUIC ports require domain routing.",
-        cautions:
-          "Protocol and encryption changes can prevent recognition; avoid unnecessarily broad ranges.",
+        purpose: "Limits domain sniffing from initial QUIC handshakes to selected UDP ports.",
+        scenarios: "Use it when 443/UDP or custom QUIC ports require domain routing.",
+        cautions: "Protocol and encryption changes can prevent recognition; avoid unnecessarily broad ranges.",
       },
       "sniffer-quic-override-destination": {
         title: "sniffer.sniff.QUIC.override-destination",
-        description:
-          "Controls destination replacement specifically for QUIC sniff results.",
-        purpose: "Decide whether QUIC connections use the recovered domain.",
-        scenarios:
-          "Enable it when HTTP/3 needs domain routing and replacement is compatible.",
-        cautions:
-          "Disable it first when diagnosing UDP or QUIC connectivity regressions.",
+        purpose: "Controls destination replacement specifically for QUIC sniff results.",
+        scenarios: "Enable it when HTTP/3 needs domain routing and replacement is compatible.",
+        cautions: "Disable it first when diagnosing UDP or QUIC connectivity regressions.",
       },
       "sniffer-force-domain": {
         title: "sniffer.force-domain",
-        description:
-          "Lists domain patterns for which sniffing must be attempted.",
-        purpose: "Force sniffing for targets that default behavior might skip.",
-        scenarios:
-          "Use it when a domain depends on sniffing to match the correct rule.",
-        cautions:
-          "Follow mihomo domain wildcard syntax and avoid overly broad entries.",
+        purpose: "Lists domain patterns for which sniffing must be attempted.",
+        scenarios: "Use it when a domain depends on sniffing to match the correct rule.",
+        cautions: "Follow mihomo domain wildcard syntax and avoid overly broad entries.",
       },
       "sniffer-skip-domain": {
         title: "sniffer.skip-domain",
-        description: "Lists domain patterns that should not be sniffed.",
-        purpose:
-          "Bypass incompatible targets or ones whose handshake metadata should not be inspected.",
-        scenarios:
-          "Useful for smart-home, LAN, or specialized protocols that fail under sniffing.",
+        purpose: "Lists domain patterns that should not be sniffed.",
+        scenarios: "Useful for smart-home, LAN, or specialized protocols that fail under sniffing.",
         cautions: "Skipped traffic may only match IP-based rules.",
       },
       "sniffer-skip-src-address": {
         title: "sniffer.skip-src-address",
-        description: "Skips domain sniffing for selected source IPs or CIDRs.",
-        purpose:
-          "Disable sniffing for specified LAN devices or traffic origins.",
-        scenarios:
-          "Use it for an incompatible device or a separate privacy policy.",
-        cautions:
-          "Address changes can invalidate entries, while broad CIDRs can skip much more traffic than intended.",
+        purpose: "Skips domain sniffing for selected source IPs or CIDRs.",
+        scenarios: "Use it for an incompatible device or a separate privacy policy.",
+        cautions: "Address changes can invalidate entries, while broad CIDRs can skip much more traffic than intended.",
       },
       "sniffer-skip-dst-address": {
         title: "sniffer.skip-dst-address",
-        description:
-          "Skips domain sniffing for selected destination IPs or CIDRs.",
-        purpose:
-          "Avoid protocol probing for specified servers or address ranges.",
-        scenarios:
-          "Use it for LAN ranges, private services, or known incompatible targets.",
-        cautions:
-          "Skipped traffic must rely on existing DNS mappings or IP rules.",
+        purpose: "Skips domain sniffing for selected destination IPs or CIDRs.",
+        scenarios: "Use it for LAN ranges, private services, or known incompatible targets.",
+        cautions: "Skipped traffic must rely on existing DNS mappings or IP rules.",
       },
       "proxies-ip-version": {
         title: "Bulk proxies.ip-version override",
-        description:
-          "Sets the IP-version preference used to resolve every subscription proxy server.",
-        purpose: "Normalize IPv4/IPv6 resolution behavior across proxy nodes.",
-        scenarios:
-          "Use it when subscriptions are inconsistent or the current network favors one IP version.",
-        cautions:
-          "This is Jeemi composition metadata, not wildcard YAML; it is expanded onto real proxy nodes.",
+        purpose: "Sets the IP-version preference used to resolve every subscription proxy server.",
+        scenarios: "Use it when subscriptions are inconsistent or the current network favors one IP version.",
+        cautions: "This is Jeemi composition metadata, not wildcard YAML; it is expanded onto real proxy nodes.",
       },
       "proxies-udp": {
         title: "Bulk proxies.udp override",
-        description: "Sets UDP forwarding consistently across proxy nodes.",
-        purpose:
-          "Normalize node behavior for games, QUIC, DNS, and other UDP traffic.",
-        scenarios:
-          "Enable it when a subscription omits UDP and the protocol and server are known to support it.",
-        cautions:
-          "The field cannot add UDP capability to an incompatible protocol or server.",
+        purpose: "Set UDP forwarding consistently across nodes for gaming, QUIC, DNS, and other UDP traffic.",
+        scenarios: "Enable it when a subscription omits UDP and the protocol and server are known to support it.",
+        cautions: "The field cannot add UDP capability to an incompatible protocol or server.",
       },
       "proxies-interface-name": {
         title: "Bulk proxies.interface-name override",
-        description:
-          "Binds proxy-node dial traffic to a named system network interface.",
-        purpose:
-          "Control which physical or virtual interface establishes proxy connections.",
-        scenarios:
-          "Useful for multi-homed systems, policy routing, or avoiding TUN loops.",
-        cautions:
-          "The interface must exist on the current platform, so portable local configurations may need adjustment.",
+        purpose: "Binds proxy-node dial traffic to a named system network interface.",
+        scenarios: "Useful for multi-homed systems, policy routing, or avoiding TUN loops.",
+        cautions: "The interface must exist on the current platform, so portable local configurations may need adjustment.",
       },
       "proxies-routing-mark": {
         title: "Bulk proxies.routing-mark override",
-        description:
-          "Sets a Linux routing mark on underlying proxy-node connections.",
-        purpose:
-          "Let Linux policy-routing tables distinguish connections created by mihomo.",
-        scenarios:
-          "Use it for advanced transparent routing and loop prevention on Linux.",
-        cautions:
-          "It is primarily Linux-specific and must match actual system routing rules.",
+        purpose: "Sets a Linux routing mark on underlying proxy-node connections.",
+        scenarios: "Use it for advanced transparent routing and loop prevention on Linux.",
+        cautions: "It is primarily Linux-specific and must match actual system routing rules.",
       },
       "proxies-tfo": {
         title: "Bulk proxies.tfo override",
-        description:
-          "Controls TCP Fast Open consistently for proxy-node dials.",
-        purpose:
-          "Reduce TCP setup latency where both the system and server support TFO.",
-        scenarios:
-          "Use it after verifying path support and when optimizing short connections.",
-        cautions:
-          "Some networks and operating systems are incompatible; disable it when connections regress.",
+        purpose: "Control TCP Fast Open across nodes to reduce connection delays when supported by the system and server.",
+        scenarios: "Use it after verifying path support and when optimizing short connections.",
+        cautions: "Some networks and operating systems are incompatible; disable it when connections regress.",
       },
       "proxies-mptcp": {
         title: "Bulk proxies.mptcp override",
-        description:
-          "Controls Multipath TCP consistently for proxy-node dials.",
-        purpose:
-          "Use multiple paths where the operating system, network, and server support MPTCP.",
-        scenarios:
-          "Enable it only in a deliberately configured MPTCP environment.",
-        cautions:
-          "Platform and network support is limited, and incompatibility can prevent connections.",
+        purpose: "Control Multipath TCP across nodes to use multiple paths on compatible systems and networks.",
+        scenarios: "Enable it only in a deliberately configured MPTCP environment.",
+        cautions: "Platform and network support is limited, and incompatibility can prevent connections.",
       },
       "proxies-dialer-proxy": {
         title: "Bulk proxies.dialer-proxy override",
-        description:
-          "Makes every proxy node dial through a named proxy or group, forming a chain.",
-        purpose: "Apply a common entry or relay hop to subscription nodes.",
-        scenarios:
-          "Use it when every node must be reached through one fixed upstream.",
-        cautions:
-          "The target must exist and must not create a cycle; mistakes can disable all nodes.",
+        purpose: "Makes every proxy node dial through a named proxy or group, forming a chain.",
+        scenarios: "Use it when every node must be reached through one fixed upstream.",
+        cautions: "The target must exist and must not create a cycle; mistakes can disable all nodes.",
       },
       "proxies-client-fingerprint": {
         title: "Bulk proxies.client-fingerprint override",
-        description:
-          "Sets a TLS client fingerprint for compatible VMess, VLESS, Trojan, and AnyTLS nodes.",
-        purpose:
-          "Make TLS ClientHello resemble common browser implementations.",
-        scenarios:
-          "Use it when a server or network requires a particular uTLS fingerprint.",
-        cautions:
-          "Jeemi applies it only to protocols documented to support the field, not to unrelated nodes such as Shadowsocks.",
+        purpose: "Set TLS client fingerprints for compatible VMess, VLESS, Trojan, and AnyTLS nodes so handshakes resemble the selected browser.",
+        scenarios: "Use it when a server or network requires a particular uTLS fingerprint.",
+        cautions: "Jeemi applies it only to protocols documented to support the field, not to unrelated nodes such as Shadowsocks.",
       },
       "proxy-groups": {
         title: "proxy-groups policy groups",
-        description:
-          "Defines selectors, URL tests, failover, and load-balancing groups.",
-        purpose:
-          "Organize proxy nodes and other groups into switchable outbound policies.",
-        scenarios:
-          "Use groups to filter nodes by name or protocol and offer manual or automatic selection.",
-        cautions:
-          "Prefer references to centrally managed groups. Duplicate names and dependency cycles block final configuration activation.",
+        purpose: "Defines selectors, URL tests, failover, and load-balancing groups.",
+        scenarios: "Use groups to filter nodes by name or protocol and offer manual or automatic selection.",
+        cautions: "Prefer references to centrally managed groups. Duplicate names and dependency cycles block final configuration activation.",
       },
       "rule-providers": {
         title: "rule-providers rule sets",
-        description:
-          "Defines remote, file-backed, or inline rule collections referenced by RULE-SET rules.",
-        purpose:
-          "Reuse and independently update large domain, ipcidr, or classical rule sets.",
-        scenarios:
-          "Use them for ad blocking, regional routing, or application-specific routing lists.",
-        cautions:
-          "Behavior, format, and content must agree. mihomo handles remote downloads, cache paths, and refreshes.",
+        purpose: "Defines remote, file-backed, or inline rule collections referenced by RULE-SET rules.",
+        scenarios: "Use them for ad blocking, regional routing, or application-specific routing lists.",
+        cautions: "Behavior, format, and content must agree. mihomo handles remote downloads, cache paths, and refreshes.",
       },
       "local-strategy-groups": {
         title: "Local policy groups",
-        description:
-          "Local policy groups are either rule groups or selectors. Rule groups organize rule sets and proxy, direct, or block directions; selectors filter proxies and materialize a mihomo proxy-group.",
-        purpose:
-          "Reuse routing and proxy-selection logic across local configurations while stable IDs keep references intact after renaming.",
-        scenarios:
-          "Create a rule group to use the proxy rule target, route directly, or block. Create a selector to organize proxies by name or protocol, including flags inserted into name conditions.",
-        cautions:
-          "A rule group is not a mihomo outbound and does not bind a selector. The local configuration's rules.rules default selector resolves proxy routing; selector-owned rules target themselves.",
+        purpose: "Local policy groups are either rule groups or selectors. Rule groups organize rule sets and proxy, direct, or block directions; selectors filter proxies and materialize a mihomo proxy-group.",
+        scenarios: "Create a rule group to use the proxy rule target, route directly, or block. Create a selector to organize proxies by name or protocol, including flags inserted into name conditions.",
+        cautions: "A rule group is not a mihomo outbound and does not bind a selector. The local configuration's rules.rules default selector resolves proxy routing; selector-owned rules target themselves.",
       },
       "local-rule-sets": {
         title: "Local rule sets",
-        description:
-          "Local rule sets hold reusable domain, ipcidr, or classical content from an editable payload or a real HTTP source.",
-        purpose:
-          "Keep rule content separate from policy-group targets, output mode, and order to avoid duplicating it across local configurations.",
-        scenarios:
-          "Use them for ad blocking, direct-domain lists, regional routing, or application-specific routing rules.",
-        cautions:
-          "A local policy group must reference the rule set and behavior must match its content. Configure no-resolve on an ipcidr rule set or the applicable target-IP entries in classical content, never on a policy-group reference. Mutable HTTP content cannot be expanded inline before it is fetched and pinned.",
+        purpose: "Local rule sets hold reusable domain, ipcidr, or classical content from an editable payload or a real HTTP source.",
+        scenarios: "Use them for ad blocking, direct-domain lists, regional routing, or application-specific routing rules.",
+        cautions: "A local policy group must reference the rule set and behavior must match its content. Configure no-resolve on an ipcidr rule set or the applicable target-IP entries in classical content, never on a policy-group reference. Mutable HTTP content cannot be expanded inline before it is fetched and pinned.",
       },
       rules: {
         title: "Rules and subscription association",
-        description:
-          "Enable local rules, add policy groups in order, and prepend, append, or replace rules. Each reference can be disabled separately. After saving, select this configuration from the subscription card’s Associate local configuration menu.",
-        purpose:
-          "Restructure routing and selectors through the UI. Custom YAML fields handle other injected values; local scripts are an alternative at the same processing stage.",
-        scenarios:
-          "Use reusable rule groups for proxy, direct, or reject policies and selector groups for filtered subscription nodes.",
-        cautions:
-          "Complete reconstruction replaces source rules, selectors, rule providers and sub-rules together. It requires an included, enabled local selector and an explicit MATCH. Subscription Fallback traffic may override the local MATCH afterwards. Turning off local rules applies only custom fields and preserves references and composition modes. Every affected subscription is checked before saving, including core validation when available; failure preserves saved data and the draft.",
+        purpose: "Enable local rules, add policy groups in order, and prepend, append, or replace rules. Each reference can be disabled separately. After saving, select this configuration from the subscription card’s Associate local configuration menu.",
+        scenarios: "Use reusable rule groups for proxy, direct, or reject policies and selector groups for filtered subscription nodes.",
+        cautions: "Complete reconstruction replaces source rules, selectors, rule providers and sub-rules together. It requires an included, enabled local selector and an explicit MATCH. Subscription Fallback traffic may override the local MATCH afterwards. Turning off local rules applies only custom fields and preserves references and composition modes. Every affected subscription is checked before saving, including core validation when available; failure preserves saved data and the draft.",
       },
     },
     kinds: {
@@ -1709,10 +1514,11 @@ export const enUS = {
   },
   help: {
     section: {
-      description: "Description",
       purpose: "Purpose",
       scenarios: "When to use it",
-      cautions: "Cautions",
+      cautions: "Notes",
+      example: "Example",
+      cautionsAndExample: "Notes and example",
     },
     topics: {
       macNetworkAuthorization: enMacNetworkHelp,
@@ -1720,573 +1526,327 @@ export const enUS = {
       authorizationCleanup: enAuthorizationCleanupHelp,
       coreAuthorization: {
         title: "Unified Linux proxy authorization",
-        description:
-          "The system password dialog installs the authorization helper for core networking, privileged listener ports, and this account's DNS setup and cleanup on JeemiTun. Both proxy modes share the helper; ordinary starts, stops, and full restarts reuse it.",
-        purpose:
-          "Grant CAP_NET_ADMIN, CAP_NET_RAW, and CAP_NET_BIND_SERVICE to the verified mihomo core, and install four DNS permissions restricted to this account and JeemiTun. Jeemi remains unprivileged and directly manages the core process.",
-        scenarios:
-          "Confirm installation, an upgrade from an older authorization setup, or helper repair. A healthy helper grants permissions to newly installed, verified cores. Restarting Linux or Jeemi normally requires no password.",
-        cautions:
-          "The helper service waits at startup without starting the proxy or storing passwords. Other processes of the same account can also change JeemiTun DNS; other interfaces are outside this grant. Replaced cores need verification again; cancellation preserves the existing core. Requires a desktop Polkit agent and file capability support; systemd-resolved integration requires systemd 257 or newer. The password dialog may show the sealed helper's /proc/…/fd/… path.",
+        purpose: "Authorize mihomo network operations, low-port listening, and DNS changes and recovery for the current account on JeemiTun. Both proxy modes share one helper; the client stays unprivileged and manages the core directly.",
+        scenarios: "Confirm installation, an upgrade from an older authorization setup, or helper repair. A healthy helper grants permissions to newly installed, verified cores. Restarting Linux or Jeemi normally requires no password.",
+        cautions: "The helper service waits at startup without starting the proxy or storing passwords. Other processes of the same account can also change JeemiTun DNS; other interfaces are outside this grant. Replaced cores need verification again; cancellation preserves the existing core. Requires a desktop Polkit agent and file capability support; systemd-resolved integration requires systemd 257 or newer. The password dialog may show the sealed helper's /proc/…/fd/… path.",
       },
       runtimePreferences: {
         title: "Proxy runtime parameters",
-        description:
-          "Automatically saves outbound, proxy, listener, TUN, and safe runtime baseline settings, then injects them after subscription and local configuration composition.",
-        purpose:
-          "Gives mihomo an explicit, validated runtime baseline even when a subscription omits essential fields.",
-        scenarios:
-          "Adjust common network parameters, DNS resolvers, Fake IP, policy mappings, and hosts from Home without editing immutable subscription source text.",
-        cautions:
-          "Edits are validated before commit; a failed live apply keeps the previous healthy generation. Linux system proxy currently supports Ubuntu/GNOME and only affects apps that follow desktop proxy settings; terminal tools may not. Both Linux proxy modes request persistent authorization for the selected mihomo through the system password dialog on first start. The GUI stays unprivileged. Managed fields stay locked in the local configuration tree.",
+        purpose: "Manage and automatically save outbound mode, proxy, listener, TUN, and DNS settings, applying them to the final runtime configuration after subscription and local processing.",
+        scenarios: "Adjust common network parameters, DNS resolvers, Fake IP, policy mappings, and hosts from Home without editing immutable subscription source text.",
+        cautions: "Valid changes save automatically. If applying them fails, the previous working runtime configuration remains active and the reason is shown. Managed fields are locked in local configurations. Linux system proxy currently supports Ubuntu/GNOME and only applications that follow desktop proxy settings; terminal tools may not. Initial startup prepares system authorization as needed.",
       },
       runtimeBaseline: {
         title: "Safe runtime baseline",
-        description:
-          "Controls logging, process lookup, IPv6, proxy listening, LAN access, TUN automatic routes, interface detection, and route-exclusion ranges in one place.",
-        purpose:
-          "Completes missing subscription values and keeps system proxy and TUN behavior under one Jeemi-managed source.",
-        scenarios:
-          "Use it for listener port conflicts, trusted LAN sharing, or platform-specific TUN routing behavior.",
-        cautions:
-          "LAN access widens the listener boundary. Disabling automatic routes or interface detection can require manual route maintenance. Excluded ranges bypass TUN, so broad exclusions can bypass the proxy.",
+        purpose: "Set logging, process lookup, IPv6, proxy listeners, LAN access, and TUN routing in one place, supplying baseline values missing from subscriptions.",
+        scenarios: "Use it for listener port conflicts, trusted LAN sharing, or platform-specific TUN routing behavior.",
+        cautions: "LAN access widens the listener boundary. Disabling automatic routes or interface detection can require manual route maintenance. Excluded ranges bypass TUN, so broad exclusions can bypass the proxy.",
       },
       runtimeFindProcess: {
         title: "Process lookup",
-        description:
-          "Controls whether mihomo looks up the process that owns a connection. The default is strict: the core decides when lookup is needed. always forces lookup; off disables it.",
-        purpose:
-          "Provides the originating process for process rules and connection details. The Home selection is injected into the final runtime configuration.",
-        scenarios:
-          "Adjust it for PROCESS-NAME or PROCESS-PATH rules, or when diagnosing application connections. Usually keep strict.",
-        cautions:
-          "Results depend on platform support and permissions. off affects rules that need process information. This field is locked in local configurations; Home overrides any subscription or script value.",
+        purpose: "Find the process behind a connection for process rules and connection details. The default, strict, lets the core decide when lookup is needed; always looks up every connection and off disables lookup.",
+        scenarios: "Adjust it for PROCESS-NAME or PROCESS-PATH rules, or when diagnosing application connections. Usually keep strict.",
+        cautions: "Results depend on platform support and permissions. off affects rules that need process information. This field is locked in local configurations; Home overrides any subscription or script value.",
       },
       runtimeTunRouteExclude: {
         title: "TUN excluded subnets",
-        description:
-          "Manages tun.route-exclude-address as a YAML string array. When injection is enabled, entries can be appended uniquely or fully override the source; with auto-route enabled, matching ranges are omitted from TUN routes.",
-        purpose:
-          "Keeps LAN, management, or other destinations that require native system routing outside TUN capture.",
-        scenarios:
-          "Append local ranges to subscription exclusions or override them with an independent list for routers, NAS devices, enterprise networks, or another VPN.",
-        cautions:
-          "When disabled, the subscription value is preserved. Only CIDRs such as 192.168.0.0/16 or fc00::/7 are accepted. Public exclusions bypass mihomo entirely, so keep them narrow.",
+        purpose: "Keep selected CIDR ranges on native system routes instead of TUN. When enabled, append unique entries to or replace the subscription’s tun.route-exclude-address; this applies with auto-route.",
+        scenarios: "Append local ranges to subscription exclusions or override them with an independent list for routers, NAS devices, enterprise networks, or another VPN.",
+        cautions: "When disabled, the subscription value is preserved. Only CIDRs such as 192.168.0.0/16 or fc00::/7 are accepted. Public exclusions bypass mihomo entirely, so keep them narrow.",
+        example: "Example for appending a home network range:\n- \"192.168.0.0/16\"",
       },
       runtimeDns: {
         title: "DNS baseline",
-        description:
-          "Controls mihomo DNS service, IPv6 answers, enhanced mode, and Fake IP pools.",
-        purpose:
-          "Supplies working defaults when a subscription omits DNS and gives IPv4 and IPv6 Fake IP explicit, validated address pools.",
-        scenarios:
-          "Adjust it for local DNS listening, switching Fake IP or Redir Host, or an IPv4-only local network.",
-        cautions:
-          "The default binds only to 127.0.0.1:1053. Using 0.0.0.0 exposes DNS to the LAN. Fake IP ranges must remain valid CIDRs of the expected address family.",
+        purpose: "Manage the mihomo DNS listener, IPv6 answers, enhanced mode, and Fake IP pools, supplying defaults for subscriptions without DNS settings.",
+        scenarios: "Adjust it for local DNS listening, switching Fake IP or Redir Host, or an IPv4-only local network.",
+        cautions: "The default binds only to 127.0.0.1:1053. Using 0.0.0.0 exposes DNS to the LAN. Fake IP ranges must remain valid CIDRs of the expected address family.",
       },
       runtimeDnsMerge: {
         title: "DNS resource composition",
-        description:
-          "Each DNS list or mapping can be enabled independently, then append unique values to or fully override the matching subscription field.",
-        purpose:
-          "Preserves useful subscription policies while still supporting a deterministic Jeemi-managed result when needed.",
-        scenarios:
-          "Append public resolvers, add domain policies, replace subscription defaults with a fixed list, or disable a resource to preserve the subscription unchanged.",
-        cautions:
-          "Append keeps subscription entries first, adds Home values, and removes exact duplicates. Home wins same-key mapping conflicts. YAML is validated on blur and saved only after it passes.",
+        purpose: "Each DNS list or mapping can be enabled independently, then append unique values to or fully override the matching subscription field.",
+        scenarios: "Append public resolvers, add domain policies, replace subscription defaults with a fixed list, or disable a resource to preserve the subscription unchanged.",
+        cautions: "Append keeps subscription entries first, adds Home values, and removes exact duplicates. Home wins same-key mapping conflicts. YAML is validated on blur and saved only after it passes.",
       },
       runtimeDnsResolvers: {
         title: "DNS resolver lists",
-        description:
-          "Configures nameserver or proxy-server-nameserver as a YAML string array, with quick-add choices for common resolvers.",
-        purpose:
-          "Provides explicit upstream DNS services for ordinary domains and proxy-server domains.",
-        scenarios:
-          "Use it to add IP, DoH, DoT, or DoQ upstreams, or to keep proxy-server name resolution independent from the proxy chain.",
-        cautions:
-          "An enabled nameserver needs at least one entry. Disabling a resource stops injecting it. Proxy-server policy is effective only when proxy-server-nameserver has a usable value.",
+        purpose: "Set upstream DNS separately for ordinary domains and proxy server domains using YAML string lists. The plus button inserts common resolvers.",
+        scenarios: "Use it to add IP, DoH, DoT, or DoQ upstreams, or to keep proxy-server name resolution independent from the proxy chain.",
+        cautions: "An enabled nameserver needs at least one entry. Disabling a resource stops injecting it. Proxy-server policy is effective only when proxy-server-nameserver has a usable value.",
+        example: "Example nameserver list:\n- \"223.5.5.5\"\n- \"https://dns.alidns.com/dns-query\"",
       },
       runtimeFakeIpFilter: {
         title: "Fake IP filter list",
-        description:
-          "Manages domain matchers that should not receive Fake IP answers as a YAML string array.",
-        purpose:
-          "Lets LAN, discovery, and Fake-IP-incompatible domains continue to receive real DNS results.",
-        scenarios:
-          "Adjust it when local domains, discovery, games, or specific applications resolve incorrectly in Fake IP mode.",
-        cautions:
-          "Disabling the resource preserves the subscription fake-ip-filter and mode. Overly broad matchers reduce Fake IP coverage.",
+        purpose: "Choose domains that receive real addresses instead of Fake IP, for LAN services or applications incompatible with Fake IP.",
+        scenarios: "Adjust it when local domains, discovery, games, or specific applications resolve incorrectly in Fake IP mode.",
+        cautions: "Disabling the resource preserves the subscription fake-ip-filter and mode. Overly broad matchers reduce Fake IP coverage.",
       },
       runtimeDnsPolicies: {
         title: "DNS resolver policy maps",
-        description:
-          "Uses a YAML map to assign one or more resolvers to domains or rule collections.",
-        purpose:
-          "Routes different domains to different upstreams and separately controls normal and proxy-server resolution policies.",
-        scenarios:
-          "Use it for regional DNS routing, intranet domains, or dedicated proxy-server name resolution.",
-        cautions:
-          "Only maps of strings or string arrays without anchors or aliases are accepted. Disabling a resource never injects or clears the subscription field.",
+        purpose: "Map domains or rule collections to DNS upstreams in YAML, with separate policies for ordinary domains and proxy server domains.",
+        scenarios: "Use it for regional DNS routing, intranet domains, or dedicated proxy-server name resolution.",
+        cautions: "Only maps of strings or string arrays without anchors or aliases are accepted. Disabling a resource never injects or clears the subscription field.",
+        example: "Send an internal domain to internal DNS:\n\"+.corp.example\": \"192.168.1.1\"\nReplace the domain and DNS address with your actual values.",
       },
       runtimeHosts: {
         title: "hosts mapping",
-        description:
-          "The header switch reveals the editor; when enabled, Home manages the top-level hosts map and injects use-hosts: true into DNS.",
-        purpose:
-          "Pins a domain to one or more addresses and composes those entries with subscription hosts using the selected mode.",
-        scenarios:
-          "Use it for local development, intranet services, or a temporary DNS override.",
-        cautions:
-          "Only YAML maps without anchors or aliases are accepted, and values must be strings or string lists. Turning it off preserves subscription use-hosts and hosts instead of forcing them off.",
+        purpose: "Resolve domains to fixed addresses. Enabling this opens a YAML editor, combines top-level hosts using the selected strategy, and sets dns.use-hosts: true.",
+        scenarios: "Use it for local development, intranet services, or a temporary DNS override.",
+        cautions: "Only YAML maps without anchors or aliases are accepted, and values must be strings or string lists. Turning it off preserves subscription use-hosts and hosts instead of forcing them off.",
+        example: "Local development example:\n\"app.test\": \"127.0.0.1\"",
       },
       runtimeLanBypass: {
         title: "LAN direct-route protection",
-        description:
-          "Jeemi places default DIRECT rules for common loopback, private, link-local, and multicast destinations at the start of final rules and lets you edit them.",
-        purpose:
-          "Prevents an incomplete or badly ordered subscription from sending local and LAN access through a proxy.",
-        scenarios:
-          "The defaults cover routers, NAS devices, intranet services, loopback addresses, and discovery protocols; developers can adjust or clear them for debugging networks.",
-        cautions:
-          "Only DOMAIN, DOMAIN-SUFFIX, IP-CIDR, and IP-CIDR6 rules targeting DIRECT are accepted. An empty list disables the prefix. Restoring defaults still requires Save.",
+        purpose: "Prepend editable DIRECT rules to the final rules list, keeping local, LAN, and device discovery traffic from being sent through a proxy.",
+        scenarios: "The defaults cover routers, NAS devices, intranet services, loopback addresses, and discovery protocols; developers can adjust or clear them for debugging networks.",
+        cautions: "Only DOMAIN, DOMAIN-SUFFIX, IP-CIDR, and IP-CIDR6 rules targeting DIRECT are accepted. An empty list disables the prefix. Restoring defaults still requires Save.",
       },
       runtimeListener: {
         title: "External proxy listener",
-        description:
-          "Selects the HTTP, SOCKS, or Mixed proxy listener and port exposed by Jeemi.",
-        purpose:
-          "Keeps the operating-system proxy and manually configured applications pointed at one explicit local listener.",
-        scenarios:
-          "Use it to support a required proxy protocol or resolve a local port conflict with another application.",
-        cautions:
-          "The port must be between 1 and 65535 and not already in use. Changes regenerate the final runtime configuration and become active only after validation and hot reload succeed.",
+        purpose: "Choose the local HTTP, SOCKS, or Mixed proxy listener and port used by the system proxy and manually configured applications.",
+        scenarios: "Use it to support a required proxy protocol or resolve a local port conflict with another application.",
+        cautions: "The port must be between 1 and 65535 and not already in use. Changes regenerate the final runtime configuration and become active only after validation and hot reload succeed.",
       },
       runtimeLanAccess: {
         title: "Allow LAN connections",
-        description:
-          "Controls whether the proxy listener binds only to loopback or accepts connections from LAN devices.",
-        purpose:
-          "Lets other devices on a trusted local network use Jeemi's proxy port when explicitly needed.",
-        scenarios:
-          "Enable it to provide a temporary proxy to a phone, tablet, or another computer after defining the network boundary.",
-        cautions:
-          "This exposes the proxy port to the LAN. Pair it with authentication, firewall rules, and a trusted network; avoid enabling it on public networks.",
+        purpose: "Controls whether the proxy listener binds only to loopback or accepts connections from LAN devices.",
+        scenarios: "Enable it to provide a temporary proxy to a phone, tablet, or another computer after defining the network boundary.",
+        cautions: "This exposes the proxy port to the LAN. Pair it with authentication, firewall rules, and a trusted network; avoid enabling it on public networks.",
       },
       trafficChart: {
         title: "Live traffic chart",
-        description:
-          "Receives real upload, download, and cumulative traffic from mihomo's /traffic WebSocket once per second and plots the last minute.",
-        purpose:
-          "Quickly confirms whether traffic is flowing and how upstream and downstream rates change over time.",
-        scenarios:
-          "Use it during downloads, video, speed tests, or when a started proxy appears to carry no traffic.",
-        cautions:
-          "Data is marked live only while the control API is healthy. A disconnected curve is marked stale and reconnects automatically; Jeemi never fills gaps with simulated traffic.",
+        purpose: "Show live mihomo upload and download rates, totals, and the last minute’s trend to see whether traffic is flowing.",
+        scenarios: "Use it during downloads, video, speed tests, or when a started proxy appears to carry no traffic.",
+        cautions: "Data is marked live only while the control API is healthy. A disconnected curve is marked stale and reconnects automatically; Jeemi never fills gaps with simulated traffic.",
       },
       home: {
         title: "Home",
-        description:
-          "Shows core state, memory, uptime, and live traffic, with proxy start/stop controls and outbound, listener, and DNS parameters.",
-        purpose:
-          "Provides a quick client, core, and network check for routine use and troubleshooting.",
-        scenarios:
-          "Start here after launch, around core start or stop actions, or while diagnosing network problems.",
-        cautions:
-          "Opening Home does not change system networking. Valid parameter edits save automatically; network operations take effect only after core health checks. Failed applies retain the previous active configuration and show the reason.",
+        purpose: "Shows core state, memory, uptime, and live traffic, with proxy start/stop controls and outbound, listener, and DNS parameters.",
+        scenarios: "Start here after launch, around core start or stop actions, or while diagnosing network problems.",
+        cautions: "Opening Home does not change system networking. Valid parameter edits save automatically; network operations take effect only after core health checks. Failed applies retain the previous active configuration and show the reason.",
       },
       processMemory: {
         title: "Process memory",
-        description:
-          "Shows the client, web runtime, mihomo, and their combined memory in binary units such as MiB. The client includes Jeemi, its authorization helper, and related support processes. The authorization helper reports its own memory and the managed mihomo memory.",
-        purpose:
-          "Tracks the UI and proxy core separately. The web runtime includes only this Jeemi instance's WebView2, WebKitGTK, or WebKit processes, excluding other applications. The helper can collect these measurements when the client cannot read them.",
-        scenarios:
-          "Compare memory before and after opening pages, loading subscriptions, hiding the window, or starting and stopping the proxy.",
-        cautions:
-          "Windows prefers private working set. Linux and macOS report resident memory (RSS), which can count shared pages more than once, so the total is not unique physical memory usage. An unreachable or incompatible helper, or uncertain process ownership, produces a dash. The total requires all three complete measurements; missing values are never treated as zero.",
+        purpose: "Show memory for the client, web runtime, mihomo, and their total in binary units such as MiB. Client memory includes Jeemi, the authorization helper, and related helpers. Web runtime memory includes only Jeemi’s WebView2/WebKitGTK/WebKit processes, excluding other applications.",
+        scenarios: "Compare memory before and after opening pages, loading subscriptions, hiding the window, or starting and stopping the proxy.",
+        cautions: "Windows prefers private working set. Linux and macOS report resident memory (RSS), which can count shared pages more than once, so the total is not unique physical memory usage. An unreachable or incompatible helper, or uncertain process ownership, produces a dash. The total requires all three complete measurements; missing values are never treated as zero.",
       },
       subscriptions: {
         title: "Subscriptions",
-        description:
-          "Adds and fetches subscriptions from URLs, configuration files, or QR codes, then manages source revisions and mutually exclusive local configuration or local script associations.",
-        purpose:
-          "Brings different subscription sources into Jeemi with validation, traceability, and failure-safe retention.",
-        scenarios:
-          "Use it to import a subscription, fetch it again, inspect its source, or assign a local override per subscription.",
-        cautions:
-          "Subscription URLs and source text can contain credentials, and failed updates must not replace the current revision. The offline selector is a composition preview, never a claimed live mihomo state.",
+        purpose: "Adds and fetches subscriptions from URLs, configuration files, or QR codes, then manages source revisions and mutually exclusive local configuration or local script associations.",
+        scenarios: "Use it to import a subscription, fetch it again, inspect its source, or assign a local override per subscription.",
+        cautions: "Subscription URLs and source text can contain credentials, and failed updates must not replace the current revision. The offline selector is a composition preview, never a claimed live mihomo state.",
       },
       config: {
         title: "Config",
-        description:
-          "Organises local scripts, local configurations, local policy groups, and local rule sets into reusable subscription processing resources.",
-        purpose:
-          "Adjust subscriptions with structured fields or synchronous main(config) scripts, and maintain policy groups and rule content in one place.",
-        scenarios:
-          "Use it when subscription content cannot cover local network needs or different subscriptions require different overrides.",
-        cautions:
-          "Each subscription can associate at most one local configuration or script; the two are mutually exclusive. Saving is not activation, referenced resources cannot be deleted, and final runtime configurations still require validation.",
+        purpose: "Manage local configurations, main(config) scripts, policy groups, and rule sets so subscriptions can share field changes, node transformations, and routing rules.",
+        scenarios: "Use it when subscription content cannot cover local network needs or different subscriptions require different overrides.",
+        cautions: "Each subscription can associate at most one local configuration or script; the two are mutually exclusive. Saving is not activation, referenced resources cannot be deleted, and final runtime configurations still require validation.",
       },
       connections: {
         title: "Connections",
-        description:
-          "Shows live destinations, processes, matched rules, actual outbounds, and traffic. Click a target or process name to inspect its full path, addresses, and proxy chain.",
-        purpose:
-          "Explains current traffic routing and helps diagnose rule matches, unexpected access, or performance issues.",
-        scenarios:
-          "Use it for failed requests, unexpected traffic, or closing one connection or the currently filtered result set.",
-        cautions:
-          "Rule sets show their provider name, and MATCH shows MATCH. Other rules show the type and payload returned by the core, falling back to inline if the payload is absent; missing original flags cannot be reconstructed. Process paths may be unavailable. Details retain the last snapshot when a connection ends or its stream disconnects. Domains, IPs, and paths may be private; bulk close requires confirmation and only affects the current results.",
+        purpose: "Shows live destinations, processes, matched rules, actual outbounds, and traffic. Click a target or process name to inspect its full path, addresses, and proxy chain.",
+        scenarios: "Investigate failed requests, unexpected traffic, or connections through a selector. Choose all, direct, or proxy, then narrow results by target, process, rule, or selector name.",
+        cautions: "Connection data is fetched only while this page and the window are visible. Leaving or hiding stops requests; returning fetches fresh data. Rule sets show their provider name, MATCH shows MATCH, and other rules show their type and payload, or inline when the payload is absent. Process paths may be unavailable. Ended or disconnected details retain the last snapshot; closing is disabled when the stream is lost. Domains, IPs, and paths may be private; bulk close requires confirmation and affects only current results.",
       },
       logs: {
         title: "Logs",
-        description:
-          "Streams raw logs from the current mihomo core through its control API.",
-        purpose:
-          "Quickly inspect rule matches, DNS, connections, and internal core activity with instant in-page search.",
-        scenarios:
-          "Use it to diagnose routing, resolution, or rule issues, or temporarily raise the log level while observing behavior.",
-        cautions:
-          "Only new entries received while the page is active are shown; no history is stored. Output is displayed exactly as mihomo sends it and may include domains, IPs, and other runtime data. Debug output is high-volume and is not recommended for long-term use.",
+        purpose: "View and search live, unmodified mihomo logs to inspect DNS, connections, rule matches, and core activity.",
+        scenarios: "Use it to diagnose routing, resolution, or rule issues, or temporarily raise the log level while observing behavior.",
+        cautions: "Only new entries received while the page is active are shown; no history is stored. Output is displayed exactly as mihomo sends it and may include domains, IPs, and other runtime data. Debug output is high-volume and is not recommended for long-term use.",
       },
       tools: {
         title: "Tools",
-        description:
-          "Collects focused utilities such as IP lookup, streaming unlock tests, and DNS lookup.",
-        purpose:
-          "Checks the active egress and DNS result without entering a complex configuration workflow.",
-        scenarios:
-          "Use it to verify proxy egress, regional availability, or DNS resolution.",
-        cautions:
-          "Lookups and unlock tests contact external services and may disclose the egress IP or queried domain. Data source, timeout, and failure state must be visible.",
+        purpose: "Use independent collapsible tools. DNS lookup is currently available to compare answers across servers and egress routes.",
+        scenarios: "Investigate different DNS answers through local and proxy routes, failed access, or missing records.",
+        cautions: "DNS lookups send the domain to the selected servers. Tools not yet implemented remain unavailable; each tool shows its route, timeout, and failure details.",
       },
       dnsQuery: enDNSQueryHelp,
       homeSettings: {
         title: "Home settings",
-        description:
-          "Manages the interface theme, language, Jeemi update checks, and mihomo core version selection.",
-        purpose:
-          "Keeps client-wide interface and system preferences in one place.",
-        scenarios:
-          "Use it to change display preferences, check for client updates, or select an official core version.",
-        cautions:
-          "Theme and language are stored by the frontend after confirmation. Core downloads and removals run immediately; the active version is persisted by Go only after confirmation.",
+        purpose: "Manages the interface theme, language, Jeemi update checks, and mihomo core version selection.",
+        scenarios: "Use it to change display preferences, check for client updates, or select an official core version.",
+        cautions: "Theme and language are stored by the frontend after confirmation. Core downloads and removals run immediately; the active version is persisted by Go only after confirmation.",
       },
       subscriptionSettings: {
         title: "Subscription settings",
-        description:
-          "Manages subscription fetching, node-card density, and the all-node delay-test concurrency limit.",
-        purpose:
-          "Adapts subscription freshness, information density, and test load to different devices and workflows.",
-        scenarios:
-          "Use it to keep fetching manual, change node-card density, or limit simultaneous tests for large node lists.",
-        cautions:
-          "Go saves density and concurrency atomically. On-launch fetching remains disabled until scheduling and failure rollback are implemented.",
+        purpose: "Manage node card density, test concurrency, and connection reset behavior after switching to suit browsing preferences and network conditions.",
+        scenarios: "Use it to keep fetching manual, change node-card density, or limit simultaneous tests for large node lists.",
+        cautions: "Settings are saved on confirmation. Higher test concurrency creates more network requests; resetting connections interrupts the affected sessions. Automatic fetching at startup is not available yet.",
       },
       emptySettings: {
         title: "Page settings",
-        description:
-          "This is the current navigation page's dedicated settings entry, but no options are defined yet.",
-        purpose:
-          "Keeps a stable, consistent settings entry for every primary feature.",
-        scenarios:
-          "Add options here only when a real page-specific display or behavior preference appears.",
-        cautions:
-          "Do not invent non-functional switches to fill space. New business settings need a default, persistence location, and rollback behavior.",
+        purpose: "Show options for the current page. This page has no separate settings yet.",
+        scenarios: "Check here for display or behavior preferences for this page. Return to the page when there are no options to adjust.",
+        example: "For example, change the theme or language in Home settings; these preferences apply throughout the client.",
       },
       appUpdate: {
         title: "Jeemi update checks",
-        description:
-          "Compares against the latest stable release in bluevava/jeemi-desktop and asks before downloading and updating.",
-        purpose: "Keeps users informed about security fixes and new features.",
-        scenarios:
-          "Check manually from the About card or Home settings. If no newer release exists, Jeemi reports that you are up to date.",
-        cautions:
-          "After confirmation, Jeemi downloads the matching package, verifies its digest, stops the proxy, replaces the client, and restarts. Download and verification can be cancelled; replacement failures trigger restoration of previous files. The installation must be writable. Installed authorization helpers still use the existing authorization flow for upgrades.",
+        purpose: "Compares against the latest stable release in bluevava/jeemi-desktop and asks before downloading and updating.",
+        scenarios: "Check manually from the About card or Home settings. If no newer release exists, Jeemi reports that you are up to date.",
+        cautions: "After confirmation, Jeemi downloads the matching package, verifies its digest, stops the proxy, replaces the client, and restarts. Download and verification can be cancelled; replacement failures trigger restoration of previous files. The installation must be writable. Installed authorization helpers still use the existing authorization flow for upgrades.",
       },
       coreVersion: {
         title: "mihomo version",
-        description:
-          "Checks official mihomo releases and selects a verified version for Jeemi.",
-        purpose: "Makes compatibility, feature, and rollback choices explicit.",
-        scenarios:
-          "Use it to install a core, upgrade, or roll back after a compatibility issue.",
-        cautions:
-          "Online installation accepts only exact platform matches from official stable releases with SHA-256. Manual imports have no publisher identity verification and should use trusted official files only. Neither path switches versions automatically; choose one and confirm at the bottom of the page.",
+        purpose: "Checks official mihomo releases and selects a verified version for Jeemi.",
+        scenarios: "Use it to install a core, upgrade, or roll back after a compatibility issue.",
+        cautions: "Online installation accepts only exact platform matches from official stable releases with SHA-256. Manual imports have no publisher identity verification and should use trusted official files only. Neither path switches versions automatically; choose one and confirm at the bottom of the page.",
       },
       coreFiles: {
         title: "mihomo core files",
-        description:
-          "Manages versions downloaded and verified by Jeemi below jeemi_data/core/mihomo.",
-        purpose:
-          "Keeps multiple versions available for upgrade testing, compatibility rollback, and disk cleanup.",
-        scenarios:
-          "Use it to inspect the actual core path, remove unused versions, or manually back up diagnostic information.",
-        cautions:
-          "The active version cannot be removed. When an imported version cannot be recognised, Jeemi uses a content-derived unknown-* directory. Do not replace the executable or metadata.json directly, or integrity checks will mark that version unusable.",
+        purpose: "Manage mihomo version files saved and verified by Jeemi, keeping multiple versions for upgrades, rollback, and disk cleanup.",
+        scenarios: "Use it to inspect the actual core path, remove unused versions, or manually back up diagnostic information.",
+        cautions: "The active version cannot be removed. When an imported version cannot be recognised, Jeemi uses a content-derived unknown-* directory. Do not replace the executable or metadata.json directly, or integrity checks will mark that version unusable.",
       },
       geoData: {
         title: "GEO database management",
-        description:
-          "Manages GeoIP MetaDB/DAT, GeoSite DAT, and ASN MMDB independently while injecting the format and loader as Jeemi-reserved runtime parameters.",
-        purpose:
-          "Lets incomplete subscriptions use GEOIP, GEOSITE, or IP-ASN rules with databases verified by a publisher digest when available and by the selected mihomo core.",
-        scenarios:
-          "Use it to change GeoIP formats, update databases, use a trusted custom HTTPS mirror, or import local databases on an offline device.",
-        cautions:
-          "Files are never replaced beneath a running mihomo process. Updates wait for a full restart and can be rolled back. A custom source without a publisher digest proves readability and content integrity only, not publisher identity.",
+        purpose: "Manage and validate GeoIP MetaDB/DAT, GeoSite DAT, and ASN MMDB databases for GEOIP, GEOSITE, and IP-ASN rules, including format and loader preferences.",
+        scenarios: "Use it to change GeoIP formats, update databases, use a trusted custom HTTPS mirror, or import local databases on an offline device.",
+        cautions: "Files are never replaced beneath a running mihomo process. Updates wait for a full restart and can be rolled back. A custom source without a publisher digest proves readability and content integrity only, not publisher identity.",
       },
       subscriptionFetch: {
         title: "Subscription fetch method",
-        description:
-          "Defines whether updates are triggered manually, at launch, or by a future scheduled job.",
-        purpose:
-          "Balances subscription freshness, startup speed, and control over network requests.",
-        scenarios:
-          "Adjust it when subscriptions have different update needs or startup requests should be avoided.",
-        cautions:
-          "Fetching needs cancellation, timeouts, and size limits. These choices show the plan only and are not persisted yet.",
+        purpose: "Choose when to fetch subscriptions to balance freshness and network requests. This option is not enabled yet.",
+        scenarios: "Adjust it when subscriptions have different update needs or startup requests should be avoided.",
+        cautions: "This option does not currently trigger automatic updates. Fetch the subscription manually from the Subscriptions page when needed.",
       },
       subscriptionDelayTest: {
         title: "Node-test concurrency",
-        description:
-          "Controls concurrent mihomo delay requests during batch testing. With a quick search, only nodes in the search results are tested; an empty search tests all nodes. Remaining nodes stay in one Jeemi queue.",
-        purpose:
-          "Balances completion speed against local, network, and provider load while preventing repeated clicks from creating overlapping queues.",
-        scenarios:
-          "Lower it for large node lists, slower devices, or provider concurrency limits; raise it moderately for faster completion.",
-        cautions:
-          "The allowed range is 1–50 and the default is 8. Matching a selector name includes all its real nodes; duplicates are tested once and no matches disables testing. Tests make real outbound requests. The queue uses the search results at the time of the click; editing the search does not change an active queue. Batch and per-node entries stay locked until completion.",
+        purpose: "Limit concurrent batch node tests. Test matching nodes when a search is active, or all nodes otherwise. Remaining tests stay queued; repeated clicks do not create overlapping queues.",
+        scenarios: "Lower it for large node lists, slower devices, or provider concurrency limits; raise it moderately for faster completion.",
+        cautions: "The allowed range is 1–50 and the default is 8. Search matches node names only; duplicates are tested once and no matches disables testing. Tests make real outbound requests. The queue uses the search results at the time of the click; editing the search does not change an active queue. Batch and per-node entries stay locked until completion.",
       },
       subscriptionConnectionReset: {
         title: "Reset connections on switch",
-        description:
-          "Chooses whether established connections are closed after a node or fallback traffic change takes effect on the Subscriptions page.",
-        purpose:
-          "Moves long-lived traffic to the new route promptly while limiting how much active traffic is interrupted.",
-        scenarios:
-          "Off preserves sessions. Selector matches the node's selector exactly in connection chains; fallback changes match the previously active terminal-rule target. All resets every existing connection.",
-        cautions:
-          "Selector is the default. After a successful rule-mode reload changes the effective target, Jeemi reads current connections and closes matching IDs. No override matches the original target, and Direct matches DIRECT. Restarts, failed reloads and pending changes do not trigger extra closures. Applications may reconnect; All also interrupts unrelated routes.",
+        purpose: "After a node or fallback change takes effect, close existing connections within the selected scope so applications reconnect through the new route.",
+        scenarios: "Off preserves sessions. Selector matches the node's selector exactly in connection chains; fallback changes match the previously active terminal-rule target. All resets every existing connection.",
+        cautions: "Selector is the default. After a successful rule-mode reload changes the effective target, Jeemi reads current connections and closes matching IDs. No override matches the original target, and Direct matches DIRECT. Restarts, failed reloads and pending changes do not trigger extra closures. Applications may reconnect; All also interrupts unrelated routes.",
       },
       subscriptionImport: {
         title: "Subscription import",
-        description:
-          "Imports mihomo, Surge or universal URI subscriptions from an http/https URL, file or QR code and preserves the original text.",
-        purpose:
-          "Normalises different sources into traceable, immutable subscription revisions for later composition and runtime validation.",
-        scenarios:
-          "Use it for a first subscription, a YAML/JSON/TXT/CONF file, or a provider-supplied subscription QR code.",
-        cautions:
-          "Surge/URI nodes and DNS are converted before local processing and runtime preferences. Source routing rules are omitted; unsupported nodes have explanations. Source text is immutable and conversion or validation failures preserve the current revision.",
+        purpose: "Import mihomo, Surge, or common URI subscriptions from HTTP(S) URLs, files, or QR codes, preserving traceable source revisions.",
+        scenarios: "Use it for a first subscription, a YAML/JSON/TXT/CONF file, or a provider-supplied subscription QR code.",
+        cautions: "Surge/URI nodes and DNS are converted before local processing and runtime preferences. Source routing rules are omitted; unsupported nodes have explanations. Source text is immutable and conversion or validation failures preserve the current revision.",
       },
       subscriptionQRCode: {
         title: "QR subscription import",
-        description:
-          "Recognises QR codes from a selected image or an immediate desktop screenshot, then fetches http/https content as a subscription URL. Linux Wayland uses the image supplied by the desktop screenshot service.",
-        purpose:
-          "Imports long addresses that are awkward to type without retaining screenshots or QR images in the data directory.",
-        scenarios:
-          "Use it when a provider offers only a QR code or when the code is visible in a browser, chat app, or another display.",
-        cautions:
-          "Jeemi temporarily hides and restores its window when capture finishes or is cancelled. Linux Wayland may show a desktop screenshot confirmation; the desktop decides whether permission is remembered. This requires no administrator password and is separate from mihomo network authorization. macOS may require Screen Recording permission. Images are decoded locally; temporary portal screenshots are cleaned up after reading, never stored in Jeemi data or uploaded. Only a valid subscription URL is fetched. Selecting an existing image needs only file read access.",
+        purpose: "Read a QR code from an image or desktop capture and fetch its HTTP(S) address as a subscription. Images are used for local recognition without long-term storage.",
+        scenarios: "Use it when a provider offers only a QR code or when the code is visible in a browser, chat app, or another display.",
+        cautions: "Jeemi temporarily hides and restores its window when capture finishes or is cancelled. Linux Wayland may show a desktop screenshot confirmation; the desktop decides whether permission is remembered. This requires no administrator password and is separate from mihomo network authorization. macOS may require Screen Recording permission. Images are decoded locally; temporary portal screenshots are cleaned up after reading, never stored in Jeemi data or uploaded. Only a valid subscription URL is fetched. Selecting an existing image needs only file read access.",
       },
       subscriptionRawText: {
         title: "Subscription source",
-        description:
-          "Shows the original YAML, JSON, or TXT text from the current saved subscription revision as read-only content.",
-        purpose:
-          "Lets you verify what the provider returned, inspect field structure, and understand later composition input.",
-        scenarios:
-          "Use it after fetching, while diagnosing format problems, or when comparing provider content.",
-        cautions:
-          "The source may contain passwords, tokens, node addresses, and private rule URLs. Jeemi does not copy or redact this view automatically; inspect it before sharing.",
+        purpose: "Read the current subscription revision’s original YAML, JSON, or TXT to inspect the provider’s actual content and field structure.",
+        scenarios: "Use it after fetching, while diagnosing format problems, or when comparing provider content.",
+        cautions: "The source may contain passwords, tokens, node addresses, and private rule URLs. Jeemi does not copy or redact this view automatically; inspect it before sharing.",
       },
       subscriptionAssociation: {
         title: "Subscription and local handler association",
-        description:
-          "Each subscription can use either one local configuration or one local script. The two handlers are mutually exclusive and both may be reused.",
-        purpose:
-          "Applies structured field composition or a JavaScript object transform per subscription while preserving the original source.",
-        scenarios:
-          "Associate a configuration for reusable rules and parameters, or a script for programmatic node, group, rule, and field transforms.",
-        cautions:
-          "Script association and saves to referenced scripts first generate and validate final runtime configurations. Failures preserve the prior association and script. Referenced handlers cannot be deleted.",
+        purpose: "Link one local configuration or script to a subscription to reuse field composition or programmatic transformations. They are mutually exclusive and preserve the original subscription.",
+        scenarios: "Associate a configuration for reusable rules and parameters, or a script for programmatic node, group, rule, and field transforms.",
+        cautions: "Script association and saves to referenced scripts first generate and validate final runtime configurations. Failures preserve the prior association and script. Referenced handlers cannot be deleted.",
       },
       subscriptionIcon: {
         title: "Subscription icon",
-        description:
-          "Choose a controlled Emoji or HTTP(S) icon URL, or detect common icon files from the subscription source when no icon is configured.",
-        purpose:
-          "Makes subscriptions easier to distinguish in cards and the collapsed subscription shelf.",
-        scenarios:
-          "Use a fixed Emoji, a provider-supplied icon URL, or let Jeemi probe favicon.ico, favicon.png, sub.ico, and sub.png.",
-        cautions:
-          "Displaying a remote icon makes a network request. Automatic detection only probes same-origin root paths and sends no subscription path, query, or Referer; it never changes the saved source.",
+        purpose: "Distinguish subscriptions with an Emoji or HTTP(S) icon. When unset, common icons can be detected on the subscription’s source site.",
+        scenarios: "Use a fixed Emoji, a provider-supplied icon URL, or let Jeemi probe favicon.ico, favicon.png, sub.ico, and sub.png.",
+        cautions: "Displaying a remote icon makes a network request. Automatic detection only probes same-origin root paths and sends no subscription path, query, or Referer; it never changes the saved source.",
       },
       localPackage: {
         title: "Import and export packages",
-        description:
-          "Card menus export and import .json files. Configuration packages include all saved YAML tree fields, merge settings, referenced strategy groups and their rule sets. Script packages include the name, description and full source.",
-        purpose:
-          "Back up or transfer complete local configurations, or restore a backup into the current card.",
-        scenarios:
-          "Export on the source client, import from a configuration or script card on the destination, review same-name replacements, then confirm.",
-        cautions:
-          "Import replaces the current card while keeping its subscription associations. Same-name resources affect every configuration using them. Failed subscription checks prevent saving; each rule set must still have one strategy-group owner. Files preserve raw fields and source, which may include credentials or URLs you entered; store them carefully.",
+        purpose: "Back up or transfer local configurations and scripts as .json files. Configuration packages include saved fields, composition settings, policy groups, and rule sets; script packages include the name, description, and complete source.",
+        scenarios: "Export on the source client, import from a configuration or script card on the destination, review same-name replacements, then confirm.",
+        cautions: "Import replaces the current card while keeping its subscription associations. Same-name resources affect every configuration using them. Failed subscription checks prevent saving; each rule set must still have one strategy-group owner. Files preserve raw fields and source, which may include credentials or URLs you entered; store them carefully.",
       },
       localConfig: {
         title: "Local configuration",
-        description:
-          "Maintains a sparse subscription overlay with structured fields, reusable local policy groups, and explicit composition modes.",
-        purpose:
-          "Reuses the same adjustments across subscriptions while preserving each original subscription configuration.",
-        scenarios:
-          "Create a local configuration to share node properties, rule ordering, or selector resources, then associate it on the Subscriptions page.",
-        cautions:
-          "Creating or saving does not associate a subscription or start the core. A subscription can use either a local configuration or a local script. Jeemi-owned fields remain reserved, and changes to a running configuration must pass validation before application.",
+        purpose: "Adjust subscriptions with structured fields and policy groups, combining enabled fields using the selected strategies. Multiple subscriptions can reuse one local configuration without changing their original content.",
+        scenarios: "Create a local configuration to share node properties, rule ordering, or selector resources, then associate it on the Subscriptions page.",
+        cautions: "Creating or saving does not associate a subscription or start the core. A subscription can use either a local configuration or a local script. Jeemi-owned fields remain reserved, and changes to a running configuration must pass validation before application.",
       },
       localScript: {
         title: "Local script transform",
-        description:
-          "Parses the current subscription YAML into a plain JavaScript object, calls main(config), and encodes the returned object for the remaining composition pipeline.",
-        purpose:
-          "Provides reusable conditional transforms for nodes, groups, rules, or fields that structured local configuration cannot express conveniently.",
-        scenarios:
-          "Run a test against the current subscription and inspect the final preview before association. Editing a referenced script validates every associated subscription.",
-        cautions:
-          "The Go-isolated runtime exposes no filesystem, network, process, environment, or Wails APIs. Its clock and random source are fixed, execution is time-bounded, and the result must be a valid top-level configuration object. Scripts are still executable logic; use only content you trust.",
+        purpose: "Transform a subscription configuration object with synchronous main(config). The returned object continues into final configuration generation, supporting conditional changes to nodes, policy groups, and rules.",
+        scenarios: "Run a test against the current subscription and inspect the final preview before association. Editing a referenced script validates every associated subscription.",
+        cautions: "The Go-isolated runtime exposes no filesystem, network, process, environment, or Wails APIs. Its clock and random source are fixed, execution is time-bounded, and the result must be a valid top-level configuration object. Scripts are still executable logic; use only content you trust.",
       },
       subscriptionShelf: {
         title: "Subscription shelf",
-        description:
-          "The shelf lives in an app-shell overlay below the title bar. Expanded mode manages all cards; collapsed mode shows the current summary, a usage-backed traffic label, selector search, and quick actions.",
-        purpose:
-          "Keeps traffic, expiry, update age, and node search together without moving proxy selectors when the shelf expands or collapses.",
-        scenarios:
-          "Expand it to switch or edit subscriptions; collapse it to search selectors or use refresh, rule-provider, speed-test, and hidden-selector actions. Batch testing follows the current search results; an empty search tests all nodes.",
-        cautions:
-          "Traffic and names may be absent or stale. Testing is enabled only for a healthy mihomo session matching the current projection, and showing hidden groups changes only this view, not the subscription or running core.",
+        purpose: "Expand to manage subscription cards; collapse to see the current subscription’s usage, expiry, update time, node search, and shortcuts. Expanding or collapsing keeps selectors in place.",
+        scenarios: "Expand it to switch or edit subscriptions; collapse it to search node names or use refresh, rule-provider, speed-test, and hidden-selector actions. Batch testing follows the current search results; an empty search tests all nodes.",
+        cautions: "Traffic and names may be absent or stale. Testing is enabled only for a healthy mihomo session matching the current projection, and showing hidden groups changes only this view, not the subscription or running core.",
+      },
+      subscriptionNodeSearch: {
+        title: "Node name search",
+        purpose: "Filter node names by keywords using | for OR, & for AND, and ! for exclusion, ignoring case. Batch tests use the filtered results too.",
+        scenarios: "Use to select nodes by region, route, and provider keywords together, or batch-test only those matches.",
+        cautions: "The fixed order is | OR → & AND → ! exclusion. The first unprefixed term and terms after | form one OR set; every & term is required; ! terms are always excluded last. Keep each prefix when moving a condition. Leading/trailing whitespace and empty conditions are ignored; internal spaces stay literal. With no OR terms, filtering starts from all nodes. Only real node names are searched, excluding selector, protocol, and provider names.",
+        example: "Enter hk | jp & gm & !ev: first collect nodes containing hk or jp, then require gm, and finally exclude ev. Writing hk & gm & !ev | jp gives the same result.",
       },
       fallbackTraffic: {
         title: "Fallback traffic",
-        description:
-          "Choose where unmatched traffic goes for this subscription: leave the original rule unchanged, connect directly, or use a selector from the composed configuration.",
-        purpose:
-          "Inject the terminal target after local configuration or script processing, while keeping the subscription source and local proxy rule-group binding intact.",
-        scenarios:
-          "Use it when subscriptions need different fallback routes or unmatched traffic should go directly. The preference is saved per subscription and affects routing in rule mode. After a manual change takes effect, existing connections follow Reset connections on switch in subscription settings.",
-        cautions:
-          "The original target is the first MATCH / FINAL before injection, not the selected node. After refresh, switching or editing, selector names must match exactly; a missing target resets to no override. Fetch or composition failures keep the preference. An override edits the first top-level terminal in place, or appends MATCH if absent. No override does not repair an invalid source target.",
+        purpose: "Set the fallback for each subscription: keep the target after local processing, use DIRECT, or choose a selector. This preserves the source subscription and targets of earlier matching rules.",
+        scenarios: "Use it when subscriptions need different fallback routes or unmatched traffic should go directly. The preference is saved per subscription and affects routing in rule mode. After a manual change takes effect, existing connections follow Reset connections on switch in subscription settings.",
+        cautions: "The original target is the first MATCH / FINAL before injection, not the selected node. After refresh, switching or editing, selector names must match exactly; a missing target resets to no override. Fetch or composition failures keep the preference. An override edits the first top-level terminal in place, or appends MATCH if absent. No override does not repair an invalid source target.",
       },
       selectorPreview: {
         title: "Proxy selector preview",
-        description:
-          "Reads proxy groups and statically available nodes from the current subscription composed with its local configuration. The icon control beside the title shares Rule, Global, and Direct outbound modes with Home.",
-        purpose:
-          "Lets you inspect selector structure offline, then quickly switch between rule groups, GLOBAL with every real node, and the direct view while mihomo is running.",
-        scenarios:
-          "Use it after importing, refreshing, switching subscriptions, or changing an association. Search and temporary hidden-group controls live in the collapsed shelf; outbound mode lives beside the selector title.",
-        cautions:
-          "Global hides ordinary selectors and Direct shows none. Search excludes protocol and provider names; external-provider nodes, delay, and true selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
+        purpose: "Preview selectors and resolvable nodes after local configuration or script processing, even before starting the core. The adjacent rule, global, and direct mode controls share Home settings.",
+        scenarios: "Use it after importing, refreshing, switching subscriptions, or changing an association. Search and temporary hidden-group controls live in the collapsed shelf; outbound mode lives beside the selector title.",
+        cautions: "Global hides ordinary selectors and Direct shows none. Search matches node names only, excluding selector, protocol, and provider names; external-provider nodes, delay, and true selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
       },
       ruleProviderRefresh: {
         title: "Rule-provider update",
-        description:
-          "Lists providers available after subscription/local composition. Switches are saved per subscription, while downloads use a healthy mihomo control session.",
-        purpose:
-          "Lets each subscription decide which providers enter its final runtime configuration and shows the core's last successful update time.",
-        scenarios:
-          "Use it to temporarily disable a routing rule set or to download stale provider content again.",
-        cautions:
-          "Disabling removes the provider and its known references after composition without rewriting source. The change must be regenerated, validated, and applied. Update time is shown only when mihomo reports it; React never downloads provider files directly.",
+        purpose: "Enable or disable composed rule providers per subscription, update individual providers through the running mihomo core, and inspect their last successful update times.",
+        scenarios: "Use it to temporarily disable a routing rule set or to download stale provider content again.",
+        cautions: "Disabling removes the provider and its known references from the final configuration without changing the subscription source. Changes take effect after validation, and previously matched traffic may use later rules. Downloads require the core to run; update times come from its actual responses.",
       },
       localConfigField: {
         title: "Local configuration field",
-        description:
-          "Controls whether one mihomo field is output, its local value, and its type-aware composition with the subscription value.",
-        purpose:
-          "Prevents a full default configuration from unintentionally overriding subscriptions and keeps order, conflicts, and sources reviewable.",
-        scenarios:
-          "Enable it when a subscription lacks required DNS, rules, TUN parameters, or another advanced field.",
-        cautions:
-          "Use only strategies allowed for the field type. Same-name objects block composition by default, and runtime-owned fields cannot be controlled locally.",
+        purpose: "Control whether a mihomo field is emitted, its local value, and how it combines with subscription values. Only enabled fields adjust the subscription.",
+        scenarios: "Enable a field when a subscription lacks it or several subscriptions need the same override. Adjust locked fields in their corresponding Home settings.",
+        cautions: "Use only strategies allowed for the field type. Same-name objects block composition by default, and runtime-owned fields cannot be controlled locally.",
       },
       managedStorage: {
         title: "Managed storage directory",
-        description:
-          "Shows the read-only Jeemi directory for subscription configurations, local configurations, or local scripts.",
-        purpose:
-          "Helps with backups, migration, and file-permission diagnostics.",
-        scenarios:
-          "Locate your data or back up its directory after closing the client.",
-        cautions:
-          "These files may contain subscription credentials or private configuration. Do not replace managed files while the client is running, and review backups before sharing. This view does not change the directory.",
+        purpose: "Locate stored subscriptions, local configurations, or scripts for backup, migration, and permission troubleshooting.",
+        scenarios: "Locate your data or back up its directory after closing the client.",
+        cautions: "These files may contain subscription credentials or private configuration. Do not replace managed files while the client is running, and review backups before sharing. This view does not change the directory.",
       },
       subscriptionSource: {
         title: "Subscription URL and name",
-        description:
-          "Fetches a complete subscription configuration from an HTTP(S) URL. An empty name on creation uses Profile-Title, then the Subscription-Userinfo name, then the URL host.",
-        purpose:
-          "Keeps a refreshable source with a name that makes subscriptions easy to identify.",
-        scenarios:
-          "Add a URL subscription or update the source when a provider changes its link.",
-        cautions:
-          "URLs may contain access credentials; keep them private. A changed URL is fetched and validated before saving, and failure preserves the old URL and revision. Cards and ordinary Jeemi logs show a redacted address.",
+        purpose: "Save an HTTP(S) subscription source that can be fetched again. New names may be blank, using Profile-Title, the name in Subscription-Userinfo, or the URL host in that order.",
+        scenarios: "Add a URL subscription or update the source when a provider changes its link.",
+        cautions: "URLs may contain access credentials; keep them private. A changed URL is fetched and validated before saving, and failure preserves the old URL and revision. Cards and ordinary Jeemi logs show a redacted address.",
       },
       localConfigPreview: {
         title: "Local YAML preview",
-        description:
-          "Shows YAML and bulk node transforms produced by the current local configuration draft.",
-        purpose:
-          "Lets you review enabled fields, composition choices, and sensitive content before saving.",
-        scenarios:
-          "Check a new override or investigate how local settings will affect a subscription.",
-        cautions:
-          "This preview is not active and is not the final configuration composed with a subscription. Sensitive fields are hidden initially; review them before sharing a revealed preview.",
+        purpose: "Preview YAML output and batch node transformations from the local configuration draft to inspect fields, composition settings, and sensitive content before saving.",
+        scenarios: "Check a new override or investigate how local settings will affect a subscription.",
+        cautions: "This preview is not active and is not the final configuration composed with a subscription. Sensitive fields are hidden initially; review them before sharing a revealed preview.",
       },
       geoDataFormat: {
         title: "GeoIP format",
-        description:
-          "Chooses MMDB/MetaDB or DAT for GeoIP; GeoSite DAT and ASN MMDB are maintained separately.",
-        purpose:
-          "Keeps GeoIP data consistent with the final runtime configuration.",
-        scenarios:
-          "Keep the default MMDB, or choose DAT and prepare its database when needed.",
-        cautions:
-          "This is a settings draft until confirmed. The chosen format needs a valid matching file; a running core uses new files only after a full restart.",
+        purpose: "Chooses MMDB/MetaDB or DAT for GeoIP; GeoSite DAT and ASN MMDB are maintained separately.",
+        scenarios: "Keep the default MMDB, or choose DAT and prepare its database when needed.",
+        cautions: "This is a settings draft until confirmed. The chosen format needs a valid matching file; a running core uses new files only after a full restart.",
       },
       geoDataLoader: {
         title: "GEO loader",
-        description:
-          "Chooses the memory-conserving memconservative or standard loader for DAT data.",
-        purpose:
-          "Adjusts the loading strategy to the available device resources.",
-        scenarios:
-          "Keep the memory-conserving default, or try the standard loader when investigating DAT compatibility.",
-        cautions:
-          "The loader does not convert MMDB into DAT. Confirm the preference on this page; GEO changes during a running session wait for a full restart.",
+        purpose: "Choose memconservative or standard loading for DAT data to suit available device resources.",
+        scenarios: "Keep the memory-conserving default, or try the standard loader when investigating DAT compatibility.",
+        cautions: "The loader does not convert MMDB into DAT. Confirm the preference on this page; GEO changes during a running session wait for a full restart.",
       },
       geoDataSource: {
         title: "GEO download source",
-        description:
-          "Uses the recommended source or a custom HTTPS address for each database.",
-        purpose:
-          "Supports trusted mirrors when the default source is unavailable, and local imports for offline use.",
-        scenarios:
-          "Check for updates manually, use a private mirror, or import a previously downloaded database.",
-        cautions:
-          "Opening settings normally does not access the network. Confirm source changes before downloading. Imports or custom sources without a valid publisher digest prove local integrity, not publisher identity.",
+        purpose: "Choose recommended download sources or custom HTTPS mirrors for GEO database update checks and downloads.",
+        scenarios: "Check for updates manually, use a private mirror, or import a previously downloaded database.",
+        cautions: "Opening settings normally does not access the network. Confirm source changes before downloading. Imports or custom sources without a valid publisher digest prove local integrity, not publisher identity.",
       },
       runtimeLogLevel: {
         title: "mihomo log level",
-        description:
-          "Controls the levels emitted by mihomo and whether the Logs page is available.",
-        purpose: "Balances everyday logging volume with diagnostic detail.",
-        scenarios:
-          "Use the Silent default, or temporarily choose Error, Warning, Info, or Debug while investigating a problem.",
-        cautions:
-          "Silent hides the Logs navigation entry and closes that page. Debug output may include destinations and IP addresses; the page keeps only the latest 500 entries in memory.",
+        purpose: "Controls the levels emitted by mihomo and whether the Logs page is available.",
+        scenarios: "Use the Silent default, or temporarily choose Error, Warning, Info, or Debug while investigating a problem.",
+        cautions: "Silent hides the Logs navigation entry and closes that page. Debug output may include destinations and IP addresses; the page keeps only the latest 500 entries in memory.",
       },
     },
   },

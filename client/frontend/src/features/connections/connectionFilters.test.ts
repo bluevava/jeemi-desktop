@@ -45,9 +45,9 @@ describe("connection filters", () => {
     const unknown = connection("unknown", [], "unknown.example");
     expect(isDirectConnection(unknown)).toBe(false);
     for (const route of ["direct", "proxy"] as const) {
-      expect(filterConnections([unknown], { query: "", route, selectedSelectors: null })).toEqual([]);
+      expect(filterConnections([unknown], { query: "", route })).toEqual([]);
     }
-    expect(filterConnections([unknown], { query: "", route: "all", selectedSelectors: null })).toEqual([unknown]);
+    expect(filterConnections([unknown], { query: "", route: "all" })).toEqual([unknown]);
   });
 
   it("filters direct and proxy connections independently", () => {
@@ -55,31 +55,27 @@ describe("connection filters", () => {
       filterConnections(items, {
         query: "",
         route: "direct",
-        selectedSelectors: null,
       }).map((item) => item.id),
     ).toEqual(["direct"]);
     expect(
       filterConnections(items, {
         query: "",
         route: "proxy",
-        selectedSelectors: null,
       }).map((item) => item.id),
     ).toEqual(["proxy-a", "proxy-b"]);
   });
 
-  it("applies selected proxy groups and text search together", () => {
+  it("finds selectors through case-insensitive text search without an option list", () => {
     expect(
       filterConnections(items, {
-        query: "a.example",
+        query: "  sElEcToR a  ",
         route: "proxy",
-        selectedSelectors: new Set(["Selector A"]),
       }).map((item) => item.id),
     ).toEqual(["proxy-a"]);
     expect(
       filterConnections(items, {
-        query: "",
+        query: "missing selector",
         route: "proxy",
-        selectedSelectors: new Set(),
       }),
     ).toEqual([]);
   });
@@ -87,10 +83,10 @@ describe("connection filters", () => {
   it("searches displayed rule conditions and retains hidden selector-chain search", () => {
     const inline = { ...items[1], rule: "DomainSuffix", rulePayload: "example.com" };
     expect(filterConnections([inline], {
-      query: "DOMAIN-SUFFIX,example.com", route: "all", selectedSelectors: null,
+      query: "DOMAIN-SUFFIX,example.com", route: "all",
     })).toEqual([inline]);
     expect(filterConnections([inline], {
-      query: "Selector A", route: "proxy", selectedSelectors: null,
+      query: "Selector A", route: "proxy",
     })).toEqual([inline]);
   });
 });

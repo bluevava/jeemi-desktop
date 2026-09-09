@@ -358,9 +358,8 @@ export const zhCN = {
   },
   connections: {
     title: "实时链接",
-    summary: "{{count}} 条链接 · 累计上传 {{upload}} · 下载 {{download}}",
-    summaryFiltered:
-      "显示 {{count}} / {{total}} 条链接 · 累计上传 {{upload}} · 下载 {{download}}",
+    summary: "{{count}} 条链接",
+    summaryFiltered: "显示 {{count}} / {{total}} 条链接",
     search: "搜索目标、进程、规则或代理链",
     loading: "正在连接 mihomo 链接流…",
     requiresCore: "启动 mihomo 且控制 API 健康后，才能查看和关闭实时链接。",
@@ -403,8 +402,6 @@ export const zhCN = {
       all: "全部",
       direct: "直连",
       proxy: "代理",
-      selectors: "筛选代理选择器",
-      selectorsPlaceholder: "选择代理选择器",
     },
     closeAll: {
       button: "关闭当前结果",
@@ -414,9 +411,6 @@ export const zhCN = {
       confirm: "关闭当前结果",
     },
     states: {
-      offline: "核心未运行",
-      connecting: "正在连接",
-      live: "实时",
       reconnecting: "正在重连",
       error: "链接流中断",
     },
@@ -490,7 +484,8 @@ export const zhCN = {
     selector: {
       title: "代理选择器",
       tools: "代理选择器快捷工具栏",
-      search: "快速搜索选择器或节点",
+      search: "搜索节点名称",
+      searchPlaceholder: "搜索节点，如 hk | jp & gm & !ev",
       outboundMode: "切换出站方式",
       outboundModes: {
         rule: "规则模式",
@@ -509,7 +504,7 @@ export const zhCN = {
       selectSubscription: "选择一份订阅后查看代理选择器",
       empty: "最终配置中没有代理选择器",
       hiddenOnly: "当前没有可见选择器，可在订阅栏开启显示 hidden 选择器",
-      noSearchResults: "没有匹配的选择器或节点",
+      noSearchResults: "没有匹配的节点",
       unknownType: "未知类型",
       nodeCount: "{{count}}",
       defaultSelection: "配置默认项",
@@ -833,55 +828,35 @@ export const zhCN = {
         help: {
           inline: {
             title: "inline 规则输出",
-            description:
-              "控制本策略组引用的规则集是以 RULE-SET 方式引用，还是把本地 payload 直接展开到顶层 rules。",
-            purpose:
-              "明确选择可独立更新的规则提供者，或固定写入最终规则顺序的本地规则。",
-            scenarios:
-              "默认保持关闭；只有希望把 Jeemi 内编辑的本地规则直接写入最终规则时再开启。",
-            cautions:
-              "引用 HTTP 规则集时不能开启。切换会改变最终运行配置，仍需完成组合与目标核心校验。",
+            purpose: "控制本策略组引用的规则集是以 RULE-SET 方式引用，还是把本地 payload 直接展开到顶层 rules。",
+            scenarios: "默认保持关闭；只有希望把 Jeemi 内编辑的本地规则直接写入最终规则时再开启。",
+            cautions: "引用 HTTP 规则集时不能开启。切换会改变最终运行配置，仍需完成组合与目标核心校验。",
           },
           policy: {
             title: "规则目标方向",
-            description:
-              "规则组只声明命中后走代理、直连或屏蔽，不在共享资源中绑定具体选择器。",
-            purpose:
-              "让同一个规则组在不同本地配置中复用，并由各配置统一决定代理出口。",
-            scenarios:
-              "代理规则使用本地配置的代理规则出口；直连和屏蔽分别输出 DIRECT 与 REJECT。",
-            cautions:
-              "选择代理时，引用该规则组的本地配置必须在“规则配置”中设置代理规则出口。",
+            purpose: "为规则组指定代理、直连或屏蔽方向；代理出口由引用它的本地配置统一指定，便于跨配置复用。",
+            scenarios: "多份本地配置共用同一套规则，但分别使用不同代理出口时使用。",
+            cautions: "选择代理时，引用该规则组的本地配置必须在“规则配置”中设置代理规则出口。",
+            example: "代理方向使用本地配置的代理规则出口；直连输出 DIRECT，屏蔽输出 REJECT。",
           },
           ruleSets: {
             title: "策略组规则集",
-            description:
-              "按当前顺序引用本地规则集，该顺序就是本策略组内规则的输出顺序。",
-            purpose:
-              "集中维护规则内容与顺序，并让规则目标始终由所属策略组统一决定。",
-            scenarios:
-              "添加、移除或拖动规则集，以调整同一策略组内规则的匹配先后。",
-            cautions:
-              "每个规则集最多归属一个策略组；inline 只接受本地 payload，HTTP 规则集必须使用 RULE-SET。",
+            purpose: "按当前顺序引用本地规则集，该顺序就是本策略组内规则的输出顺序。",
+            scenarios: "添加、移除或拖动规则集，以调整同一策略组内规则的匹配先后。",
+            cautions: "每个规则集最多归属一个策略组；inline 只接受本地 payload，HTTP 规则集必须使用 RULE-SET。",
           },
           lazy: {
             title: "惰性测速",
-            description:
-              "让非 select 选择器在实际被使用时再执行健康检查，而不是始终主动检查。",
-            purpose: "减少暂未使用的选择器产生的周期性探测请求。",
+            purpose: "让非 select 选择器在实际被使用时再执行健康检查，而不是始终主动检查。",
             scenarios: "选择器数量较多，且不希望未使用的组持续测速时开启。",
-            cautions:
-              "这是 mihomo 的选择器配置语义，不代表节点当前一定可用；实际行为仍受测速 URL 和间隔影响。",
+            cautions: "这是 mihomo 的选择器配置语义，不代表节点当前一定可用；实际行为仍受测速 URL 和间隔影响。",
           },
           namePatterns: {
             title: "节点名称条件",
-            description:
-              "每行填写一个名称片段；普通条件用于包含匹配，以 ! 开头的条件用于排除。",
-            purpose:
-              "从全部订阅节点开始，按协议和名称筛选；可用国旗工具插入名称中包含的 Emoji。",
-            scenarios: "例如用“AI”保留相关节点，再用“!test”排除测试节点。",
-            cautions:
-              "多个正向条件取并集，所有排除条件最后应用；协议与名称之间取交集，全部留空表示使用全部订阅直接代理节点，按名称去重。",
+            purpose: "按名称片段与协议筛选订阅节点。名称每行一个条件，以 ! 开头表示排除；国旗工具可插入节点名称中的 Emoji。",
+            scenarios: "按地区、线路或用途自动把订阅节点归入选择器，同时去掉不需要的节点。",
+            cautions: "多个正向条件取并集，所有排除条件最后应用；协议与名称之间取交集，全部留空表示使用全部订阅直接代理节点，按名称去重。",
+            example: "每行填写一个条件，例如：\nAI\n!test\n保留名称含 AI 的节点，最后排除含 test 的节点。此处按行填写，不使用订阅搜索框的 &、| 表达式。",
           },
         },
       },
@@ -906,24 +881,16 @@ export const zhCN = {
         help: {
           noResolve: {
             title: "ipcidr 的 no-resolve",
-            description:
-              "控制生成 ipcidr 规则时是否追加 no-resolve，跳过对目标 IP 的额外 DNS 解析。",
-            purpose: "避免已经是 IP/CIDR 的匹配目标进入不必要的域名解析流程。",
-            scenarios:
-              "仅在 behavior 为 ipcidr 且确认规则不需要解析目标域名时开启。",
-            cautions:
-              "domain 不支持该参数；classical 必须在适用的 IP-CIDR 等具体 payload 条目中逐条声明。",
+            purpose: "控制生成 ipcidr 规则时是否追加 no-resolve，跳过对目标 IP 的额外 DNS 解析。",
+            scenarios: "仅在 behavior 为 ipcidr 且确认规则不需要解析目标域名时开启。",
+            cautions: "domain 不支持该参数；classical 必须在适用的 IP-CIDR 等具体 payload 条目中逐条声明。",
           },
           payload: {
             title: "本地规则集 YAML",
-            description:
-              "编辑只含顶层 payload 的单文档 mihomo YAML，payload 必须是纯文本规则列表。",
-            purpose:
-              "保留规则顺序与编辑注释，并让 Jeemi 在保存时执行结构和基础语义校验。",
-            scenarios:
-              "用于 Jeemi 内维护 domain、ipcidr 或 classical 本地规则内容。",
-            cautions:
-              "不接受锚点、别名、额外顶层字段或裸列表；classical 的 no-resolve 要写在需要它的具体规则条目中。",
+            purpose: "编辑仅含顶层 payload 的 mihomo YAML 规则列表，保留顺序与注释；保存时检查结构和基础语义。",
+            scenarios: "用于 Jeemi 内维护 domain、ipcidr 或 classical 本地规则内容。",
+            cautions: "不接受锚点、别名、额外顶层字段或裸列表；classical 的 no-resolve 要写在需要它的具体规则条目中。",
+            example: "domain 规则集示例：\npayload:\n  - \"+.example.com\"",
           },
         },
         sourceTypes: {
@@ -966,31 +933,21 @@ export const zhCN = {
       help: {
         localMatch: {
           title: "本地 MATCH 覆写",
-          description:
-            "设置本地重构结果中未命中前置规则的流量出口，可沿用订阅、直连或选择已引用且启用的本地选择器。",
-          purpose: "为本地配置定义兜底出口，与各条已命中规则的目标独立。",
+          purpose: "设置本地重构结果中未命中前置规则的流量出口，可沿用订阅、直连或选择已引用且启用的本地选择器。",
           scenarios: "合并订阅时修改兜底，或完全重构规则后指定新的兜底出口。",
-          cautions:
-            "完全重构不能选择不覆写，且需要至少一个已启用的本地选择器。关闭本地规则时跳过本地 MATCH。订阅页漏网之鱼随后可再次覆写；其不覆写表示沿用本地处理结果。",
+          cautions: "完全重构不能选择不覆写，且需要至少一个已启用的本地选择器。关闭本地规则时跳过本地 MATCH。订阅页漏网之鱼随后可再次覆写；其不覆写表示沿用本地处理结果。",
         },
         proxySelector: {
           title: "代理规则出口",
-          description:
-            "为本地配置中所有目标为“代理”的规则组提供同一个具体选择器。",
-          purpose: "把可复用规则组的方向与每份本地配置实际使用的代理出口分开。",
-          scenarios:
-            "引用代理方向规则组时选择；仅使用选择器策略组时，规则直接指向各自选择器。",
-          cautions:
-            "这里只控制已命中代理规则的出口，与本地 MATCH 兜底独立。关闭已被代理规则使用的选择器前，需要更换出口或关闭相关规则组。订阅页漏网之鱼最后还能覆盖 MATCH。",
+          purpose: "为本地配置中所有目标为“代理”的规则组提供同一个具体选择器。",
+          scenarios: "引用代理方向规则组时选择；仅使用选择器策略组时，规则直接指向各自选择器。",
+          cautions: "这里只控制已命中代理规则的出口，与本地 MATCH 兜底独立。关闭已被代理规则使用的选择器前，需要更换出口或关闭相关规则组。订阅页漏网之鱼最后还能覆盖 MATCH。",
         },
         activation: {
           title: "本地规则开关",
-          description:
-            "总开关控制是否生成本地选择器、规则和规则提供者；每个引用的开关只控制当前本地配置中的该组。",
-          purpose: "暂时忽略全部或部分策略组，保留引用、顺序和组合方式。",
+          purpose: "临时停用全部或部分本地策略组，保留引用、顺序和组合方式。总开关控制本地选择器、规则与规则提供者的生成；逐组开关只影响当前配置。",
           scenarios: "对比订阅原始规则与本地规则，逐组启用以排查分流效果。",
-          cautions:
-            "关闭总开关仍会注入自定义字段；重新启用和保存前会检查最终配置。禁用状态随本地配置导入导出，不影响其他配置中相同策略组的开关。",
+          cautions: "关闭总开关仍会注入自定义字段；重新启用和保存前会检查最终配置。禁用状态随本地配置导入导出，不影响其他配置中相同策略组的开关。",
         },
       },
     },
@@ -1035,251 +992,189 @@ export const zhCN = {
       ...zhLocalConfigFieldHelp,
       generic: {
         title: "{{field}} 字段",
-        description:
-          "{{field}} 是 mihomo 配置字段；启用后由这份本地配置参与最终运行配置组合。",
-        purpose: "为订阅配置补充或覆盖该字段，同时保留订阅原文不变。",
+        purpose: "启用 {{field}} 后，以本地值参与最终配置组合，为订阅补充或覆盖该字段，原文保持不变。",
         scenarios: "订阅缺少该能力，或不同订阅需要复用相同客户端配置时使用。",
-        cautions:
-          "字段含义和可选值以当前 mihomo 官方文档为准；保存前会校验 YAML 类型，运行前还会用真实最终配置校验。",
+        cautions: "字段含义和可选值以当前 mihomo 官方文档为准；保存前会校验 YAML 类型，运行前还会用真实最终配置校验。",
       },
       "log-level": {
         title: "log-level 日志级别",
-        description:
-          "控制 mihomo 输出日志的最低级别，可选 silent、error、warning、info 或 debug。",
-        purpose: "平衡运行信息完整度、排错能力与日志噪声。",
-        scenarios:
-          "日常使用通常选择 info；排查核心或规则问题时临时选择 debug。",
-        cautions:
-          "debug 会产生更多日志，并可能包含目标域名等运行信息，不建议长期启用或未经检查直接分享日志。",
+        purpose: "控制 mihomo 输出日志的最低级别，可选 silent、error、warning、info 或 debug。",
+        scenarios: "默认保持 silent；排查核心、DNS 或规则问题时，在主页临时提高日志级别。",
+        cautions: "由主页管理并在本地配置中锁定。silent 会关闭日志页面入口；debug 输出较多且可能含目标域名等信息，分享前请检查。",
       },
       ipv6: {
         title: "ipv6 总开关",
-        description: "控制 mihomo 是否解析和处理 IPv6 流量。",
-        purpose: "使支持 IPv6 的网络和节点可以正常使用 IPv6 地址。",
+        purpose: "控制 mihomo 是否解析和处理 IPv6 流量。",
         scenarios: "本地网络、DNS 和代理节点均具备稳定 IPv6 能力时启用。",
-        cautions:
-          "网络没有可用 IPv6 路由时启用可能增加超时；它与 dns.ipv6 的职责不同。",
+        cautions: "网络没有可用 IPv6 路由时启用可能增加超时；它与 dns.ipv6 的职责不同。",
       },
       "dns-ipv6": {
         title: "dns.ipv6",
-        description: "控制 mihomo DNS 模块是否返回 AAAA（IPv6）结果。",
-        purpose: "决定经 mihomo DNS 查询时是否向应用提供 IPv6 地址。",
-        scenarios:
-          "本地和代理链路具备 IPv6 连通性，并希望应用优先或同时使用 IPv6 时启用。",
-        cautions:
-          "顶层 ipv6 或实际网络不支持 IPv6 时应谨慎启用，否则应用可能拿到不可达地址。",
+        purpose: "控制 mihomo DNS 模块是否返回 AAAA（IPv6）结果。",
+        scenarios: "本地和代理链路具备 IPv6 连通性，并希望应用优先或同时使用 IPv6 时启用。",
+        cautions: "顶层 ipv6 或实际网络不支持 IPv6 时应谨慎启用，否则应用可能拿到不可达地址。",
       },
       "sniffer-enable": {
         title: "sniffer.enable",
-        description:
-          "启用域名嗅探，通过 HTTP、TLS 或 QUIC 握手还原连接目标域名。",
-        purpose: "让仅提供 IP 目标的连接仍可匹配域名规则。",
+        purpose: "从 HTTP、TLS 或 QUIC 握手识别域名，让仅有 IP 的连接也能参与域名规则匹配。",
         scenarios: "TUN、透明代理或应用绕过系统 DNS 时常用。",
-        cautions:
-          "嗅探只读取协议握手元数据，不等于解密内容；仍应按隐私需求决定是否开启。",
+        cautions: "嗅探只读取协议握手元数据，不等于解密内容；仍应按隐私需求决定是否开启。",
       },
       "sniffer-force-dns-mapping": {
         title: "sniffer.force-dns-mapping",
-        description: "强制对 DNS 映射得到的连接尝试域名嗅探。",
-        purpose: "在目标 IP 已存在 DNS 映射时提高域名识别一致性。",
+        purpose: "强制对 DNS 映射得到的连接尝试域名嗅探。",
         scenarios: "Fake-IP 或透明代理场景中需要稳定域名规则匹配时使用。",
-        cautions:
-          "会增加嗅探范围；若特定应用不兼容，可配合 skip-domain 或地址跳过列表。",
+        cautions: "会增加嗅探范围；若特定应用不兼容，可配合 skip-domain 或地址跳过列表。",
       },
       "sniffer-parse-pure-ip": {
         title: "sniffer.parse-pure-ip",
-        description: "允许对没有 DNS 映射的纯 IP 连接尝试嗅探域名。",
-        purpose: "识别直接连接 IP、但握手中仍携带主机名的流量。",
+        purpose: "允许对没有 DNS 映射的纯 IP 连接尝试嗅探域名。",
         scenarios: "应用使用硬编码 IP 或自带 DNS 时使用。",
         cautions: "无法保证所有协议都能识别；不应把嗅探失败视为连接失败。",
       },
       "sniffer-override-destination": {
         title: "sniffer.override-destination",
-        description: "使用嗅探得到的域名替换连接目标，供后续解析和路由使用。",
-        purpose: "使路由和出站连接以还原后的域名为准。",
+        purpose: "使用嗅探得到的域名替换连接目标，供后续解析和路由使用。",
         scenarios: "需要域名规则和代理端 DNS 解析一致生效时使用。",
         cautions: "部分使用证书固定、特殊 SNI 或 IP 直连语义的应用可能不兼容。",
       },
       "sniffer-http-ports": {
         title: "sniffer.sniff.HTTP.ports",
-        description: "限定进行 HTTP Host 嗅探的端口或端口范围。",
-        purpose: "只在预期承载 HTTP 的端口上解析 Host。",
+        purpose: "限定进行 HTTP Host 嗅探的端口或端口范围。",
         scenarios: "除 80 外还使用 8080、8880 等 HTTP 端口时补充。",
         cautions: "范围过大会增加无效探测；范围过小会遗漏非标准端口。",
       },
       "sniffer-http-override-destination": {
         title: "sniffer.sniff.HTTP.override-destination",
-        description: "仅控制 HTTP 嗅探结果是否覆盖连接目标。",
-        purpose: "为 HTTP 单独细化全局 override-destination 行为。",
+        purpose: "仅控制 HTTP 嗅探结果是否覆盖连接目标。",
         scenarios: "希望 HTTP 使用还原域名，但 TLS 或 QUIC 保持原目标时使用。",
         cautions: "覆盖目标可能改变 DNS 解析位置，修改后应验证目标站点连通性。",
       },
       "sniffer-tls-ports": {
         title: "sniffer.sniff.TLS.ports",
-        description: "限定从 TLS ClientHello 的 SNI 嗅探域名的端口范围。",
-        purpose: "识别 HTTPS 和其他 TLS 连接的目标域名。",
+        purpose: "限定从 TLS ClientHello 的 SNI 嗅探域名的端口范围。",
         scenarios: "443、8443 或自定义 TLS 服务端口需要域名规则时使用。",
         cautions: "Encrypted ClientHello 等场景可能无法取得域名。",
       },
       "sniffer-tls-override-destination": {
         title: "sniffer.sniff.TLS.override-destination",
-        description: "仅控制 TLS 嗅探结果是否覆盖连接目标。",
-        purpose: "为 TLS 流量单独细化目标替换行为。",
+        purpose: "仅控制 TLS 嗅探结果是否覆盖连接目标。",
         scenarios: "希望 SNI 参与最终连接解析时启用。",
         cautions: "证书固定或依赖原始 IP 的应用可能需要关闭或加入跳过列表。",
       },
       "sniffer-quic-ports": {
         title: "sniffer.sniff.QUIC.ports",
-        description: "限定从 QUIC 初始握手嗅探域名的 UDP 端口范围。",
-        purpose: "识别 HTTP/3 等 QUIC 流量的目标域名。",
+        purpose: "限定从 QUIC 初始握手嗅探域名的 UDP 端口范围。",
         scenarios: "需要对 443/UDP 或自定义 QUIC 端口应用域名规则时使用。",
         cautions: "协议版本和加密变化可能导致无法识别，范围也不应无谓扩大。",
       },
       "sniffer-quic-override-destination": {
         title: "sniffer.sniff.QUIC.override-destination",
-        description: "仅控制 QUIC 嗅探结果是否覆盖连接目标。",
-        purpose: "为 QUIC 流量单独决定是否使用还原域名连接。",
+        purpose: "仅控制 QUIC 嗅探结果是否覆盖连接目标。",
         scenarios: "HTTP/3 需要域名路由且目标替换兼容时启用。",
         cautions: "出现 UDP/QUIC 连接异常时可先关闭此项定位问题。",
       },
       "sniffer-force-domain": {
         title: "sniffer.force-domain",
-        description: "指定必须尝试嗅探的域名匹配项。",
-        purpose: "为容易被默认策略跳过的目标强制启用嗅探。",
+        purpose: "指定必须尝试嗅探的域名匹配项。",
         scenarios: "某些域名必须依赖嗅探才能正确命中规则时使用。",
         cautions: "匹配语法应遵循 mihomo 域名通配规则，避免过宽条目。",
       },
       "sniffer-skip-domain": {
         title: "sniffer.skip-domain",
-        description: "指定不进行域名嗅探的域名匹配项。",
-        purpose: "绕过不兼容或不希望检查握手元数据的目标。",
+        purpose: "指定不进行域名嗅探的域名匹配项。",
         scenarios: "智能家居、局域网服务或特殊协议因嗅探异常时使用。",
         cautions: "跳过后相关流量可能只能按 IP 规则匹配。",
       },
       "sniffer-skip-src-address": {
         title: "sniffer.skip-src-address",
-        description: "按源 IP/CIDR 跳过域名嗅探。",
-        purpose: "为指定局域网设备或来源流量禁用嗅探。",
+        purpose: "按源 IP/CIDR 跳过域名嗅探。",
         scenarios: "某台设备协议不兼容或有独立隐私策略时使用。",
         cautions: "地址变化会使规则失效，CIDR 过宽会跳过大量流量。",
       },
       "sniffer-skip-dst-address": {
         title: "sniffer.skip-dst-address",
-        description: "按目标 IP/CIDR 跳过域名嗅探。",
-        purpose: "避免对特定服务器或地址段做协议探测。",
+        purpose: "按目标 IP/CIDR 跳过域名嗅探。",
         scenarios: "局域网地址、专用服务或已知不兼容目标时使用。",
         cautions: "跳过后只能依赖已有 DNS 映射或 IP 规则。",
       },
       "proxies-ip-version": {
         title: "proxies.ip-version 批量覆盖",
-        description: "为订阅中所有代理节点设置域名解析所用的 IP 版本偏好。",
-        purpose: "统一节点服务器地址的 IPv4/IPv6 解析策略。",
+        purpose: "为订阅中所有代理节点设置域名解析所用的 IP 版本偏好。",
         scenarios: "订阅节点配置不一致，或当前网络只适合某一 IP 版本时使用。",
-        cautions:
-          "这是 Jeemi 组合指令，不会写入通配 YAML；最终会展开到真实代理节点。",
+        cautions: "这是 Jeemi 组合指令，不会写入通配 YAML；最终会展开到真实代理节点。",
       },
       "proxies-udp": {
         title: "proxies.udp 批量覆盖",
-        description: "统一设置代理节点是否启用 UDP 转发能力。",
-        purpose: "为游戏、QUIC、DNS 等 UDP 流量统一节点行为。",
+        purpose: "统一设置节点的 UDP 转发开关，供游戏、QUIC、DNS 等 UDP 流量使用。",
         scenarios: "订阅未声明 UDP，且所用协议和服务器确认支持 UDP 时启用。",
         cautions: "字段不能让本身不支持 UDP 的协议或服务器凭空获得能力。",
       },
       "proxies-interface-name": {
         title: "proxies.interface-name 批量覆盖",
-        description: "将代理节点的拨号流量绑定到指定系统网络接口。",
-        purpose: "控制节点连接从哪张物理或虚拟网卡发出。",
+        purpose: "将代理节点的拨号流量绑定到指定系统网络接口。",
         scenarios: "多网卡、策略路由或需要避免 TUN 回环时使用。",
-        cautions:
-          "接口名必须在当前平台存在；跨设备复用本地配置时通常需要调整。",
+        cautions: "接口名必须在当前平台存在；跨设备复用本地配置时通常需要调整。",
       },
       "proxies-routing-mark": {
         title: "proxies.routing-mark 批量覆盖",
-        description: "为代理节点的底层连接设置 Linux 路由标记。",
-        purpose: "配合 Linux 策略路由表区分 mihomo 发出的连接。",
+        purpose: "为代理节点的底层连接设置 Linux 路由标记。",
         scenarios: "高级 Linux 路由、透明代理防回环时使用。",
         cautions: "主要适用于 Linux；标记必须与系统路由规则匹配。",
       },
       "proxies-tfo": {
         title: "proxies.tfo 批量覆盖",
-        description: "统一控制代理节点拨号是否使用 TCP Fast Open。",
-        purpose: "在系统和服务端支持时减少 TCP 建连等待。",
+        purpose: "统一控制节点 TCP Fast Open，在系统和服务端支持时减少建连等待。",
         scenarios: "已确认网络路径支持 TFO，并希望优化短连接时使用。",
         cautions: "部分网络或系统实现不兼容，遇到连接异常应关闭。",
       },
       "proxies-mptcp": {
         title: "proxies.mptcp 批量覆盖",
-        description: "统一控制代理节点拨号是否使用 Multipath TCP。",
-        purpose: "在支持的系统和网络中利用多路径传输。",
+        purpose: "统一控制节点 Multipath TCP，在兼容系统与网络中使用多路径传输。",
         scenarios: "具备 MPTCP 内核、路由和服务端条件时使用。",
         cautions: "平台和网络支持有限，不兼容时可能无法连接。",
       },
       "proxies-dialer-proxy": {
         title: "proxies.dialer-proxy 批量覆盖",
-        description:
-          "让所有代理节点通过指定代理或策略组继续拨号，形成链式代理。",
-        purpose: "统一构建前置代理或中转链路。",
+        purpose: "让所有代理节点通过指定代理或策略组继续拨号，形成链式代理。",
         scenarios: "所有订阅节点都需要经过固定入口节点时使用。",
-        cautions:
-          "目标名称必须存在，且不得形成循环依赖；错误设置会使全部节点不可用。",
+        cautions: "目标名称必须存在，且不得形成循环依赖；错误设置会使全部节点不可用。",
       },
       "proxies-client-fingerprint": {
         title: "proxies.client-fingerprint 批量覆盖",
-        description:
-          "为兼容的 VMess、VLESS、Trojan 和 AnyTLS 节点统一设置 TLS 客户端指纹。",
-        purpose: "使 TLS ClientHello 更接近常见浏览器实现。",
+        purpose: "为兼容的 VMess、VLESS、Trojan 和 AnyTLS 节点设置 TLS 客户端指纹，使握手特征接近所选浏览器。",
         scenarios: "服务端或网络环境要求特定 uTLS 指纹时使用。",
-        cautions:
-          "Jeemi 只应用到官方支持该字段的协议，不会改写 Shadowsocks 等不适用节点。",
+        cautions: "Jeemi 只应用到官方支持该字段的协议，不会改写 Shadowsocks 等不适用节点。",
       },
       "proxy-groups": {
         title: "proxy-groups 策略组",
-        description: "定义选择器、自动测速、故障转移或负载均衡等代理策略组。",
-        purpose: "把代理节点和其他策略组组织成可切换的出站策略。",
+        purpose: "定义选择器、自动测速、故障转移或负载均衡等代理策略组。",
         scenarios: "需要按名称或协议筛选节点，并提供手动或自动选择时使用。",
-        cautions:
-          "本地配置应优先引用配置页统一维护的策略组；同名覆盖和循环引用会阻止最终配置生效。",
+        cautions: "本地配置应优先引用配置页统一维护的策略组；同名覆盖和循环引用会阻止最终配置生效。",
       },
       "rule-providers": {
         title: "rule-providers 规则集",
-        description:
-          "定义可由 RULE-SET 路由规则引用的远程、本地或内联规则集合。",
-        purpose: "复用和独立更新大量 domain、ipcidr 或 classical 规则。",
+        purpose: "定义可由 RULE-SET 路由规则引用的远程、本地或内联规则集合。",
         scenarios: "维护广告拦截、地区分流或业务专用规则集时使用。",
-        cautions:
-          "behavior、format 和内容必须匹配；远程地址、缓存路径和更新由 mihomo 处理。",
+        cautions: "behavior、format 和内容必须匹配；远程地址、缓存路径和更新由 mihomo 处理。",
       },
       "local-strategy-groups": {
         title: "本地策略组",
-        description:
-          "本地策略组分为规则组和选择器。规则组组织规则集与代理、直连、屏蔽方向；选择器筛选代理节点并生成 mihomo proxy-group。",
-        purpose:
-          "让多份本地配置复用同一套路由规则和代理选择逻辑，资源改名时仍通过稳定 ID 保持引用。",
-        scenarios:
-          "规则需要走代理规则出口、直连或屏蔽时创建规则组；需要按名称或协议组织节点时创建选择器，国旗可插入名称条件。",
-        cautions:
-          "规则组不是 mihomo 出站，也不绑定具体选择器；代理方向由本地配置“规则配置”中的代理规则出口解析。选择器规则固定指向自身。",
+        purpose: "本地策略组分为规则组和选择器。规则组组织规则集与代理、直连、屏蔽方向；选择器筛选代理节点并生成 mihomo proxy-group。",
+        scenarios: "规则需要走代理规则出口、直连或屏蔽时创建规则组；需要按名称或协议组织节点时创建选择器，国旗可插入名称条件。",
+        cautions: "规则组不是 mihomo 出站，也不绑定具体选择器；代理方向由本地配置“规则配置”中的代理规则出口解析。选择器规则固定指向自身。",
       },
       "local-rule-sets": {
         title: "本地规则集",
-        description:
-          "本地规则集保存可复用的 domain、ipcidr 或 classical 规则内容，可来自 Jeemi 内编辑的 payload 或真实 HTTP 地址。",
-        purpose:
-          "把规则内容与策略组的目标、输出方式和排序分开管理，减少多份本地配置中的重复。",
+        purpose: "本地规则集保存可复用的 domain、ipcidr 或 classical 规则内容，可来自 Jeemi 内编辑的 payload 或真实 HTTP 地址。",
         scenarios: "维护广告拦截、直连域名、地区分流或业务专用规则列表时使用。",
-        cautions:
-          "规则集必须由本地策略组引用；behavior 要与内容一致。no-resolve 在 ipcidr 规则集或 classical 的具体目标 IP 条目上设置，不属于策略组引用。远程 HTTP 正文不能在未下载锁定时展开为 inline。",
+        cautions: "规则集必须由本地策略组引用；behavior 要与内容一致。no-resolve 在 ipcidr 规则集或 classical 的具体目标 IP 条目上设置，不属于策略组引用。远程 HTTP 正文不能在未下载锁定时展开为 inline。",
       },
       rules: {
         title: "规则配置与订阅关联",
-        description:
-          "启用本地规则后，有序引用策略组并选择加入头部、加入尾部或完全覆写；每个引用均可单独停用。保存后，在订阅卡片菜单的“关联本地配置”中选择此配置。",
-        purpose:
-          "通过界面重构订阅的分流与选择器；自定义字段配置负责其它 YAML 注入，本地脚本是同一级的另一种处理方式。",
-        scenarios:
-          "需要把共享规则组或选择器规则追加到订阅头部、终结规则前，或替换订阅普通规则时使用。",
-        cautions:
-          "完全重构统一替换订阅规则、选择器、规则提供者及原有子规则，要求已引用且启用的本地选择器和明确的 MATCH。本地 MATCH 先生成，订阅页漏网之鱼随后可再覆盖。关闭总开关仅注入自定义字段，保留引用和组合方式。保存前检查全部关联订阅，有可用核心时执行核心校验，失败保留旧数据和草稿。",
+        purpose: "启用本地规则后，有序引用策略组并选择加入头部、加入尾部或完全覆写；每个引用均可单独停用。保存后，在订阅卡片菜单的“关联本地配置”中选择此配置。",
+        scenarios: "需要把共享规则组或选择器规则追加到订阅头部、终结规则前，或替换订阅普通规则时使用。",
+        cautions: "完全重构统一替换订阅规则、选择器、规则提供者及原有子规则，要求已引用且启用的本地选择器和明确的 MATCH。本地 MATCH 先生成，订阅页漏网之鱼随后可再覆盖。关闭总开关仅注入自定义字段，保留引用和组合方式。保存前检查全部关联订阅，有可用核心时执行核心校验，失败保留旧数据和草稿。",
       },
     },
     kinds: {
@@ -1543,10 +1438,11 @@ export const zhCN = {
   },
   help: {
     section: {
-      description: "功能介绍",
       purpose: "作用",
       scenarios: "使用场景",
-      cautions: "注意事项",
+      cautions: "注意点",
+      example: "示例",
+      cautionsAndExample: "注意点与示例",
     },
     topics: {
       macNetworkAuthorization: zhMacNetworkHelp,
@@ -1554,519 +1450,327 @@ export const zhCN = {
       authorizationCleanup: zhAuthorizationCleanupHelp,
       coreAuthorization: {
         title: "Linux 代理统一授权",
-        description:
-          "首次启动通过系统密码框安装授权助手，为核心的网络操作、低端口监听，以及当前账户对 JeemiTun 的 DNS 设置和恢复统一授权。两种代理模式共用助手，日常启动、停止和完整重启直接复用。",
-        purpose:
-          "为已校验的 mihomo 授予 CAP_NET_ADMIN、CAP_NET_RAW、CAP_NET_BIND_SERVICE，并安装仅限当前账户与 JeemiTun 的四项 DNS 授权规则。Jeemi 保持普通用户运行，直接管理核心进程。",
-        scenarios:
-          "首次使用、升级旧版授权方案或修复助手时通过系统确认；新安装的已校验核心由健康助手补齐权限。正常重启系统或 Jeemi 不需要再次输入密码。",
-        cautions:
-          "助手服务开机待命，不自动启动代理，也不保存密码。同账户其他程序也能修改 JeemiTun 的 DNS；其它网卡不在授权范围。核心被替换后需要重新校验，取消保留原有核心。需要桌面 Polkit 认证代理和本地文件能力支持；使用 systemd-resolved 时需要 systemd 257 或更新版本。系统密码框可能显示已封存授权工具的 /proc/…/fd/… 路径。",
+        purpose: "一次授权 mihomo 所需的网络操作、低端口监听和当前账户对 JeemiTun 的 DNS 设置与恢复。两种代理模式复用同一助手，客户端保持普通用户并直接管理核心。",
+        scenarios: "首次使用、升级旧版授权方案或修复助手时通过系统确认；新安装的已校验核心由健康助手补齐权限。正常重启系统或 Jeemi 不需要再次输入密码。",
+        cautions: "助手服务开机待命，不自动启动代理，也不保存密码。同账户其他程序也能修改 JeemiTun 的 DNS；其它网卡不在授权范围。核心被替换后需要重新校验，取消保留原有核心。需要桌面 Polkit 认证代理和本地文件能力支持；使用 systemd-resolved 时需要 systemd 257 或更新版本。系统密码框可能显示已封存授权工具的 /proc/…/fd/… 路径。",
       },
       runtimePreferences: {
         title: "代理运行参数",
-        description:
-          "自动保存出站、代理、监听、TUN 与安全运行基线，并在订阅和本地配置组合后注入最终运行配置。",
-        purpose:
-          "即使订阅配置缺少基础字段，也让 mihomo 使用一组明确、可校验且由 Jeemi 统一管理的运行参数。",
-        scenarios:
-          "在主页调整常用网络参数、DNS 解析器、Fake IP、策略映射和 hosts，无需直接修改订阅原文。",
-        cautions:
-          "修改先校验再提交；运行中应用失败会保留旧的健康 generation。Linux 系统代理目前适配 Ubuntu/GNOME，只影响遵循桌面代理的应用；终端工具未必跟随。Linux 两种代理模式均在首次启动时通过系统密码框为所选 mihomo 持久授权，界面保持普通用户权限。这里接管的字段在本地配置树中锁定。",
+        purpose: "统一管理并自动保存出站方式、代理、监听、TUN 和 DNS 参数，在订阅与本地处理完成后注入最终运行配置。",
+        scenarios: "在主页调整常用网络参数、DNS 解析器、Fake IP、策略映射和 hosts，无需直接修改订阅原文。",
+        cautions: "有效修改会自动保存；运行中应用失败会保留上一份有效运行配置，并显示原因。接管的字段在本地配置中锁定。Linux 系统代理目前适配 Ubuntu/GNOME，仅影响遵循桌面代理的应用；终端工具未必跟随。首次启动按需完成系统授权。",
       },
       runtimeBaseline: {
         title: "安全运行基线",
-        description:
-          "统一控制日志、进程查找、IPv6、代理监听、局域网访问，以及 TUN 自动路由、接口检测和路由排除网段。",
-        purpose:
-          "补齐不完整订阅中的必要值，并保证系统代理或 TUN 始终由 Jeemi 的单一设置来源管理。",
-        scenarios:
-          "遇到监听端口冲突、需要局域网共享，或当前平台需要调整 TUN 路由行为时使用。",
-        cautions:
-          "允许局域网会扩大监听范围；关闭自动路由或接口检测可能需要自行维护路由。排除的网段会绕过 TUN，范围过大会造成流量绕过代理。",
+        purpose: "统一设置日志、进程查找、IPv6、代理监听、局域网访问和 TUN 路由行为，补齐订阅中缺少的基础参数。",
+        scenarios: "遇到监听端口冲突、需要局域网共享，或当前平台需要调整 TUN 路由行为时使用。",
+        cautions: "允许局域网会扩大监听范围；关闭自动路由或接口检测可能需要自行维护路由。排除的网段会绕过 TUN，范围过大会造成流量绕过代理。",
       },
       runtimeFindProcess: {
         title: "查找进程",
-        description:
-          "控制 mihomo 是否查找连接所属的进程，默认 strict。always 始终查找，strict 由核心判断是否需要，off 关闭查找。",
-        purpose:
-          "为进程规则和连接信息提供来源进程；主页的选择会注入最终运行配置。",
-        scenarios:
-          "使用 PROCESS-NAME、PROCESS-PATH 等规则或排查应用连接时调整；通常保留 strict 即可。",
-        cautions:
-          "查找结果受平台和权限影响；off 会影响依赖进程信息的规则。该字段在本地配置中锁定，订阅或脚本中的同名值会被主页设置覆盖。",
+        purpose: "查找连接所属进程，为进程规则与连接详情提供信息。默认 strict，由核心判断是否需要；always 始终查找，off 关闭查找。",
+        scenarios: "使用 PROCESS-NAME、PROCESS-PATH 等规则或排查应用连接时调整；通常保留 strict 即可。",
+        cautions: "查找结果受平台和权限影响；off 会影响依赖进程信息的规则。该字段在本地配置中锁定，订阅或脚本中的同名值会被主页设置覆盖。",
       },
       runtimeTunRouteExclude: {
         title: "Tun排除网段",
-        description:
-          "以 YAML 字符串数组管理 tun.route-exclude-address；开启注入后可选择追加去重或完全覆盖，启用 auto-route 时匹配网段不会写入 TUN 路由。",
-        purpose:
-          "让局域网、管理网或其它必须使用系统原生路由的目标绕过 TUN 接管。",
-        scenarios:
-          "订阅已有排除网段时可追加本地网段，或使用完全覆盖建立独立列表；访问路由器、NAS、企业内网及其它 VPN 网段时常用。",
-        cautions:
-          "关闭时完整保留订阅配置；只接受 CIDR，例如 192.168.0.0/16 或 fc00::/7。排除公网网段会让流量完全绕过 mihomo，应保持范围最小。",
+        purpose: "让指定 CIDR 网段绕过 TUN，使用系统原生路由。开启后可追加去重或完全覆盖订阅的 tun.route-exclude-address，配合 auto-route 生效。",
+        scenarios: "订阅已有排除网段时可追加本地网段，或使用完全覆盖建立独立列表；访问路由器、NAS、企业内网及其它 VPN 网段时常用。",
+        cautions: "关闭时完整保留订阅配置；只接受 CIDR，例如 192.168.0.0/16 或 fc00::/7。排除公网网段会让流量完全绕过 mihomo，应保持范围最小。",
+        example: "追加家庭网段示例：\n- \"192.168.0.0/16\"",
       },
       runtimeDns: {
         title: "DNS 基础参数",
-        description:
-          "控制 mihomo DNS 服务、IPv6 响应、增强模式和 Fake IP 地址池。",
-        purpose:
-          "为缺少 DNS 段的订阅提供可运行默认值，并为 IPv4/IPv6 Fake IP 使用明确、可校验的地址池。",
-        scenarios:
-          "需要本地 DNS 监听、切换 Fake IP/Redir Host，或处理只支持 IPv4 的本地网络时调整。",
-        cautions:
-          "默认仅监听 127.0.0.1:1053；改为 0.0.0.0 会向局域网暴露 DNS 服务。Fake IP 网段必须保持正确的 IPv4/IPv6 CIDR 类型。",
+        purpose: "管理 mihomo DNS 的监听、IPv6 响应、增强模式及 Fake IP 地址池，并为缺少 DNS 配置的订阅提供默认值。",
+        scenarios: "需要本地 DNS 监听、切换 Fake IP/Redir Host，或处理只支持 IPv4 的本地网络时调整。",
+        cautions: "默认仅监听 127.0.0.1:1053；改为 0.0.0.0 会向局域网暴露 DNS 服务。Fake IP 网段必须保持正确的 IPv4/IPv6 CIDR 类型。",
       },
       runtimeDnsMerge: {
         title: "DNS 资源组合",
-        description:
-          "每个 DNS 列表或映射都可独立启用，并选择追加去重或完全覆盖订阅中的同名字段。",
-        purpose:
-          "既能保留订阅已有解析策略，也能在需要确定结果时由 Jeemi 完整接管。",
-        scenarios:
-          "追加公共解析器、补充域名策略，或用一套固定列表替换订阅默认值时使用；关闭某项即可完全保留订阅配置。",
-        cautions:
-          "追加时订阅项保留在前、主页新增项随后加入并按完整值去重；映射发生同名键冲突时以主页值为准。YAML 只在失焦时校验，通过后才保存。",
+        purpose: "每个 DNS 列表或映射都可独立启用，并选择追加去重或完全覆盖订阅中的同名字段。",
+        scenarios: "追加公共解析器、补充域名策略，或用一套固定列表替换订阅默认值时使用；关闭某项即可完全保留订阅配置。",
+        cautions: "追加时订阅项保留在前、主页新增项随后加入并按完整值去重；映射发生同名键冲突时以主页值为准。YAML 只在失焦时校验，通过后才保存。",
       },
       runtimeDnsResolvers: {
         title: "DNS 解析器列表",
-        description:
-          "以 YAML 字符串数组配置 nameserver 或 proxy-server-nameserver，并可通过加号快速加入常用解析器。",
-        purpose: "分别为常规域名和代理服务器域名提供明确的上游 DNS。",
-        scenarios:
-          "需要补充 IP、DoH、DoT 或 DoQ 上游，或避免代理节点域名解析依赖代理链时使用。",
-        cautions:
-          "nameserver 启用时至少保留一项；关闭资源表示不注入该字段。代理服务器策略只有在 proxy-server-nameserver 有实际值时才会生效。",
+        purpose: "以 YAML 字符串数组分别设置普通域名与代理节点域名的上游 DNS；加号可快速加入常用解析器。",
+        scenarios: "需要补充 IP、DoH、DoT 或 DoQ 上游，或避免代理节点域名解析依赖代理链时使用。",
+        cautions: "nameserver 启用时至少保留一项；关闭资源表示不注入该字段。代理服务器策略只有在 proxy-server-nameserver 有实际值时才会生效。",
+        example: "nameserver 示例：\n- \"223.5.5.5\"\n- \"https://dns.alidns.com/dns-query\"",
       },
       runtimeFakeIpFilter: {
         title: "Fake IP 过滤列表",
-        description: "以 YAML 字符串数组管理不应返回 Fake IP 的域名匹配项。",
-        purpose:
-          "让局域网、发现协议或与 Fake IP 不兼容的域名继续获得真实解析结果。",
-        scenarios:
-          "局域网域名、设备发现、游戏或特定应用在 Fake IP 模式下解析异常时调整。",
-        cautions:
-          "关闭资源会完整保留订阅的 fake-ip-filter 及其模式；过宽的规则会降低 Fake IP 模式的覆盖范围。",
+        purpose: "指定不分配 Fake IP 的域名，使局域网或与 Fake IP 不兼容的服务获得真实地址。",
+        scenarios: "局域网域名、设备发现、游戏或特定应用在 Fake IP 模式下解析异常时调整。",
+        cautions: "关闭资源会完整保留订阅的 fake-ip-filter 及其模式；过宽的规则会降低 Fake IP 模式的覆盖范围。",
       },
       runtimeDnsPolicies: {
         title: "DNS 解析策略映射",
-        description: "以 YAML 映射为域名或规则集合指定一个或多个解析器。",
-        purpose:
-          "让不同域名使用不同上游，并分别控制普通解析与代理服务器解析策略。",
-        scenarios:
-          "需要分流国内外 DNS、指定内网域名解析器，或单独控制代理节点域名解析时使用。",
-        cautions:
-          "只接受无锚点、无别名的字符串或字符串数组映射。关闭资源时不会注入或清空订阅字段。",
+        purpose: "以 YAML 映射为不同域名或规则集合指定 DNS 上游，分别控制普通域名和代理节点域名的解析策略。",
+        scenarios: "需要分流国内外 DNS、指定内网域名解析器，或单独控制代理节点域名解析时使用。",
+        cautions: "只接受无锚点、无别名的字符串或字符串数组映射。关闭资源时不会注入或清空订阅字段。",
+        example: "把内网域名交给内网 DNS：\n\"+.corp.example\": \"192.168.1.1\"\n请换成实际域名与 DNS 地址。",
       },
       runtimeHosts: {
         title: "hosts 映射",
-        description:
-          "标题栏开关开启后显示编辑器，由主页管理顶层 hosts 映射并同时向 DNS 注入 use-hosts: true。",
-        purpose:
-          "把特定域名固定解析到一个或多个地址，并按所选方式与订阅 hosts 组合。",
+        purpose: "把域名固定解析到指定地址。开启后显示 YAML 编辑器，按所选方式组合顶层 hosts，并注入 dns.use-hosts: true。",
         scenarios: "本地开发、内网服务或临时覆盖域名解析时使用。",
-        cautions:
-          "只接受无锚点、无别名的 YAML 映射，值必须是字符串或字符串列表。关闭开关会保留订阅原有 use-hosts 与 hosts，而不是强制关闭它们。",
+        cautions: "只接受无锚点、无别名的 YAML 映射，值必须是字符串或字符串列表。关闭开关会保留订阅原有 use-hosts 与 hosts，而不是强制关闭它们。",
+        example: "本地开发示例：\n\"app.test\": \"127.0.0.1\"",
       },
       runtimeLanBypass: {
         title: "局域网直连保护",
-        description:
-          "Jeemi 默认把常见本机、私网、链路本地和组播地址的 DIRECT 规则放在最终 rules 最前面，并允许修改。",
-        purpose: "避免不完整或顺序不当的订阅把局域网与本机访问错误送入代理。",
-        scenarios:
-          "默认适用于路由器、NAS、局域网服务、回环地址和本地发现协议；开发者也可为调试网络调整或清空列表。",
-        cautions:
-          "仅允许目标为 DIRECT 的 DOMAIN、DOMAIN-SUFFIX、IP-CIDR 和 IP-CIDR6 规则。空列表表示不追加保护规则；恢复系统默认不会立即保存，仍需点击保存。",
+        purpose: "在最终 rules 最前面加入可编辑的 DIRECT 规则，避免本机、局域网和设备发现流量误走代理。",
+        scenarios: "默认适用于路由器、NAS、局域网服务、回环地址和本地发现协议；开发者也可为调试网络调整或清空列表。",
+        cautions: "仅允许目标为 DIRECT 的 DOMAIN、DOMAIN-SUFFIX、IP-CIDR 和 IP-CIDR6 规则。空列表表示不追加保护规则；恢复系统默认不会立即保存，仍需点击保存。",
       },
       runtimeListener: {
         title: "外部代理监听",
-        description:
-          "选择 Jeemi 对外提供的 HTTP、SOCKS 或 Mixed 代理监听及端口。",
-        purpose:
-          "确保系统代理和需要手动配置代理的应用连接到唯一、明确的本地监听。",
-        scenarios:
-          "需要兼容特定代理协议，或要调整与其他本机程序冲突的监听端口时使用。",
-        cautions:
-          "端口必须在 1–65535 范围内且未被占用；修改会重新生成最终运行配置，运行中仅在校验和热更新成功后生效。",
+        purpose: "选择本机提供的 HTTP、SOCKS 或 Mixed 代理协议与端口，供系统代理和手动配置代理的应用连接。",
+        scenarios: "需要兼容特定代理协议，或要调整与其他本机程序冲突的监听端口时使用。",
+        cautions: "端口必须在 1–65535 范围内且未被占用；修改会重新生成最终运行配置，运行中仅在校验和热更新成功后生效。",
       },
       runtimeLanAccess: {
         title: "允许局域网连接",
-        description: "控制代理监听只绑定本机回环地址，还是允许局域网设备连接。",
-        purpose: "在明确需要时让同一局域网中的其他设备使用 Jeemi 的代理端口。",
-        scenarios:
-          "为手机、平板或其他电脑临时提供代理，并已配置网络访问边界时开启。",
-        cautions:
-          "开启会把代理端口暴露到局域网；应同时配置认证、防火墙和可信网络，公共网络中不要随意开启。",
+        purpose: "控制代理监听只绑定本机回环地址，还是允许局域网设备连接。",
+        scenarios: "为手机、平板或其他电脑临时提供代理，并已配置网络访问边界时开启。",
+        cautions: "开启会把代理端口暴露到局域网；应同时配置认证、防火墙和可信网络，公共网络中不要随意开启。",
       },
       trafficChart: {
         title: "实时流量图",
-        description:
-          "通过 mihomo /traffic WebSocket 每秒接收真实上传、下载速度与累计流量，并绘制最近一分钟趋势。",
-        purpose: "快速判断当前是否有流量、上下行变化和代理链路是否持续传输。",
+        purpose: "显示 mihomo 实时上传、下载速度、累计流量和最近一分钟趋势，便于判断链路是否正在传输。",
         scenarios: "下载、视频、测速或排查代理启动后没有流量时在主页查看。",
-        cautions:
-          "只有控制 API 健康时才显示为实时；断线后的曲线会标记为过期并自动重连，不会用模拟数据补齐。",
+        cautions: "只有控制 API 健康时才显示为实时；断线后的曲线会标记为过期并自动重连，不会用模拟数据补齐。",
       },
       home: {
         title: "主页",
-        description:
-          "集中查看核心状态、内存、运行时长和实时流量，并管理代理启停、出站方式、监听及 DNS 参数。",
-        purpose: "让日常检查和问题排查都能快速确认客户端、核心与网络状态。",
+        purpose: "集中查看核心状态、内存、运行时长和实时流量，并管理代理启停、出站方式、监听及 DNS 参数。",
         scenarios: "应用启动后、启停核心前后或排查网络问题时优先查看。",
-        cautions:
-          "打开页面不会修改系统网络。有效运行参数会自动保存；网络操作只有核心健康后才生效。应用失败时保留旧活动配置，并显示原因。",
+        cautions: "打开页面不会修改系统网络。有效运行参数会自动保存；网络操作只有核心健康后才生效。应用失败时保留旧活动配置，并显示原因。",
       },
       processMemory: {
         title: "进程内存",
-        description:
-          "分别显示客户端、网页运行时、mihomo 和三项合计，使用 MiB 等二进制单位。客户端包含 Jeemi、授权助手和相关辅助进程；授权助手负责提供自身与受管 mihomo 的内存。",
-        purpose:
-          "单独查看界面与代理核心的内存变化。网页运行时只统计当前 Jeemi 的 WebView2、WebKitGTK 或 WebKit 进程，不混入其他应用；客户端无法读取时由助手协助采集。",
+        purpose: "分别显示客户端、网页运行时、mihomo 的内存与合计，使用 MiB 等二进制单位。客户端包含 Jeemi、授权助手及相关辅助进程；网页运行时只统计当前 Jeemi 的 WebView2/WebKitGTK/WebKit，不包含其他应用。",
         scenarios: "比较打开页面、加载订阅、隐藏窗口和启停代理前后的内存占用。",
-        cautions:
-          "Windows 优先统计私有工作集；Linux 和 macOS 统计驻留内存 RSS，共享页可能重复计入，因此合计不是去重后的物理内存占用。助手失联、版本不支持或进程归属无法确认时显示“—”；只有完整取得三项数据才显示合计，不将缺失项当作零。",
+        cautions: "Windows 优先统计私有工作集；Linux 和 macOS 统计驻留内存 RSS，共享页可能重复计入，因此合计不是去重后的物理内存占用。助手失联、版本不支持或进程归属无法确认时显示“—”；只有完整取得三项数据才显示合计，不将缺失项当作零。",
       },
       subscriptions: {
         title: "订阅",
-        description:
-          "通过 URL、配置文件或二维码添加和拉取订阅，管理原文修订，以及互斥的本地配置或本地脚本关联。",
-        purpose:
-          "把不同来源的订阅以可校验、可追踪、失败可保留的方式纳入 Jeemi。",
-        scenarios:
-          "首次导入订阅、手动刷新、核对原文或为不同订阅指定本地覆盖时使用。",
-        cautions:
-          "订阅 URL 和原文可能包含凭据；更新失败不得覆盖当前修订。离线选择器只是组合预览，不能冒充 mihomo 当前运行状态。",
+        purpose: "通过 URL、配置文件或二维码添加和拉取订阅，管理原文修订，以及互斥的本地配置或本地脚本关联。",
+        scenarios: "首次导入订阅、手动刷新、核对原文或为不同订阅指定本地覆盖时使用。",
+        cautions: "订阅 URL 和原文可能包含凭据；更新失败不得覆盖当前修订。离线选择器只是组合预览，不能冒充 mihomo 当前运行状态。",
       },
       config: {
         title: "配置",
-        description:
-          "分区管理本地脚本、本地配置、本地策略组和本地规则集，为订阅提供可复用的处理方式。",
-        purpose:
-          "用结构化字段或同步 main(config) 脚本调整订阅，并集中维护策略组与规则内容。",
-        scenarios:
-          "订阅内容不能满足本地网络需求，或不同订阅需要关联不同覆盖策略时使用。",
-        cautions:
-          "每份订阅最多关联一份本地配置或脚本，两者互斥。保存不等于已激活；被引用资源不能直接删除，最终运行配置仍须校验。",
+        purpose: "集中管理本地配置、main(config) 脚本、策略组与规则集，让多份订阅复用字段调整、节点转换和路由规则。",
+        scenarios: "订阅内容不能满足本地网络需求，或不同订阅需要关联不同覆盖策略时使用。",
+        cautions: "每份订阅最多关联一份本地配置或脚本，两者互斥。保存不等于已激活；被引用资源不能直接删除，最终运行配置仍须校验。",
       },
       connections: {
         title: "链接",
-        description:
-          "展示实时链接的目标、进程、命中规则、实际出口和流量；点击目标或进程名称查看完整路径、地址和代理链。",
-        purpose: "理解当前流量去向并定位规则命中、异常访问或性能问题。",
-        scenarios:
-          "排查访问失败、异常流量，或需要关闭单条及当前筛选出的活动链接时使用。",
-        cautions:
-          "规则集显示提供者名称，MATCH 直接显示 MATCH；普通规则显示核心返回的类型和参数，参数缺失时显示 inline，无法还原未返回的原始标记。进程路径可能不可用；链接结束或断流后详情保留最后快照。详情含域名、IP 和路径等隐私，批量关闭需确认且只影响当前筛选结果。",
+        purpose: "展示实时链接的目标、进程、命中规则、实际出口和流量；点击目标或进程名称查看完整路径、地址和代理链。",
+        scenarios: "排查访问失败、异常流量或定位某个选择器的链接。先选全部、直连或代理，再输入目标、进程、规则或选择器名称缩小结果。",
+        cautions: "仅查看本页且窗口可见时获取链接数据；离开页面或隐藏窗口会停止请求，返回后重新读取。规则集显示提供者名称，MATCH 直接显示 MATCH；普通规则显示类型和参数，参数缺失时显示 inline。进程路径可能不可用；链接结束或断流后详情保留最后快照，断流时禁用关闭操作。详情含域名、IP 和路径等隐私，批量关闭需确认且只影响当前筛选结果。",
       },
       logs: {
         title: "日志",
-        description: "通过 mihomo 控制 API 实时显示当前核心输出的原始日志。",
-        purpose:
-          "快速观察规则命中、DNS、连接和核心内部运行信息，并在页面内即时搜索。",
-        scenarios:
-          "排查访问、解析或规则问题，或临时提高日志级别观察运行过程时使用。",
-        cautions:
-          "页面只接收打开期间的新日志，不保存历史记录；日志内容按 mihomo 原样显示，可能包含域名、IP 等运行信息。debug 输出量较大，不建议长期启用。",
+        purpose: "实时查看和搜索 mihomo 原始日志，了解 DNS、连接、规则命中及核心运行情况。",
+        scenarios: "排查访问、解析或规则问题，或临时提高日志级别观察运行过程时使用。",
+        cautions: "页面只接收打开期间的新日志，不保存历史记录；日志内容按 mihomo 原样显示，可能包含域名、IP 等运行信息。debug 输出量较大，不建议长期启用。",
       },
       tools: {
         title: "工具",
-        description: "集中提供 IP 查询、流媒体解锁测试、DNS 查询等独立小工具。",
-        purpose: "在不进入复杂配置流程的情况下快速检查当前出口与解析结果。",
-        scenarios: "验证代理出口、区域可用性或排查 DNS 解析问题时使用。",
-        cautions:
-          "查询与解锁测试会向外部服务发起请求并可能暴露出口 IP 或查询域名；必须展示数据来源、超时和失败状态。",
+        purpose: "集中使用独立、可折叠的小工具；目前可查询 DNS，对比不同服务器与出口的解析结果。",
+        scenarios: "排查同一域名在本地和代理出口下解析不同、访问失败或记录缺失的问题。",
+        cautions: "DNS 查询会将域名发送到所选服务器；未实现的工具暂不可用。查询路径、超时和失败原因以各工具显示的结果为准。",
       },
       dnsQuery: zhDNSQueryHelp,
       homeSettings: {
         title: "主页设置",
-        description:
-          "管理界面主题、语言、Jeemi 更新检查和 mihomo 核心版本选择。",
-        purpose: "集中维护影响整个客户端的系统级与界面级偏好。",
+        purpose: "管理界面主题、语言、Jeemi 更新检查和 mihomo 核心版本选择。",
         scenarios: "调整显示偏好、检查客户端更新或切换官方核心版本时使用。",
-        cautions:
-          "主题与语言在确认后由前端保存；核心下载和删除会立即执行，使用版本只有点击确认后才由 Go 控制层持久化。",
+        cautions: "主题与语言在确认后由前端保存；核心下载和删除会立即执行，使用版本只有点击确认后才由 Go 控制层持久化。",
       },
       subscriptionSettings: {
         title: "订阅设置",
-        description: "管理订阅拉取策略、节点卡片密度和全量测速并发上限。",
-        purpose: "让订阅更新、信息密度和测速压力适配不同设备与使用习惯。",
-        scenarios:
-          "需要手动控制网络请求、切换节点卡片密度或限制大量节点同时测速时使用。",
-        cautions:
-          "节点密度与测速并发由 Go 原子保存；启动时自动拉取仍保持禁用，直到具备调度与失败回滚。",
+        purpose: "管理节点卡片密度、测速并发和切换后的链接重置方式，以适配浏览习惯和网络条件。",
+        scenarios: "需要手动控制网络请求、切换节点卡片密度或限制大量节点同时测速时使用。",
+        cautions: "确认后保存设置。提高测速并发会增加网络请求；切换重置链接会中断对应的已有会话。启动时自动拉取目前尚未启用。",
       },
       emptySettings: {
         title: "页面设置",
-        description: "这是当前导航页面的独立设置入口，但暂时没有已定义选项。",
-        purpose: "保持每个一级功能拥有稳定且一致的设置入口。",
-        scenarios: "未来出现确实属于该页面的显示或行为偏好时在此增加。",
-        cautions:
-          "不要为了填满页面创建无实际作用的开关；新增业务设置必须明确默认值、持久化位置和回滚行为。",
+        purpose: "显示当前页面可调整的选项；此页面暂时没有独立设置。",
+        scenarios: "想调整当前页面的显示或操作偏好时查看；没有可调项时返回原页面即可。",
+        example: "例如，需要修改主题或语言时，进入主页设置；它们统一影响整个客户端。",
       },
       appUpdate: {
         title: "Jeemi 更新检查",
-        description: "与 bluevava/jeemi-desktop 开源仓库的最新正式发布版本比较，有更新时询问是否自动下载并更新。",
-        purpose: "帮助用户获知安全修复和新功能。",
+        purpose: "与 bluevava/jeemi-desktop 开源仓库的最新正式发布版本比较，有更新时询问是否自动下载并更新。",
         scenarios: "在关于卡片或主页设置中手动检查；没有新版本时提示当前已经是最新版本。",
-        cautions:
-          "确认后会下载匹配系统与架构的发布包，校验摘要，停止代理并自动替换、重启客户端。下载和校验阶段可取消，替换失败会尝试恢复旧文件。安装位置须可写；配套授权助手更新仍通过既有授权流程完成。",
+        cautions: "确认后会下载匹配系统与架构的发布包，校验摘要，停止代理并自动替换、重启客户端。下载和校验阶段可取消，替换失败会尝试恢复旧文件。安装位置须可写；配套授权助手更新仍通过既有授权流程完成。",
       },
       coreVersion: {
         title: "mihomo 版本",
-        description: "检查官方 mihomo 发布并选择 Jeemi 使用的已校验版本。",
-        purpose: "在兼容性、功能和回滚需求之间提供明确选择。",
+        purpose: "检查官方 mihomo 发布并选择 Jeemi 使用的已校验版本。",
         scenarios: "安装核心、升级新版本或遇到兼容问题需要回退时使用。",
-        cautions:
-          "在线安装只接受当前平台精确匹配且带 SHA-256 的官方稳定版资产；手动导入没有发布方身份校验，只应选择官方可信文件。安装或导入不会自动切换，选择版本后还需点击页面底部确认。",
+        cautions: "在线安装只接受当前平台精确匹配且带 SHA-256 的官方稳定版资产；手动导入没有发布方身份校验，只应选择官方可信文件。安装或导入不会自动切换，选择版本后还需点击页面底部确认。",
       },
       coreFiles: {
         title: "mihomo 核心文件",
-        description:
-          "管理 jeemi_data/core/mihomo 下由 Jeemi 下载并校验的版本文件。",
-        purpose: "允许多个版本并存，以便升级验证、兼容性回退和释放磁盘空间。",
-        scenarios:
-          "查看核心实际路径、清理不再使用的旧版本或人工备份诊断信息时使用。",
-        cautions:
-          "当前使用版本禁止删除；识别不到手动导入版本时会使用内容摘要派生的 unknown-* 目录。不要直接替换可执行文件或 metadata.json，否则完整性检查会把该版本视为不可用。",
+        purpose: "管理 Jeemi 保存并校验的 mihomo 版本文件，支持多版本并存，便于升级、回退和清理空间。",
+        scenarios: "查看核心实际路径、清理不再使用的旧版本或人工备份诊断信息时使用。",
+        cautions: "当前使用版本禁止删除；识别不到手动导入版本时会使用内容摘要派生的 unknown-* 目录。不要直接替换可执行文件或 metadata.json，否则完整性检查会把该版本视为不可用。",
       },
       geoData: {
         title: "GEO 规则库管理",
-        description:
-          "独立管理 GeoIP MetaDB/DAT、GeoSite DAT 与 ASN MMDB，并把格式与加载器作为 Jeemi 保留运行参数注入配置。",
-        purpose:
-          "让来源不完整的订阅也能在需要 GEOIP、GEOSITE 或 IP-ASN 规则时使用经过摘要与当前 mihomo 核心校验的数据库。",
-        scenarios:
-          "切换 GeoIP 文件格式、更新规则库、使用可信自定义 HTTPS 镜像，或在离线设备上导入本地数据库时使用。",
-        cautions:
-          "文件不会在运行中的 mihomo 下方直接替换；更新会等待完整重启并支持回滚。自定义源可能没有发布者摘要，只能证明下载完整性与核心可读性，不能证明发布者身份。",
+        purpose: "管理并校验 GeoIP MetaDB/DAT、GeoSite DAT 与 ASN MMDB，为 GEOIP、GEOSITE 和 IP-ASN 规则提供数据库，同时管理格式与加载器。",
+        scenarios: "切换 GeoIP 文件格式、更新规则库、使用可信自定义 HTTPS 镜像，或在离线设备上导入本地数据库时使用。",
+        cautions: "文件不会在运行中的 mihomo 下方直接替换；更新会等待完整重启并支持回滚。自定义源可能没有发布者摘要，只能证明下载完整性与核心可读性，不能证明发布者身份。",
       },
       subscriptionFetch: {
         title: "订阅拉取方式",
-        description: "定义订阅由手动操作、应用启动或未来的计划任务触发更新。",
-        purpose: "平衡订阅新鲜度、启动速度和网络请求可控性。",
+        purpose: "选择何时拉取订阅，以兼顾内容更新与网络请求频率；此选项目前尚未启用。",
         scenarios: "订阅更新频率不同或需要避免启动时访问订阅服务时调整。",
-        cautions:
-          "拉取必须可取消并设置超时与大小上限；当前选项仅展示规划，尚未接入持久化。",
+        cautions: "当前不会按此选项自动更新；需要更新时，在订阅页面手动重新拉取。",
       },
       subscriptionDelayTest: {
         title: "节点测速并发",
-        description:
-          "控制批量测速同时向 mihomo 提交的 delay 请求数量。有快速搜索时只测试搜索结果中的节点，搜索为空时测试全部节点；剩余节点保留在同一队列中。",
-        purpose:
-          "在测速速度与本机、网络及代理服务商压力之间取得平衡，并阻止重复点击创建重叠队列。",
-        scenarios:
-          "节点数量很多、设备性能较弱或服务商限制并发时调低；希望更快完成时适度调高。",
-        cautions:
-          "范围固定为 1–50，默认 8。命中选择器名称会测试该组内全部真实节点，重复节点只测试一次，没有匹配节点时不可启动。测速会产生真实外部请求；队列按点击时的搜索结果执行，修改搜索不改变已开始的队列，执行期间批量和单节点入口暂时锁定。",
+        purpose: "限制批量节点测速的并发请求数。有搜索条件时测试匹配节点，否则测试全部节点；其余任务排队，重复点击不会创建重叠队列。",
+        scenarios: "节点数量很多、设备性能较弱或服务商限制并发时调低；希望更快完成时适度调高。",
+        cautions: "范围固定为 1–50，默认 8。搜索只匹配节点名称，重复节点只测试一次，没有匹配节点时不可启动。测速会产生真实外部请求；队列按点击时的搜索结果执行，修改搜索不改变已开始的队列，执行期间批量和单节点入口暂时锁定。",
       },
       subscriptionConnectionReset: {
         title: "切换重置链接",
-        description:
-          "决定在订阅页面切换代理节点或漏网之鱼生效后，是否关闭已经建立的链接。",
-        purpose: "让长连接及时改走新出口，同时按需限制被中断的链接范围。",
-        scenarios:
-          "关闭保留现有会话；选择器按代理链精确匹配节点所属选择器，漏网之鱼则匹配切换前实际使用的终结规则目标；全部会重置所有已有链接。",
-        cautions:
-          "默认是“选择器”。漏网之鱼只在规则模式热更新成功且实际出口改变后，读取当前链接并逐条关闭匹配项；不覆写按原配置目标匹配，直连按 DIRECT 匹配。重启、热更新失败或尚未生效时不额外断开。应用可能自动重连，“全部”会中断其它出口的会话。",
+        purpose: "切换节点或漏网之鱼生效后，按所选范围关闭已有链接，让应用重连时改走新出口。",
+        scenarios: "关闭保留现有会话；选择器按代理链精确匹配节点所属选择器，漏网之鱼则匹配切换前实际使用的终结规则目标；全部会重置所有已有链接。",
+        cautions: "默认是“选择器”。漏网之鱼只在规则模式热更新成功且实际出口改变后，读取当前链接并逐条关闭匹配项；不覆写按原配置目标匹配，直连按 DIRECT 匹配。重启、热更新失败或尚未生效时不额外断开。应用可能自动重连，“全部”会中断其它出口的会话。",
       },
       subscriptionImport: {
         title: "订阅导入",
-        description:
-          "通过 http/https URL、配置文件或二维码导入 mihomo、Surge 或通用 URI 订阅，保存原始文本。",
-        purpose:
-          "把不同来源统一保存为可追踪、不可变的订阅修订，为后续组合与运行校验提供可靠输入。",
-        scenarios:
-          "首次添加订阅、导入 YAML/JSON/TXT/CONF 文件，或扫描服务商提供的订阅二维码时使用。",
-        cautions:
-          "Surge/URI 会先转换节点和 DNS，再经过本地配置或脚本及运行参数。来源规则不转换；不支持的节点会显示原因。原文不可变，转换或校验失败不会覆盖当前修订。",
+        purpose: "通过 HTTP(S) URL、配置文件或二维码导入 mihomo、Surge 或通用 URI 订阅，并保存可追踪的原文修订。",
+        scenarios: "首次添加订阅、导入 YAML/JSON/TXT/CONF 文件，或扫描服务商提供的订阅二维码时使用。",
+        cautions: "Surge/URI 会先转换节点和 DNS，再经过本地配置或脚本及运行参数。来源规则不转换；不支持的节点会显示原因。原文不可变，转换或校验失败不会覆盖当前修订。",
       },
       subscriptionQRCode: {
         title: "二维码订阅导入",
-        description:
-          "从选定图片或桌面即时截图中识别二维码，并把其中的 http/https 内容作为订阅 URL 拉取。Linux Wayland 使用系统截图服务提供的画面。",
-        purpose:
-          "导入不便手工输入的长订阅地址，同时避免把截图或二维码图片长期保存到数据目录。",
-        scenarios:
-          "订阅服务只提供二维码，或二维码显示在当前电脑的浏览器、聊天工具及另一块显示器时使用。",
-        cautions:
-          "识别前会临时隐藏 Jeemi，截图结束或取消后恢复窗口。Linux Wayland 可能显示系统截图确认，是否记住允许由桌面系统决定，不需要管理员密码，也不属于 mihomo 网络授权；macOS 可能要求屏幕录制权限。截图只在本地识别，系统返回的临时截图读取后清理，不保存到 Jeemi 数据目录或上传；只有有效订阅 URL 才会发起拉取。选择已有图片只需文件读取权限。",
+        purpose: "从图片或桌面截图识别二维码，将其中的 HTTP(S) 地址作为订阅拉取；图片仅用于本地识别，不长期保存。",
+        scenarios: "订阅服务只提供二维码，或二维码显示在当前电脑的浏览器、聊天工具及另一块显示器时使用。",
+        cautions: "识别前会临时隐藏 Jeemi，截图结束或取消后恢复窗口。Linux Wayland 可能显示系统截图确认，是否记住允许由桌面系统决定，不需要管理员密码，也不属于 mihomo 网络授权；macOS 可能要求屏幕录制权限。截图只在本地识别，系统返回的临时截图读取后清理，不保存到 Jeemi 数据目录或上传；只有有效订阅 URL 才会发起拉取。选择已有图片只需文件读取权限。",
       },
       subscriptionRawText: {
         title: "订阅原文",
-        description: "只读展示当前订阅修订保存的原始 YAML、JSON 或 TXT 文本。",
-        purpose: "便于核对服务商实际返回内容、字段结构和后续配置组合输入。",
+        purpose: "只读查看当前订阅修订的原始 YAML、JSON 或 TXT，核对服务商返回的内容和字段结构。",
         scenarios: "拉取后核查配置、排查格式问题或比较服务商内容时使用。",
-        cautions:
-          "原文可能包含密码、令牌、节点地址和私有规则 URL；Jeemi 不自动复制或脱敏此视图，分享前必须人工检查。",
+        cautions: "原文可能包含密码、令牌、节点地址和私有规则 URL；Jeemi 不自动复制或脱敏此视图，分享前必须人工检查。",
       },
       subscriptionAssociation: {
         title: "订阅与本地处理方式关联",
-        description:
-          "每份订阅最多关联一份本地配置或一份本地脚本，两种处理方式互斥且都可被多份订阅复用。",
-        purpose:
-          "让结构化字段组合或 JavaScript 对象转换按订阅生效，同时始终保留订阅原文。",
-        scenarios:
-          "需要复用本地规则和参数时关联配置；需要按程序逻辑转换节点、策略组或其它字段时关联脚本。",
-        cautions:
-          "脚本关联与已关联脚本的保存都会先生成并校验最终运行配置；校验失败不会写入关联或脚本修改。已被引用的本地处理资源不能删除。",
+        purpose: "为订阅关联一份本地配置或脚本，复用字段组合或程序化转换；两者互斥，始终保留订阅原文。",
+        scenarios: "需要复用本地规则和参数时关联配置；需要按程序逻辑转换节点、策略组或其它字段时关联脚本。",
+        cautions: "脚本关联与已关联脚本的保存都会先生成并校验最终运行配置；校验失败不会写入关联或脚本修改。已被引用的本地处理资源不能删除。",
       },
       subscriptionIcon: {
         title: "订阅图标",
-        description:
-          "为订阅选择受控 Emoji 或 HTTP(S) 图标 URL；未配置时可从订阅来源站点自动探测常见图标文件。",
-        purpose: "在订阅卡片和收起信息栏中快速区分不同订阅。",
-        scenarios:
-          "可使用固定 Emoji、服务商提供的图标 URL，或让 Jeemi 检测 favicon.ico、favicon.png、sub.ico 与 sub.png。",
-        cautions:
-          "远程图标在界面显示时会发起网络请求。自动检测只访问订阅来源的同源根路径，不携带订阅路径、查询参数或 Referer，也不会修改订阅原文。",
+        purpose: "用 Emoji 或 HTTP(S) 图标区分订阅；未设置时可从订阅来源站点检测常见图标。",
+        scenarios: "可使用固定 Emoji、服务商提供的图标 URL，或让 Jeemi 检测 favicon.ico、favicon.png、sub.ico 与 sub.png。",
+        cautions: "远程图标在界面显示时会发起网络请求。自动检测只访问订阅来源的同源根路径，不携带订阅路径、查询参数或 Referer，也不会修改订阅原文。",
       },
       localPackage: {
         title: "配置文件导入与导出",
-        description:
-          "卡片菜单可导出或导入 .json 文件。本地配置包含全部已保存 YAML 树字段、组合方式、引用策略组及其规则集；脚本包含名称、说明和完整源码。",
-        purpose: "备份或迁移整套本地配置，也可在当前卡片恢复已有备份。",
-        scenarios:
-          "在来源客户端导出，到目标客户端的本地配置或脚本卡片选择导入，查看同名覆盖清单后确认。",
-        cautions:
-          "导入完整覆盖当前卡片并保留其订阅关联；同名资源会影响所有引用它的配置。受影响订阅校验失败时不写入；规则集仍只能属于一个策略组。文件保留原始字段与源码，可能包含自填凭据或 URL，请妥善保存。",
+        purpose: "用 .json 文件备份或迁移本地配置和脚本。配置包包含已保存字段、组合方式、策略组与规则集；脚本包包含名称、说明和完整源码。",
+        scenarios: "在来源客户端导出，到目标客户端的本地配置或脚本卡片选择导入，查看同名覆盖清单后确认。",
+        cautions: "导入完整覆盖当前卡片并保留其订阅关联；同名资源会影响所有引用它的配置。受影响订阅校验失败时不写入；规则集仍只能属于一个策略组。文件保留原始字段与源码，可能包含自填凭据或 URL，请妥善保存。",
       },
       localConfig: {
         title: "本地配置",
-        description:
-          "用结构化字段维护订阅配置的稀疏覆盖层，可引用本地策略组并指定字段组合方式。",
-        purpose: "让多份订阅复用同一套配置调整，同时保留各自的订阅原文。",
-        scenarios:
-          "统一节点属性、规则顺序或选择器资源时，新建本地配置，再到订阅页关联。",
-        cautions:
-          "新建和保存不会自动关联订阅或启动核心；同一订阅的本地配置与本地脚本互斥。Jeemi 保留字段不能由本地配置接管，运行中变更需校验后才应用。",
+        purpose: "用结构化字段与策略组调整订阅，按所选方式组合已启用字段；同一份本地配置可供多份订阅复用，原文保持不变。",
+        scenarios: "统一节点属性、规则顺序或选择器资源时，新建本地配置，再到订阅页关联。",
+        cautions: "新建和保存不会自动关联订阅或启动核心；同一订阅的本地配置与本地脚本互斥。Jeemi 保留字段不能由本地配置接管，运行中变更需校验后才应用。",
       },
       localScript: {
         title: "本地脚本转换",
-        description:
-          "把当前订阅 YAML 解析为普通 JavaScript 对象，调用 main(config)，并把返回对象重新编码为后续组合链路的配置。",
-        purpose:
-          "为结构化本地配置不便表达的条件式节点、策略组或规则变换提供可复用入口。",
-        scenarios:
-          "先用当前订阅运行测试并查看最终配置预览，通过后再关联；编辑已被引用的脚本时会逐份验证关联订阅。",
-        cautions:
-          "脚本在 Go 隔离运行时中执行，不提供文件、网络、进程、环境变量或 Wails API；时钟与随机源固定，单次执行限时且结果必须是有效的顶层配置对象。脚本仍是可执行逻辑，只应使用自己信任的内容。",
+        purpose: "通过同步 main(config) 函数转换订阅配置对象，返回的对象继续参与最终配置生成，适合按条件调整节点、策略组或规则。",
+        scenarios: "先用当前订阅运行测试并查看最终配置预览，通过后再关联；编辑已被引用的脚本时会逐份验证关联订阅。",
+        cautions: "脚本在 Go 隔离运行时中执行，不提供文件、网络、进程、环境变量或 Wails API；时钟与随机源固定，单次执行限时且结果必须是有效的顶层配置对象。脚本仍是可执行逻辑，只应使用自己信任的内容。",
       },
       subscriptionShelf: {
         title: "订阅配置面板",
-        description:
-          "面板位于标题栏下方的应用壳覆盖层；展开时悬浮管理全部订阅卡片，收起后显示当前订阅摘要、带用量背景的流量标签、选择器搜索和快捷操作。",
-        purpose:
-          "在保留当前订阅流量、到期和更新时间的同时集中节点搜索，并让展开和收起都不移动下方代理选择器。",
-        scenarios:
-          "切换或编辑订阅时展开；浏览节点时收起，直接搜索选择器或使用刷新、规则提供者、测速和 hidden 选择器按钮。测速只处理当前搜索结果，搜索为空时测试全部节点。",
-        cautions:
-          "流量和名称可能缺失或过期；测速只在当前投影对应的 mihomo 控制会话健康时启用，显示 hidden 只改变当前界面过滤，不改变订阅配置或运行核心。",
+        purpose: "展开时管理全部订阅卡片，收起时显示当前订阅的流量、到期、更新时间、节点搜索与快捷操作；展开或收起不会移动下方选择器。",
+        scenarios: "切换或编辑订阅时展开；浏览节点时收起，直接搜索节点名称或使用刷新、规则提供者、测速和 hidden 选择器按钮。测速只处理当前搜索结果，搜索为空时测试全部节点。",
+        cautions: "流量和名称可能缺失或过期；测速只在当前投影对应的 mihomo 控制会话健康时启用，显示 hidden 只改变当前界面过滤，不改变订阅配置或运行核心。",
+      },
+      subscriptionNodeSearch: {
+        title: "节点名称搜索",
+        purpose: "按节点名称中的关键词筛选，支持 | 或、& 与、! 排除，不区分大小写；筛选结果同时用于批量测速。",
+        scenarios: "需要同时按地区、线路和服务商挑选节点，或只对符合条件的节点批量测速时使用。",
+        cautions: "运算顺序固定为 | 或 → & 与 → ! 排除。首个无前缀关键词及 | 后的关键词属于同一或集合；& 后的条件须全部满足；! 条件始终在最后排除，移动条件时保留其前缀。关键词首尾空白和空条件会忽略，内部空格按原样匹配；没有或条件时从全部节点开始筛选。只搜索真实节点名称，不搜索选择器、协议或提供者名称。",
+        example: "输入 hk | jp & gm & !ev：先选出名称包含 hk 或 jp 的节点，再保留包含 gm 的节点，最后排除包含 ev 的节点。改写为 hk & gm & !ev | jp，结果相同。",
       },
       fallbackTraffic: {
         title: "漏网之鱼",
-        description:
-          "为当前订阅单独设置未命中前置规则的流量去向，可不覆写、直连或使用组合后存在的选择器。",
-        purpose:
-          "在本地配置或脚本处理后注入终结规则目标，无需改写订阅原文，也不改变本地代理规则组的默认选择器。",
-        scenarios:
-          "不同订阅需要不同兜底出口，或希望漏网流量直连时使用。设置按订阅保存，仅在规则模式下参与路由；手动切换生效后，按订阅设置的“切换重置链接”处理旧出口链接。",
-        cautions:
-          "不覆写括号内显示注入前首条 MATCH / FINAL 的目标，不是当前节点。刷新、切换或编辑配置后，所选选择器须按完整名称匹配，失效会自动保存为不覆写；拉取或组合失败不会清除选择。覆写只原位修改首条顶层终结规则，无终结规则时追加 MATCH；不覆写不会修复来源中已有的无效目标。",
+        purpose: "按订阅设置未命中前置规则的兜底出口，可沿用本地处理后的目标、直连或指定选择器，不改写订阅原文和已命中规则的目标。",
+        scenarios: "不同订阅需要不同兜底出口，或希望漏网流量直连时使用。设置按订阅保存，仅在规则模式下参与路由；手动切换生效后，按订阅设置的“切换重置链接”处理旧出口链接。",
+        cautions: "不覆写括号内显示注入前首条 MATCH / FINAL 的目标，不是当前节点。刷新、切换或编辑配置后，所选选择器须按完整名称匹配，失效会自动保存为不覆写；拉取或组合失败不会清除选择。覆写只原位修改首条顶层终结规则，无终结规则时追加 MATCH；不覆写不会修复来源中已有的无效目标。",
       },
       selectorPreview: {
         title: "代理选择器预览",
-        description:
-          "从当前订阅原文与关联本地配置的组合结果中读取代理组和可静态解析的节点；标题旁的图标控件与主页共享规则、全局、直连出站方式。",
-        purpose:
-          "无需先启动 mihomo 就能检查选择器结构；运行后可在规则组、包含全部真实节点的 GLOBAL 组和直连视图之间快速切换。",
-        scenarios:
-          "导入、刷新、切换订阅或修改本地配置关联后检查组合结果；搜索和临时显示 hidden 组从收起订阅栏操作，出站方式直接在选择器标题旁切换。",
-        cautions:
-          "全局模式隐藏普通选择器，直连模式不显示选择器。搜索不匹配协议类型或规则/代理提供者名称；外部 provider 节点、延迟和真实当前选择需要运行中的 mihomo。远程组图标仅允许 HTTP(S) 且不发送 Referer。",
+        purpose: "查看订阅经本地配置或脚本处理后的选择器与可解析节点，无需先启动核心。标题旁可切换规则、全局或直连方式，与主页共用设置。",
+        scenarios: "导入、刷新、切换订阅或修改本地配置关联后检查组合结果；搜索和临时显示 hidden 组从收起订阅栏操作，出站方式直接在选择器标题旁切换。",
+        cautions: "全局模式隐藏普通选择器，直连模式不显示选择器。搜索只匹配节点名称，不匹配选择器、协议或规则/代理提供者名称；外部 provider 节点、延迟和真实当前选择需要运行中的 mihomo。远程组图标仅允许 HTTP(S) 且不发送 Referer。",
       },
       ruleProviderRefresh: {
         title: "规则提供者更新",
-        description:
-          "显示订阅与本地配置组合后可用的规则提供者；开关按订阅保存，下载按钮通过健康的 mihomo 控制会话更新单个提供者。",
-        purpose:
-          "让每份订阅独立决定哪些规则提供者进入最终运行配置，并核对核心最后一次成功更新时间。",
-        scenarios:
-          "临时停用某套分流规则，或规则内容过期、需要让运行核心重新下载时使用。",
-        cautions:
-          "停用会在组合后移除提供者及其已知引用，不改写订阅原文；开关变动须重新生成、校验并应用配置。更新时间只采用 mihomo 实际返回值；React 不能直接下载规则文件。",
+        purpose: "按订阅启停组合后的规则提供者，并通过运行中的 mihomo 更新单个提供者、查看最近成功更新时间。",
+        scenarios: "临时停用某套分流规则，或规则内容过期、需要让运行核心重新下载时使用。",
+        cautions: "停用会移除最终配置中的提供者及其已知引用，不改写订阅原文；修改需校验后生效，原先命中的流量可能改走后续规则。下载需要核心运行，更新时间只显示核心实际返回的值。",
       },
       localConfigField: {
         title: "本地配置字段",
-        description:
-          "控制一个 mihomo 字段是否输出、本地值以及与订阅值的类型化组合方式。",
-        purpose: "避免完整默认配置无意覆盖订阅，并让顺序、冲突和来源可以审查。",
-        scenarios: "订阅缺少所需 DNS、规则、TUN 参数或其他高级字段时启用。",
-        cautions:
-          "只使用当前字段类型允许的策略；同名对象默认阻止组合，运行时保留字段不能由本地值控制。",
+        purpose: "控制 mihomo 字段是否输出、本地值及其与订阅值的组合方式，仅用已启用字段调整订阅。",
+        scenarios: "订阅缺少某个可编辑字段，或多份订阅需要复用相同覆盖值时启用；锁定字段请到对应的主页设置调整。",
+        cautions: "只使用当前字段类型允许的策略；同名对象默认阻止组合，运行时保留字段不能由本地值控制。",
       },
       managedStorage: {
         title: "受管存储目录",
-        description:
-          "只读显示订阅配置、本地配置或本地脚本对应的 Jeemi 数据目录。",
-        purpose: "方便备份、迁移和排查文件权限问题。",
+        purpose: "查看订阅、本地配置或本地脚本的存储目录，便于备份、迁移与排查权限问题。",
         scenarios: "确认数据存放位置，或在关闭客户端后备份相关目录。",
-        cautions:
-          "目录可能包含订阅凭据或私密配置。运行时不要直接替换受管文件；分享备份前检查内容。此处不修改目录。",
+        cautions: "目录可能包含订阅凭据或私密配置。运行时不要直接替换受管文件；分享备份前检查内容。此处不修改目录。",
       },
       subscriptionSource: {
         title: "订阅 URL 与名称",
-        description:
-          "从 HTTP(S) URL 拉取完整订阅配置。新建时名称可留空，依次采用 Profile-Title、Subscription-Userinfo 中的名称或 URL 主机。",
-        purpose: "保存可重新拉取的来源，并用可识别的名称区分订阅。",
+        purpose: "保存可重新拉取的 HTTP(S) 订阅来源。新建时名称可留空，依次使用 Profile-Title、Subscription-Userinfo 中的名称或 URL 主机。",
         scenarios: "首次添加 URL 订阅，或在服务商变更链接后更新来源。",
-        cautions:
-          "URL 可能含有访问凭据，请勿随意分享。修改 URL 会先拉取并校验新内容，失败时保留旧 URL 和修订；卡片与 Jeemi 普通日志只显示脱敏地址。",
+        cautions: "URL 可能含有访问凭据，请勿随意分享。修改 URL 会先拉取并校验新内容，失败时保留旧 URL 和修订；卡片与 Jeemi 普通日志只显示脱敏地址。",
       },
       localConfigPreview: {
         title: "本地 YAML 预览",
-        description: "展示当前本地配置草稿输出的 YAML 和批量节点转换信息。",
-        purpose: "在保存前核对输出字段、组合方式和敏感内容。",
+        purpose: "预览本地配置草稿的 YAML 输出和批量节点转换信息，在保存前核对字段、组合方式与敏感内容。",
         scenarios: "检查新增覆盖项，或排查本地配置对订阅的影响。",
-        cautions:
-          "这里的内容尚未激活，也不是经过订阅组合后的最终运行配置。敏感字段默认隐藏，显示后请勿直接分享。",
+        cautions: "这里的内容尚未激活，也不是经过订阅组合后的最终运行配置。敏感字段默认隐藏，显示后请勿直接分享。",
       },
       geoDataFormat: {
         title: "GeoIP 格式",
-        description:
-          "选择 GeoIP 使用的 MMDB/MetaDB 或 DAT 数据库；GeoSite DAT 与 ASN MMDB 单独维护。",
-        purpose: "让 GeoIP 数据格式与最终运行配置保持一致。",
+        purpose: "选择 GeoIP 使用的 MMDB/MetaDB 或 DAT 数据库；GeoSite DAT 与 ASN MMDB 单独维护。",
         scenarios: "使用默认 MMDB，或在配置需要 DAT 时切换并准备对应数据库。",
-        cautions:
-          "选择属于设置草稿，确认后才保存。切换格式需要该格式的有效文件；运行中的核心需要完整重启后才能使用新文件。",
+        cautions: "选择属于设置草稿，确认后才保存。切换格式需要该格式的有效文件；运行中的核心需要完整重启后才能使用新文件。",
       },
       geoDataLoader: {
         title: "GEO 加载器",
-        description:
-          "选择 DAT 数据的 memconservative（节省内存）或 standard（标准）加载方式。",
-        purpose: "按设备资源选择数据加载策略。",
-        scenarios:
-          "通常保持默认的节省内存模式；在排查 DAT 加载兼容性时尝试标准模式。",
-        cautions:
-          "加载器不会把 MMDB 转换为 DAT。偏好需要页面确认；运行期间涉及 GEO 变更时等待完整重启。",
+        purpose: "选择 DAT 数据的 memconservative（节省内存）或 standard（标准）加载方式，以适配设备资源。",
+        scenarios: "通常保持默认的节省内存模式；在排查 DAT 加载兼容性时尝试标准模式。",
+        cautions: "加载器不会把 MMDB 转换为 DAT。偏好需要页面确认；运行期间涉及 GEO 变更时等待完整重启。",
       },
       geoDataSource: {
         title: "GEO 下载来源",
-        description: "使用推荐来源，或为各类数据库填写自定义 HTTPS 地址。",
-        purpose:
-          "在默认来源不可达时使用可信镜像，也可通过本地导入准备离线文件。",
+        purpose: "选择推荐下载源或自定义 HTTPS 镜像，为各类 GEO 数据库检查更新与下载文件。",
         scenarios: "手动检查更新、使用自建镜像，或安装本地下载的数据库。",
-        cautions:
-          "普通打开设置页不会联网。确认来源后才能按新来源下载；无有效发布者摘要或本地导入只证明本地完整性，不代表发布者认证。",
+        cautions: "普通打开设置页不会联网。确认来源后才能按新来源下载；无有效发布者摘要或本地导入只证明本地完整性，不代表发布者认证。",
       },
       runtimeLogLevel: {
         title: "mihomo 日志级别",
-        description:
-          "控制 mihomo 生成哪些等级的日志，并决定是否显示日志页面入口。",
-        purpose: "在日常使用与故障排查之间控制日志量。",
+        purpose: "控制 mihomo 生成哪些等级的日志，并决定是否显示日志页面入口。",
         scenarios: "默认使用静默；排查问题时临时选择错误、警告、信息或调试。",
-        cautions:
-          "静默会隐藏日志导航并关闭日志页面。调试日志可能含有目标域名、IP 等运行信息；日志页只保存当前内存中的最近 500 条。",
+        cautions: "静默会隐藏日志导航并关闭日志页面。调试日志可能含有目标域名、IP 等运行信息；日志页只保存当前内存中的最近 500 条。",
       },
     },
   },

@@ -17,6 +17,12 @@ func checkLinuxTrayMenu(t *testing.T, connection *dbus.Conn, shown, reloaded, qu
 	if err := menu.Call(menuInterface+".GetProperty", 0, int32(1), "label").Store(&label); err != nil || label.Value() != "Show Jeemi" {
 		t.Fatalf("localized menu label missing: %v, %v", label, err)
 	}
+	for id := int32(4); id <= 6; id++ {
+		var enabled dbus.Variant
+		if err := menu.Call(menuInterface+".GetProperty", 0, id, "enabled").Store(&enabled); err != nil || enabled.Value() != false {
+			t.Fatalf("unconfigured proxy menu %d should be disabled: %v, %v", id, enabled, err)
+		}
+	}
 	var group []linuxMenuProperties
 	if err := menu.Call(menuInterface+".GetGroupProperties", 0, []int32{1, 3, 99}, []string{"label", "type"}).Store(&group); err != nil || len(group) != 2 || group[1].Properties["type"].Value() != "separator" {
 		t.Fatalf("invalid menu group: %v, %v", group, err)
@@ -28,7 +34,7 @@ func checkLinuxTrayMenu(t *testing.T, connection *dbus.Conn, shown, reloaded, qu
 	for _, action := range []struct {
 		id   int32
 		done <-chan struct{}
-	}{{1, shown}, {2, reloaded}, {4, quit}} {
+	}{{1, shown}, {2, reloaded}, {8, quit}} {
 		if err := menu.Call(menuInterface+".Event", 0, action.id, "clicked", dbus.MakeVariant(int32(0)), uint32(0)).Err; err != nil {
 			t.Fatal(err)
 		}
@@ -50,5 +56,40 @@ func checkLinuxTrayMenu(t *testing.T, connection *dbus.Conn, shown, reloaded, qu
 	item := connection.Object(linuxTrayName(), notifierPath)
 	if err := item.Call("org.freedesktop.DBus.Properties.Set", 0, notifierInterface, "IconName", dbus.MakeVariant("wrong-icon")).Err; err == nil {
 		t.Fatal("desktop host could replace Jeemi's icon association")
+	}
+}
+
+func TestLinuxMenuPublishesEnabledStateAndIgnoresDisabledClicks(t *testing.T) {
+	backend := &linuxTrayBackend{}
+	item := backend.AddMenuItem("Stop proxy", "Stop")
+	called := make(chan struct{}, 2)
+	item.Click(func() { called <- struct{}{} })
+	menu := &linuxDBusMenu{backend: backend}
+	revision := backend.menuRevision
+	item.Disable()
+	value, err := menu.GetProperty(1, "enabled")
+	if err != nil || value.Value() != false || backend.menuRevision <= revision {
+		t.Fatalf("disabled state was not published: %v, %v", value, err)
+	}
+	if err := menu.Event(1, "clicked", dbus.MakeVariant(int32(0)), 0); err != nil {
+		t.Fatal(err)
+	}
+	item.Enable()
+	value, err = menu.GetProperty(1, "enabled")
+	if err != nil || value.Value() != true {
+		t.Fatalf("enabled state was not published: %v, %v", value, err)
+	}
+	if err := menu.Event(1, "clicked", dbus.MakeVariant(int32(0)), 0); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-called:
+	case <-time.After(time.Second):
+		t.Fatal("enabled action did not run")
+	}
+	select {
+	case <-called:
+		t.Fatal("disabled click was dispatched")
+	case <-time.After(30 * time.Millisecond):
 	}
 }

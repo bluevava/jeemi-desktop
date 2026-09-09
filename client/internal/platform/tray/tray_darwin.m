@@ -30,7 +30,7 @@
 }
 
 - (void)selectMenuItem:(NSMenuItem *)sender {
-    if (self.item == nil) return;
+    if (self.item == nil || !sender.enabled) return;
     jeemiTrayEvent(self.handle, JEEMI_TRAY_MENU, (uint32_t)sender.tag);
 }
 
@@ -126,7 +126,7 @@ void jeemi_tray_enable_menu(uintptr_t handle) {
     });
 }
 
-void jeemi_tray_update_item(uintptr_t handle, uint32_t identifier, const char *title, const char *tooltip) {
+void jeemi_tray_update_item(uintptr_t handle, uint32_t identifier, const char *title, const char *tooltip, int enabled) {
     onMainThread(^{
         if (!isActive(handle)) return;
         NSMenuItem *item = [activeTray.menu itemWithTag:(NSInteger)identifier];
@@ -138,6 +138,7 @@ void jeemi_tray_update_item(uintptr_t handle, uint32_t identifier, const char *t
         }
         item.title = [NSString stringWithUTF8String:title];
         item.toolTip = [NSString stringWithUTF8String:tooltip];
+        item.enabled = enabled != 0;
     });
 }
 

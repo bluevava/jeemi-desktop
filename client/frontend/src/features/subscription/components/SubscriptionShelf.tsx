@@ -30,6 +30,7 @@ import {
 } from "../model";
 import { SubscriptionCard } from "./SubscriptionCard";
 import { SubscriptionIcon } from "./SubscriptionIcon";
+import { hasNodeNameSearch } from "../selectorSearch";
 
 interface SubscriptionShelfProps {
   addMenu: MenuProps;
@@ -78,7 +79,7 @@ export function SubscriptionShelf({
 }: SubscriptionShelfProps) {
   const { t } = useTranslation();
   const speedTestLabel = t(
-    selectorQuery.trim()
+    hasNodeNameSearch(selectorQuery)
       ? "subscription.shelf.speedTestMatched"
       : "subscription.shelf.speedTest",
   );
@@ -180,16 +181,19 @@ export function SubscriptionShelf({
                 {formatSubscriptionUpdateAge(selected.lastFetchedAt, locale)}
               </span>
             </button>
-            <Input
-              allowClear
-              aria-label={t("subscription.selector.search")}
-              className="subscription-summary-search"
-              onChange={(event) => onSelectorQueryChange(event.target.value)}
-              placeholder={t("subscription.selector.search")}
-              prefix={<SearchOutlined />}
-              size="small"
-              value={selectorQuery}
-            />
+            <div className="subscription-summary-search-tools">
+              <FeatureHelp compact topic="subscriptionNodeSearch" />
+              <Input
+                allowClear
+                aria-label={t("subscription.selector.search")}
+                className="subscription-summary-search"
+                onChange={(event) => onSelectorQueryChange(event.target.value)}
+                placeholder={t("subscription.selector.searchPlaceholder")}
+                prefix={<SearchOutlined />}
+                size="small"
+                value={selectorQuery}
+              />
+            </div>
           </div>
           <div
             aria-label={t("subscription.shelf.selectorTools")}

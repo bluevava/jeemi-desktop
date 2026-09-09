@@ -74,29 +74,25 @@ export const enAuthorization = {
 } as const;
 export const zhAuthorizationHelp = {
   title: "代理授权",
-  description: "在你启动或完整重启代理时，检查当前平台所需的授权。正常时直接继续，缺失、过期或异常时显示此窗口。",
-  purpose: "GUI 保持普通用户权限，由系统授权助手处理权限。Windows 和 macOS 助手管理高权限核心；Linux 助手维护受管核心的网络能力和 DNS 规则。服务启动只待命，代理仍由用户显式启动。",
+  purpose: "启动或完整重启代理时检查并补齐所需权限，客户端保持普通用户运行。Windows/macOS 助手管理核心，Linux 助手维护核心权限与 DNS 授权。",
   scenarios: "首次使用、更换核心、更新应用或修复助手。按主按钮完成当前步骤，返回窗口后自动复查，全部通过才继续本次启动。",
-  cautions: "Windows 使用系统 UAC 批准；已提权或系统策略允许时无需额外确认。Linux/macOS 可能要求管理员密码，Jeemi 不收集或保存密码。取消会取消本次启动，已有授权保留。助手未运行不代表未安装。",
+  cautions: "Windows 使用 UAC；Linux/macOS 可能要求管理员密码，Jeemi 不收集或保存密码。取消会取消本次启动，已有授权保留。助手开机待命不等于自动启动代理，未运行也不代表未安装。",
 } as const;
 export const enAuthorizationHelp = {
   title: "Proxy authorization",
-  description: "Checks platform authorization when you start or fully restart the proxy. A healthy installation proceeds directly; missing, outdated or broken authorization opens this dialog.",
-  purpose: "The GUI runs as an ordinary user. Windows and macOS helpers manage the privileged core; the Linux helper maintains managed core capabilities and DNS rules. Services wait until you explicitly start the proxy.",
+  purpose: "Check and prepare permissions when starting or fully restarting the proxy, while keeping the client unprivileged. Windows/macOS helpers manage the core; the Linux helper maintains core permissions and DNS authorization.",
   scenarios: "First use, core replacement, app updates or helper repairs. Complete the current action and return for another check. The pending start continues only after all checks pass.",
-  cautions: "Windows uses UAC approval; an elevated process or system policy may require no further confirmation. Linux/macOS may request an administrator password. Jeemi never collects or stores passwords. Cancelling cancels this start but keeps completed authorization. A stopped helper can still be installed.",
+  cautions: "Windows uses UAC; Linux/macOS may request an administrator password, which Jeemi never collects or saves. Cancelling stops this start request and retains existing authorization. A helper waiting at boot does not start the proxy automatically, and a stopped helper may still be installed.",
 } as const;
 export const zhAuthorizationCleanupHelp = {
   title: "卸载授权助手",
-  description: "检查并清理 Jeemi 的助手注册和持久授权，包含未运行或异常的安装。没有需要清理的授权时直接报告已清理。",
-  purpose: "注销当前账户的 Windows/Linux 授权服务或 macOS 助手；Linux 同时撤销受管核心能力和 Jeemi DNS 规则。Windows 正在使用的助手文件可能等待系统重启删除，不再注册或启动服务。",
+  purpose: "清理当前账户的 Jeemi 助手注册和持久授权，包括已停止或异常的安装；Linux 同时撤销受管核心能力和 Jeemi DNS 规则。",
   scenarios: "不再使用 Jeemi、删除应用前，或希望重新完成一次授权时。无需先重新安装才能清理。",
-  cautions: "运行中会先确认停止代理并恢复网络。异常恢复记录和用户配置不会删除；恢复失败不会报告成功。现有助手并不保证能免密码自卸载，必要时由系统请求管理员授权。",
+  cautions: "运行中会先确认停止代理并恢复网络。异常恢复记录和用户配置不会删除；恢复失败不会报告成功。必要时由系统请求管理员授权。Windows 正在使用的助手文件可能等到系统重启后删除，但服务会先注销。",
 } as const;
 export const enAuthorizationCleanupHelp = {
   title: "Uninstall authorization helper",
-  description: "Checks and removes Jeemi's helper registration and persistent authorization, including stopped or broken installations. If nothing remains, cleanup succeeds immediately.",
-  purpose: "Unregisters this user's Windows/Linux authorization service or the macOS helper. Linux also revokes managed core capabilities and Jeemi DNS rules. An in-use Windows helper file may be deleted after reboot; its service is no longer registered or started.",
+  purpose: "Remove Jeemi helper registration and persistent authorization for the current account, including stopped or broken installations. On Linux, also revoke managed core capabilities and Jeemi DNS rules.",
   scenarios: "Before deleting the app, when you stop using Jeemi, or when you want to authorize afresh. Reinstallation is not a prerequisite for cleanup.",
-  cautions: "A running proxy is stopped and networking restored after confirmation. Recovery records and user settings are preserved; failed recovery is not reported as success. An existing helper does not guarantee password-free removal. The system requests administrator approval when needed.",
+  cautions: "If the proxy is running, confirm stopping it and restoring networking first. Recovery records and user configuration are retained; failed recovery is not reported as success. The system may request administrator authorization. Windows may defer deleting in-use helper files until reboot, but unregisters the service first.",
 } as const;

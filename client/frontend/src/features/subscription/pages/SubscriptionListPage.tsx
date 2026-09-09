@@ -82,7 +82,7 @@ import { connectionIDsForNodeSwitch } from "../connectionReset";
 import { useProxyDelayQueue } from "../useProxyDelayQueue";
 import { screenImportErrorKey } from "../screenImport";
 import { selectAndRememberProxy } from "../proxySelection";
-import { delayTargetsForSearch, filterSelectorsByName } from "../selectorSearch";
+import { delayTargetsForSearch, filterSelectorsByNodeName } from "../selectorSearch";
 import { shouldDisplaySelector } from "../selectorPresentation";
 
 const noLocalHandlerValue = "__none__";
@@ -301,7 +301,7 @@ export function SubscriptionListPage({
             },
           ]
         : state?.projection?.selectors ?? [];
-    return filterSelectorsByName(
+    return filterSelectorsByNodeName(
       modeSelectors.filter((selector) =>
         shouldDisplaySelector(selector.hidden, showHiddenSelectors),
       ),

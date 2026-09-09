@@ -67,7 +67,7 @@
 }
 
 .connections-toolbar-actions {
-  flex: 1 1 820px;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 9px;
@@ -75,10 +75,6 @@
 
 .connections-toolbar-actions .ant-input-affix-wrapper {
   width: min(320px, 40vw);
-}
-
-.connections-toolbar-actions .ant-select {
-  width: min(260px, 34vw);
 }
 
 .connections-toolbar-actions .ant-segmented {
@@ -308,10 +304,6 @@
   }
 
   .connections-toolbar-actions .ant-input-affix-wrapper {
-    width: 100%;
-  }
-
-  .connections-toolbar-actions .ant-select {
     width: 100%;
   }
 

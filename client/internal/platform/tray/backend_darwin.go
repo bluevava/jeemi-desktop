@@ -33,10 +33,12 @@ type darwinTraySession struct {
 
 type darwinMenuItem struct {
 	mu             sync.RWMutex
+	updateMu       sync.Mutex
 	session        *darwinTraySession
 	id             uint32
 	title, tooltip string
 	callback       func()
+	enabled        bool
 }
 
 func newSystemBackend() backend { return &darwinTrayBackend{} }
@@ -91,7 +93,9 @@ func jeemiTrayEvent(handle C.uintptr_t, event C.int, itemID C.uint32_t) {
 		case C.JEEMI_TRAY_MENU:
 			if item := session.items[uint32(itemID)]; item != nil {
 				item.mu.RLock()
-				callback = item.callback
+				if item.enabled {
+					callback = item.callback
+				}
 				item.mu.RUnlock()
 			}
 		}
@@ -141,7 +145,7 @@ func (b *darwinTrayBackend) AddMenuItem(title, tooltip string) menuItem {
 	session := b.current()
 	session.mu.Lock()
 	session.nextID++
-	item := &darwinMenuItem{session: session, id: session.nextID, title: title, tooltip: tooltip}
+	item := &darwinMenuItem{session: session, id: session.nextID, title: title, tooltip: tooltip, enabled: true}
 	session.items[item.id] = item
 	session.mu.Unlock()
 	item.update()
@@ -175,10 +179,26 @@ func (item *darwinMenuItem) SetTooltip(tooltip string) {
 }
 
 func (item *darwinMenuItem) update() {
+	item.updateMu.Lock()
+	defer item.updateMu.Unlock()
 	item.mu.RLock()
 	title, tooltip := C.CString(item.title), C.CString(item.tooltip)
+	enabled := C.int(0)
+	if item.enabled {
+		enabled = 1
+	}
 	item.mu.RUnlock()
 	defer C.free(unsafe.Pointer(title))
 	defer C.free(unsafe.Pointer(tooltip))
-	C.jeemi_tray_update_item(C.uintptr_t(item.session.handle), C.uint32_t(item.id), title, tooltip)
+	C.jeemi_tray_update_item(C.uintptr_t(item.session.handle), C.uint32_t(item.id), title, tooltip, enabled)
+}
+
+func (item *darwinMenuItem) Enable()  { item.setEnabled(true) }
+func (item *darwinMenuItem) Disable() { item.setEnabled(false) }
+
+func (item *darwinMenuItem) setEnabled(enabled bool) {
+	item.mu.Lock()
+	item.enabled = enabled
+	item.mu.Unlock()
+	item.update()
 }

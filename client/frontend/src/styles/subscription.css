@@ -219,9 +219,18 @@
   font-weight: 600;
 }
 
+.subscription-summary-search-tools {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  width: clamp(240px, 26vw, 360px);
+  min-width: 0;
+  gap: 4px;
+}
+
 .subscription-summary-search.ant-input-affix-wrapper {
-  width: clamp(110px, 12vw, 150px);
-  min-width: 110px;
+  width: 100%;
+  min-width: 0;
   height: 28px;
   padding-block: 2px;
   border-color: var(--color-border);
@@ -1138,12 +1147,16 @@
   }
 
   .subscription-shelf-summary-main {
-    grid-template-columns: auto minmax(90px, 1fr) minmax(110px, 130px);
+    grid-template-columns: auto minmax(0, 1fr) minmax(160px, 240px);
     gap: 8px;
   }
 
+  .subscription-summary-search-tools {
+    width: 100%;
+  }
+
   .subscription-summary-details {
-    grid-template-columns: minmax(90px, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .subscription-summary-traffic,

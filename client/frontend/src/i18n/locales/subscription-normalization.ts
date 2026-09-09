@@ -6,8 +6,7 @@ export const zhSubscriptionNormalization = {
   requiredCore: "此订阅的高级 VLESS 字段需要 mihomo {{version}} 或更新的稳定版。",
   help: {
     title: "订阅格式转换",
-    description: "自动识别 Surge、明文或 Base64 URI 订阅，转换节点与可识别的 DNS 配置。",
-    purpose: "节点进入一个手动选择器并作为兜底出口，再应用关联的本地配置或脚本及主页运行参数。",
+    purpose: "自动识别 Surge、明文或 Base64 URI 订阅，转换节点与可识别的 DNS；节点加入一个手动选择器作为兜底出口，再应用关联的本地配置或脚本及主页运行参数。",
     scenarios: "导入其他客户端的订阅，或检查节点缺失、证书 PIN 和 DNS 字段的转换结果。",
     cautions: "原文保持不变。来源路由规则不转换；不支持的节点会列出原因，证书 PIN 冲突或 DNS 元数据损坏会拒绝本次更新。主页启用的 DNS 覆盖仍按所选方式生效。",
   },
@@ -53,8 +52,7 @@ export const enSubscriptionNormalization = {
   requiredCore: "Advanced VLESS fields in this subscription require mihomo {{version}} or a newer stable release.",
   help: {
     title: "Subscription conversion",
-    description: "Detects Surge and plain or Base64 URI subscriptions and converts nodes and recognised DNS settings.",
-    purpose: "Places nodes in one manual selector used as the fallback, then applies the associated local configuration or script and runtime preferences.",
+    purpose: "Detect Surge, plain URI, or Base64 URI subscriptions and convert nodes and recognized DNS settings. Nodes enter one manual selector used as the fallback, before applying the linked local configuration or script and Home runtime settings.",
     scenarios: "Import subscriptions from other clients or inspect missing nodes, certificate pins and DNS conversion results.",
     cautions: "The source is unchanged. Source routing rules are omitted. Unsupported nodes have explanations; conflicting pins or invalid DNS metadata reject the update. Enabled home DNS overrides still apply as configured.",
   },

@@ -11,6 +11,7 @@ type linuxMenuItem struct {
 	id             int32
 	title, tooltip string
 	separator      bool
+	enabled        bool
 	callback       func()
 }
 
@@ -30,7 +31,7 @@ func (b *linuxTrayBackend) AddSeparator() { b.addMenuItem("", "", true) }
 func (b *linuxTrayBackend) addMenuItem(title, tooltip string, separator bool) *linuxMenuItem {
 	b.nativeMu.Lock()
 	defer b.nativeMu.Unlock()
-	item := &linuxMenuItem{backend: b, id: int32(len(b.items) + 1), title: title, tooltip: tooltip, separator: separator}
+	item := &linuxMenuItem{backend: b, id: int32(len(b.items) + 1), title: title, tooltip: tooltip, separator: separator, enabled: !separator}
 	b.items = append(b.items, item)
 	b.menuChanged()
 	return item
@@ -56,6 +57,18 @@ func (i *linuxMenuItem) SetTooltip(tooltip string) {
 	defer i.backend.nativeMu.Unlock()
 	if i.tooltip != tooltip {
 		i.tooltip = tooltip
+		i.backend.menuChanged()
+	}
+}
+
+func (i *linuxMenuItem) Enable()  { i.setEnabled(true) }
+func (i *linuxMenuItem) Disable() { i.setEnabled(false) }
+
+func (i *linuxMenuItem) setEnabled(enabled bool) {
+	i.backend.nativeMu.Lock()
+	defer i.backend.nativeMu.Unlock()
+	if i.enabled != enabled {
+		i.enabled = enabled
 		i.backend.menuChanged()
 	}
 }
@@ -103,6 +116,7 @@ func (m *linuxDBusMenu) properties(id int32, names []string) (map[string]dbus.Va
 		values["children-display"] = "submenu"
 	} else {
 		item := m.backend.items[id-1]
+		values["enabled"] = item.enabled
 		if item.separator {
 			values["type"] = "separator"
 		} else {
@@ -176,7 +190,7 @@ func (m *linuxDBusMenu) Event(id int32, event string, _ dbus.Variant, _ uint32) 
 	m.backend.nativeMu.Lock()
 	var callback func()
 	_, err := m.properties(id, nil)
-	if err == nil && id != 0 && event == "clicked" {
+	if err == nil && id != 0 && event == "clicked" && m.backend.items[id-1].enabled {
 		callback = m.backend.items[id-1].callback
 	}
 	m.backend.nativeMu.Unlock()

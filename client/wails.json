@@ -8,13 +8,13 @@
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "Jeemi Contributors",
-    "email": ""
+    "email": "bluevava@proton.me"
   },
   "info": {
     "companyName": "Jeemi",
     "productName": "Jeemi",
-    "productVersion": "0.1.2",
-    "copyright": "",
+    "productVersion": "0.1.3",
+    "copyright": "Copyright © 2026 bluevava and contributors.",
     "comments": "Cross-platform mihomo desktop client"
   }
 }

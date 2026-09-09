@@ -125,16 +125,14 @@ export const enMacNetwork = {
 } as const;
 
 export const zhMacNetworkHelp = {
-  "title": "macOS 网络授权",
-  "description": "受限授权助手统一管理系统代理、TUN 与 DNS。客户端继续以普通用户运行，mihomo 由助手启动。",
-  "purpose": "完成系统批准后复用助手，避免每次启停和切换代理模式都询问管理员密码。",
-  "scenarios": "首次安装、应用迁移或升级、系统撤销后台权限时，按此处检测结果逐项完成设置。",
-  "cautions": "正式版需要 Developer ID 签名、公证和系统批准；本机测试版使用管理员安装并锁定本次构建签名，重新编译后需要更新助手记录。无需授予完全磁盘访问或辅助功能权限。助手只运行独立核验的官方核心；退出时恢复网络，不会在登录后自动启动代理。系统策略变化或重新安装仍可能要求再次批准。"
+  title: "macOS 网络授权",
+  purpose: "通过系统授权助手管理 mihomo、系统代理、TUN 与 DNS，客户端保持普通用户权限；已有授权可供日常启停复用。",
+  scenarios: "首次安装、应用迁移或升级、系统撤销后台权限时，按此处检测结果逐项完成设置。",
+  cautions: "安装或更新助手可能需要管理员批准；本机测试签名更新后也需更新助手记录。无需授予完全磁盘访问或辅助功能权限。助手待命不代表代理自启动；退出时恢复网络。系统撤销授权或重新安装后可能需要再次批准。",
 } as const;
 export const enMacNetworkHelp = {
-  "title": "macOS network authorization",
-  "description": "A restricted helper manages system proxy, TUN, and DNS. The client remains an ordinary user process; the helper starts mihomo.",
-  "purpose": "Reuse system approval across proxy starts, stops, and mode changes without repeatedly requesting an administrator password.",
-  "scenarios": "Follow the checks after first installation, an app move or update, or revocation of background permissions.",
-  "cautions": "Release builds require Developer ID signing, notarization, and system approval. Local test builds use administrator installation with exact build signatures; rebuilding requires updating the helper record. Full Disk Access and Accessibility permission are not needed. The helper runs only independently verified official cores, restores network settings on exit, and does not start the proxy at login. Reinstallation or policy changes may require approval again."
+  title: "macOS network authorization",
+  purpose: "Use a system authorization helper to manage mihomo, the system proxy, TUN, and DNS while the client runs as a regular user. Daily starts and stops reuse existing authorization.",
+  scenarios: "Follow the checks after first installation, an app move or update, or revocation of background permissions.",
+  cautions: "Installing or updating the helper may require administrator approval; local test signature changes also require updating the helper record. Full Disk Access and Accessibility permissions are not needed. An idle helper does not start the proxy automatically, and networking is restored on exit. Revoked authorization or reinstallation may require approval again.",
 } as const;

@@ -49,50 +49,37 @@ export const zhRuleSetEntry = {
   help: {
     destination: {
       title: "规则集保存方式",
-      description: "新建规则集默认使用 classical，也可选择已有的本地规则集。",
-      purpose:
-        "把当前链接的匹配条件保存为可复用的规则；追加时保留原有规则顺序和注释。",
-      scenarios:
-        "例如把工作软件的域名追加到已有规则集末尾，或保存为“未命名1”后再整理名称。",
-      cautions:
-        "点击保存才创建规则集。新规则集还需由本地策略组引用并关联订阅才会生效。规则集中的条目不含代理目标，目标由策略组决定。远程 URL 来源无法追加；domain / ipcidr 仅接受对应类型。结构遵循 mihomo 规则集格式，详见官方文档。",
+      purpose: "把当前链接的匹配条件保存到新建或已有的本地规则集；追加时保留原有顺序和注释，新建默认使用 classical。",
+      scenarios: "例如把工作软件的域名追加到已有规则集末尾，或保存为“未命名1”后再整理名称。",
+      cautions: "点击保存才创建规则集。新规则集还需由本地策略组引用并关联订阅才会生效。规则集中的条目不含代理目标，目标由策略组决定。远程 URL 来源无法追加；domain / ipcidr 仅接受对应类型。结构遵循 mihomo 规则集格式，详见官方文档。",
     },
     domain: {
       title: "域名后缀匹配",
-      description: "DOMAIN-SUFFIX 匹配指定域名及其子域名。",
-      purpose: "用一条规则覆盖同一站点的多个子域名。",
-      scenarios:
-        "anthropic.com 可匹配 anthropic.com 和 api.anthropic.com，不匹配 other-anthropic.com。",
-      cautions:
-        "不要输入 https://、端口或页面路径。classical 中保存 DOMAIN-SUFFIX 条目；domain 规则集中转换为 +.anthropic.com。结构与匹配行为以 mihomo 官方文档为准。",
+      purpose: "按域名后缀匹配站点及其子域名，用一条规则覆盖同一站点。",
+      scenarios: "希望同一站点的主域名和 API、图片等子域名统一走一个出口时使用。",
+      cautions: "不要输入 https://、端口或页面路径。classical 中保存 DOMAIN-SUFFIX 条目；domain 规则集中转换为 +.anthropic.com。结构与匹配行为以 mihomo 官方文档为准。",
+      example: "anthropic.com 可匹配 anthropic.com 和 api.anthropic.com，不匹配 other-anthropic.com。",
     },
     ip: {
       title: "目标 IP 网段匹配",
-      description: "IP-CIDR 匹配链接的目标 IPv4 或 IPv6 地址。",
-      purpose: "按单个地址或指定网段设置规则。",
-      scenarios:
-        "20.203.144.245 自动补为 /32；2001:db8::1 自动补为 /128。20.203.144.245/24 会规范为 20.203.144.0/24，覆盖整个网段。",
-      cautions:
-        "IPv6 为 128 位，/64 表示网段而不是单个地址。共享 IP 或大网段可能包含其他服务。此处不自动添加 no-resolve，现有 ipcidr 规则集的相关设置会保留。classical 保存 IP-CIDR 条目，ipcidr 只保存网段文本；具体结构与解析行为详见 mihomo 官方文档。",
+      purpose: "按目标 IPv4/IPv6 地址或 CIDR 网段匹配链接。",
+      scenarios: "目标只有 IP 地址，或需要统一处理已知服务器网段时使用。",
+      cautions: "IPv6 为 128 位，/64 表示网段而不是单个地址。共享 IP 或大网段可能包含其他服务。此处不自动添加 no-resolve，现有 ipcidr 规则集的相关设置会保留。classical 保存 IP-CIDR 条目，ipcidr 只保存网段文本；具体结构与解析行为详见 mihomo 官方文档。",
+      example: "20.203.144.245 自动补为 /32；2001:db8::1 自动补为 /128。20.203.144.245/24 会规范为 20.203.144.0/24，覆盖整个网段。",
     },
     processName: {
       title: "完整进程名匹配",
-      description: "PROCESS-NAME 按完整进程名匹配。",
-      purpose: "让同名应用进程的链接使用同一条规则。",
-      scenarios:
-        "输入 WeChat.exe，生成 PROCESS-NAME,WeChat.exe；不要输入 C:\\Apps\\WeChat.exe。",
-      cautions:
-        "这不是名称片段或正则表达式匹配，不同目录下的同名进程可能同时命中。需要 mihomo 能获取进程信息，且规则集行为为 classical。具体支持情况与结构详见 mihomo 官方文档。",
+      purpose: "按完整进程名匹配，让同名应用进程的链接使用同一条规则。",
+      scenarios: "需要按应用分流，且完整进程名稳定时使用。",
+      cautions: "这不是名称片段或正则表达式匹配，不同目录下的同名进程可能同时命中。需要 mihomo 能获取进程信息，且规则集行为为 classical。具体支持情况与结构详见 mihomo 官方文档。",
+      example: "输入 WeChat.exe，生成 PROCESS-NAME,WeChat.exe；不要输入 C:\\Apps\\WeChat.exe。",
     },
     processPath: {
       title: "进程路径包含匹配",
-      description:
-        "以完整路径为初始值，也可只保留需要匹配的路径片段，生成 PROCESS-PATH-REGEX。",
-      purpose: "按应用所在目录或可执行文件路径识别进程。",
-      scenarios:
-        "可将 C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe 缩短为 \\Microsoft\\Edge。Linux / macOS 可保留 /usr/bin/ 或 /Applications/Example.app/。",
-      cautions:
-        "输入原始路径文本，无需手写正则或双反斜杠。保存时自动转义反斜杠、点号和括号等字符；Linux / macOS 通常使用正斜杠 /，它无需转义。Windows 路径默认忽略大小写，可用开关调整。匹配方式为包含，路径越短范围越大；需要核心取得进程信息并使用 classical 规则集，具体结构详见 mihomo 官方文档。",
+      purpose: "按可执行文件路径中包含的文本识别应用，保存为 PROCESS-PATH-REGEX 规则。",
+      scenarios: "需要区分同名程序的安装位置，或统一处理某个目录下的程序时使用。",
+      cautions: "输入原始路径文本，无需手写正则或双反斜杠。保存时自动转义反斜杠、点号和括号等字符；Linux / macOS 通常使用正斜杠 /，它无需转义。Windows 路径默认忽略大小写，可用开关调整。匹配方式为包含，路径越短范围越大；需要核心取得进程信息并使用 classical 规则集，具体结构详见 mihomo 官方文档。",
+      example: "可将 C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe 缩短为 \\Microsoft\\Edge。Linux / macOS 可保留 /usr/bin/ 或 /Applications/Example.app/。",
     },
   },
 };
@@ -154,54 +141,37 @@ export const enRuleSetEntry = {
   help: {
     destination: {
       title: "Saving a rule",
-      description:
-        "A new rule set uses classical behavior. You can also select an existing local rule set.",
-      purpose:
-        "Reuse a connection's matching condition while keeping the original rule order and comments.",
-      scenarios:
-        "Append a work application's domain to an existing rule set, or save it as Unnamed1 and rename it later.",
-      cautions:
-        "The rule set is created only when you save. A new set must be referenced by a local strategy group associated with a subscription to take effect. Entries contain no outbound target; the strategy group supplies it. Remote URL sets cannot be appended to; domain / ipcidr accept only their respective types. See the official mihomo documentation for the rule set structure.",
+      purpose: "Save matching conditions from this connection to a new or existing local rule set. Appending preserves its order and comments; new rule sets default to classical.",
+      scenarios: "Append a work application's domain to an existing rule set, or save it as Unnamed1 and rename it later.",
+      cautions: "The rule set is created only when you save. A new set must be referenced by a local strategy group associated with a subscription to take effect. Entries contain no outbound target; the strategy group supplies it. Remote URL sets cannot be appended to; domain / ipcidr accept only their respective types. See the official mihomo documentation for the rule set structure.",
     },
     domain: {
       title: "Domain suffix matching",
-      description:
-        "DOMAIN-SUFFIX matches the specified domain and its subdomains.",
-      purpose: "Cover multiple subdomains of a site with one rule.",
-      scenarios:
-        "anthropic.com matches anthropic.com and api.anthropic.com, but not other-anthropic.com.",
-      cautions:
-        "Omit https://, ports, and page paths. A classical set stores a DOMAIN-SUFFIX entry; a domain set uses +.anthropic.com. See the official mihomo documentation for syntax and matching behavior.",
+      purpose: "Match a domain and its subdomains with one suffix rule.",
+      scenarios: "Use when a site and its API, image, or other subdomains should share a route.",
+      cautions: "Omit https://, ports, and page paths. A classical set stores a DOMAIN-SUFFIX entry; a domain set uses +.anthropic.com. See the official mihomo documentation for syntax and matching behavior.",
+      example: "anthropic.com matches anthropic.com and api.anthropic.com, but not other-anthropic.com.",
     },
     ip: {
       title: "Destination IP matching",
-      description:
-        "IP-CIDR matches a connection's destination IPv4 or IPv6 address.",
-      purpose: "Create a rule for one address or a subnet.",
-      scenarios:
-        "20.203.144.245 gets /32; 2001:db8::1 gets /128. Entering 20.203.144.245/24 produces 20.203.144.0/24 and covers the entire subnet.",
-      cautions:
-        "IPv6 addresses are 128 bits; /64 is a subnet, not a single address. Shared IPs or large subnets may include other services. This form does not add no-resolve; existing ipcidr settings are preserved. A classical set stores an IP-CIDR entry; an ipcidr set stores only the subnet. See the official mihomo documentation for syntax and resolution behavior.",
+      purpose: "Match connections by destination IPv4/IPv6 address or CIDR range.",
+      scenarios: "Use when only an IP address is available, or a known server range needs the same routing.",
+      cautions: "IPv6 addresses are 128 bits; /64 is a subnet, not a single address. Shared IPs or large subnets may include other services. This form does not add no-resolve; existing ipcidr settings are preserved. A classical set stores an IP-CIDR entry; an ipcidr set stores only the subnet. See the official mihomo documentation for syntax and resolution behavior.",
+      example: "20.203.144.245 gets /32; 2001:db8::1 gets /128. Entering 20.203.144.245/24 produces 20.203.144.0/24 and covers the entire subnet.",
     },
     processName: {
       title: "Full process name matching",
-      description: "PROCESS-NAME matches a complete process name.",
-      purpose: "Apply one rule to connections from processes with that name.",
-      scenarios:
-        "WeChat.exe produces PROCESS-NAME,WeChat.exe. Do not enter C:\\Apps\\WeChat.exe.",
-      cautions:
-        "This is not a substring or regular expression match. Identically named processes in different directories may all match. It requires process information from mihomo and a classical rule set. See the official mihomo documentation for platform support and syntax.",
+      purpose: "Match an exact process name so connections from processes with that name share one rule.",
+      scenarios: "Use to route an application whose exact process name is stable.",
+      cautions: "This is not a substring or regular expression match. Identically named processes in different directories may all match. It requires process information from mihomo and a classical rule set. See the official mihomo documentation for platform support and syntax.",
+      example: "WeChat.exe produces PROCESS-NAME,WeChat.exe. Do not enter C:\\Apps\\WeChat.exe.",
     },
     processPath: {
       title: "Process path substring matching",
-      description:
-        "Start with the full path, or keep only a path fragment, to generate PROCESS-PATH-REGEX.",
-      purpose:
-        "Identify a process by its application directory or executable path.",
-      scenarios:
-        "Shorten C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe to \\Microsoft\\Edge. On Linux / macOS, keep /usr/bin/ or /Applications/Example.app/.",
-      cautions:
-        "Enter a literal path, without writing regex syntax or doubling backslashes. Backslashes, dots, parentheses, and other regex characters are escaped automatically. Linux / macOS normally use forward slashes /, which need no escaping. Windows paths ignore case by default; adjust the switch as needed. Shorter substrings match more paths. Requires process information and a classical rule set; see the official mihomo documentation for syntax.",
+      purpose: "Identify an application by text contained in its executable path, saved as a PROCESS-PATH-REGEX rule.",
+      scenarios: "Use to distinguish same-named programs by installation location, or route programs from one directory together.",
+      cautions: "Enter a literal path, without writing regex syntax or doubling backslashes. Backslashes, dots, parentheses, and other regex characters are escaped automatically. Linux / macOS normally use forward slashes /, which need no escaping. Windows paths ignore case by default; adjust the switch as needed. Shorter substrings match more paths. Requires process information and a classical rule set; see the official mihomo documentation for syntax.",
+      example: "Shorten C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe to \\Microsoft\\Edge. On Linux / macOS, keep /usr/bin/ or /Applications/Example.app/.",
     },
   },
 };

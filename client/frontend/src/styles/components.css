@@ -87,11 +87,13 @@
   color: var(--color-accent);
 }
 
-.feature-help-section:last-child .feature-help-section-title .anticon {
+.feature-help-caution .feature-help-section-title .anticon {
   color: var(--color-warning);
 }
 
 .feature-help-section p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 0 0 0 21px;
   color: var(--color-text-secondary);
   font-size: var(--font-size-body);

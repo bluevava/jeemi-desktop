@@ -17,7 +17,7 @@ void jeemi_tray_stop(uintptr_t handle);
 void jeemi_tray_set_icon(uintptr_t handle, const void *bytes, size_t length);
 void jeemi_tray_set_tooltip(uintptr_t handle, const char *text);
 void jeemi_tray_enable_menu(uintptr_t handle);
-void jeemi_tray_update_item(uintptr_t handle, uint32_t item, const char *title, const char *tooltip);
+void jeemi_tray_update_item(uintptr_t handle, uint32_t item, const char *title, const char *tooltip, int enabled);
 void jeemi_tray_add_separator(uintptr_t handle);
 
 #endif

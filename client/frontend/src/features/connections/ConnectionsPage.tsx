@@ -11,9 +11,7 @@ import {
   Empty,
   Input,
   Segmented,
-  Select,
   Spin,
-  Tag,
   Tooltip,
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
@@ -25,9 +23,6 @@ import { FeatureHelp } from "../../components/help/FeatureHelp";
 import {
   closeConnections,
   closeConnection,
-  getConnections,
-  getProxyRuntimeState,
-  subscribeConnections,
   type MihomoConnection,
   type MihomoConnectionsSnapshot,
   type MihomoStreamState,
@@ -38,6 +33,7 @@ import {
   type ConnectionRouteFilter,
 } from "./connectionFilters";
 import { ConnectionDetailsDialog } from "./ConnectionDetailsDialog";
+import { observeConnections } from "./connectionFeed";
 import {
   connectionMatchedRule,
   connectionOutbound,
@@ -58,10 +54,6 @@ export function ConnectionsPage() {
   const [query, setQuery] = useState("");
   const [routeFilter, setRouteFilter] =
     useState<ConnectionRouteFilter>("all");
-  const [proxySelectors, setProxySelectors] = useState<string[]>([]);
-  const [selectedProxySelectors, setSelectedProxySelectors] = useState<
-    string[] | null
-  >(null);
   const [closingID, setClosingID] = useState("");
   const [closeAllBusy, setCloseAllBusy] = useState(false);
   const [operationError, setOperationError] = useState(false);
@@ -75,67 +67,22 @@ export function ConnectionsPage() {
     session !== null;
 
   useEffect(() => {
-    setSelectedProxySelectors(null);
-  }, [runtime?.mihomo.generationId, session?.id]);
-
-  useEffect(() => {
     setSnapshot(null);
     setUpdatedAt(0);
     setOperationError(false);
-    setProxySelectors([]);
     if (!isWindowVisible || !liveDataReady || !runtimeReady || !session) {
       setStreamState("offline");
       return () => undefined;
     }
 
-    let active = true;
     setStreamState("connecting");
-    void getConnections(session)
-      .then((value) => {
-        if (active) {
-          setSnapshot(value);
-          setUpdatedAt(Date.now());
-        }
-      })
-      .catch(() => {
-        if (active) setStreamState("error");
-      });
-    const refreshProxySelectors = async () => {
-      try {
-        const value = await getProxyRuntimeState(session);
-        if (!active) return;
-        setProxySelectors(value.selectorNames);
-        setSelectedProxySelectors((current) =>
-          current === null
-            ? null
-            : current.filter((name) => value.selectorNames.includes(name)),
-        );
-      } catch {
-        // Keep the last known selector list during a transient controller
-        // failure. The connection stream state still disables destructive
-        // actions when the session is no longer live.
-      }
-    };
-    void refreshProxySelectors();
-    const selectorTimer = globalThis.setInterval(
-      refreshProxySelectors,
-      10000,
-    );
-    const unsubscribe = subscribeConnections(session, {
+    return observeConnections(session, {
       onMessage: (value) => {
-        if (!active) return;
         setSnapshot(value);
         setUpdatedAt(Date.now());
       },
-      onStateChange: (value) => {
-        if (active) setStreamState(value);
-      },
+      onStateChange: setStreamState,
     });
-    return () => {
-      active = false;
-      globalThis.clearInterval(selectorTimer);
-      unsubscribe();
-    };
   }, [
     isWindowVisible,
     liveDataReady,
@@ -148,12 +95,8 @@ export function ConnectionsPage() {
     return filterConnections(snapshot?.connections ?? [], {
       query,
       route: routeFilter,
-      selectedSelectors:
-        selectedProxySelectors === null
-          ? null
-          : new Set(selectedProxySelectors),
     });
-  }, [query, routeFilter, selectedProxySelectors, snapshot]);
+  }, [query, routeFilter, snapshot]);
   const live = streamState === "live";
 
   useEffect(() => {
@@ -244,17 +187,12 @@ export function ConnectionsPage() {
                   {
                     count: connections.length,
                     total: snapshot?.connections.length ?? 0,
-                    upload: formatBytes(snapshot?.uploadTotal ?? 0, i18n.language),
-                    download: formatBytes(snapshot?.downloadTotal ?? 0, i18n.language),
                   },
                 )}
               </small>
             </div>
           </div>
           <div className="connections-toolbar-actions">
-            <Tag color={live ? "success" : streamState === "offline" ? "default" : "processing"}>
-              {t(`connections.states.${streamState}`)}
-            </Tag>
             <Segmented
               aria-label={t("connections.filters.route")}
               onChange={(value) =>
@@ -267,24 +205,6 @@ export function ConnectionsPage() {
               ]}
               value={routeFilter}
             />
-            {routeFilter === "proxy" ? (
-              <Select
-                aria-label={t("connections.filters.selectors")}
-                maxTagCount="responsive"
-                mode="multiple"
-                onChange={(values) =>
-                  setSelectedProxySelectors(
-                    values.length === proxySelectors.length ? null : values,
-                  )
-                }
-                options={proxySelectors.map((name) => ({
-                  label: name,
-                  value: name,
-                }))}
-                placeholder={t("connections.filters.selectorsPlaceholder")}
-                value={selectedProxySelectors ?? proxySelectors}
-              />
-            ) : null}
             <Input
               allowClear
               aria-label={t("connections.search")}
@@ -342,7 +262,9 @@ export function ConnectionsPage() {
         {!runtimeReady ? null : !snapshot ? (
           <div className="connections-loading">
             <Spin />
-            <span>{t("connections.loading")}</span>
+            <span>{t(streamState === "error" || streamState === "reconnecting"
+              ? `connections.states.${streamState}`
+              : "connections.loading")}</span>
           </div>
         ) : connections.length === 0 ? (
           <Empty

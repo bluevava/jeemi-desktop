@@ -67,6 +67,7 @@ func (a *App) startTray(ctx context.Context) {
 				// separate goroutine so that loop can process its removal message.
 				go a.requestQuit(ctx)
 			},
+			a.trayProxyControls(),
 		)
 	}
 }
