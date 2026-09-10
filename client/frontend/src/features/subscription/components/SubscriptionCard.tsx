@@ -142,6 +142,7 @@ export function SubscriptionCard({
           })}
         </Tag>
       </div>
+      {!!subscription.chainProxyGroupIds?.length && <div className="subscription-card-association">{t("chainProxy.associationTag", { count: subscription.chainProxyGroupIds.length })}</div>}
       {localConfigName || localScriptName ? (
         <div className="subscription-card-association">
           {t("subscription.card.associated", {

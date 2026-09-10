@@ -56,6 +56,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
   sessionIDRef.current = session?.id ?? "";
   subscriptionIDRef.current = runtime?.mihomo.subscriptionId ?? "";
   const subscriptionSourceKey = [
+    runtime?.configuration.chainProxyFingerprint ?? "",
     runtime?.configuration.subscriptionId ?? "",
     runtime?.configuration.subscriptionRevision ?? "",
     runtime?.configuration.localConfigId ?? "",

@@ -13,12 +13,15 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"jeemi/internal/subscriptionformat"
 )
 
 func TestFetchDetectsConvertedBodiesDespiteMIMEAndExtension(t *testing.T) {
 	for _, body := range []string{
 		"[Proxy]\nNode = socks5, 192.0.2.1, 1080, user, pass\n",
 		base64.StdEncoding.EncodeToString([]byte("anytls://pass@node.example.test:443#Node")),
+		"broken first node\nunknown://fixture\ntrojan://fixture@node.example.invalid:443?tfo=0#Good",
 	} {
 		t.Run(strings.Split(body, "\n")[0][:6], func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +35,45 @@ func TestFetchDetectsConvertedBodiesDespiteMIMEAndExtension(t *testing.T) {
 				t.Fatal("body detection or raw preservation failed", err)
 			}
 		})
+	}
+}
+
+func TestURLRefreshKeepsValidURINodesAndRejectsZeroNodes(t *testing.T) {
+	store, _ := newTestStore(t)
+	mixed := []byte("broken first node\nunknown://fixture\ntrojan://fixture@node.example.invalid:443?tfo=0#Good")
+	f := &queuedFetcher{results: []FetchedContent{
+		{Format: FormatText, Contents: []byte("anytls://pass@node.example.test:443#Old")},
+		{Format: FormatText, Contents: mixed, RemoteProfile: RemoteProfile{HasTraffic: true, TotalBytes: 20}},
+		{Format: FormatText, Contents: []byte("unknown://fixture\ntrojan://fixture@node.example.invalid:invalid")},
+	}}
+	m, err := NewManager(ManagerOptions{Store: store, Fetcher: f})
+	if err != nil {
+		t.Fatal(err)
+	}
+	initial, err := m.ImportURL(context.Background(), ImportURLInput{Name: "Fixture", SourceURL: "https://example.test/sub"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := initial.Subscriptions[0].ID
+	if _, err := m.Refresh(context.Background(), id); err != nil {
+		t.Fatal("mixed-node refresh rejected valid nodes", err)
+	}
+	before, _ := m.State()
+	text, err := m.Text(id)
+	digest := sha256.Sum256(mixed)
+	if err != nil || text.Contents != string(mixed) || before.Subscriptions[0].CurrentRevisionID != hex.EncodeToString(digest[:]) {
+		t.Fatal("refresh did not preserve the full original bytes and digest", err)
+	}
+	parsed, err := subscriptionformat.Normalize([]byte(text.Contents))
+	if err != nil || parsed.Report.ProxyCount != 1 || parsed.Report.SkippedNodes != 2 {
+		t.Fatal("stored mixed revision cannot be projected", err)
+	}
+	if _, err := m.Refresh(context.Background(), id); err == nil {
+		t.Fatal("refresh accepted zero usable nodes")
+	}
+	after, err := m.State()
+	if err != nil || !reflect.DeepEqual(before, after) {
+		t.Fatal("zero-node refresh replaced the valid revision or metadata", err)
 	}
 }
 

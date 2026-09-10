@@ -728,6 +728,9 @@ func validateContents(format Format, contents []byte) error {
 }
 
 func validateStoredMetadata(metadata metadataDocument, id string) error {
+	if err := validateChainGroups(metadata.ChainProxyGroupIDs, metadata.ChainProxyRevision); err != nil {
+		return err
+	}
 	if metadata.ManifestVersion != manifestVersion || metadata.ID != id {
 		return fmt.Errorf("subscription metadata is inconsistent")
 	}
@@ -846,6 +849,8 @@ func newRevision(format Format, contents []byte, createdAt string) revisionDocum
 func summaryFromMetadata(metadata metadataDocument) Summary {
 	revision, _ := findRevision(metadata.Revisions, metadata.CurrentRevisionID)
 	return Summary{
+		ChainProxyGroupIDs:           append([]string{}, metadata.ChainProxyGroupIDs...),
+		ChainProxyRevision:           metadata.ChainProxyRevision,
 		Fallback:                     metadata.Fallback,
 		FallbackResetTarget:          metadata.FallbackResetTarget,
 		ID:                           metadata.ID,

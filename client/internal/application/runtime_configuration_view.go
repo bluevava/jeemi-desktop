@@ -17,6 +17,7 @@ const (
 // never exposes a managed file path, controller address, controller secret, or
 // CORS policy.
 type RuntimeConfigurationText struct {
+	ChainProxyFingerprint        string `json:"chainProxyFingerprint"`
 	Source                       string `json:"source"`
 	Contents                     string `json:"contents"`
 	GenerationID                 string `json:"generationId"`
@@ -48,7 +49,8 @@ func (s *Service) RuntimeConfigurationText() (RuntimeConfigurationText, error) {
 		}
 		configurationStatus := s.runtimeConfigurationStatus()
 		return RuntimeConfigurationText{
-			Source: runtimeConfigurationViewActive, Contents: string(contents),
+			ChainProxyFingerprint: view.Source.ChainProxyFingerprint,
+			Source:                runtimeConfigurationViewActive, Contents: string(contents),
 			GenerationID: view.GenerationID, Fingerprint: configurationStatus.AppliedFingerprint,
 			SubscriptionID: view.Source.SubscriptionID, SubscriptionRevision: view.Source.SubscriptionRevision,
 			LocalConfigID: view.Source.LocalConfigID, LocalConfigRevision: view.Source.LocalConfigRevision,
@@ -81,7 +83,8 @@ func (s *Service) RuntimeConfigurationText() (RuntimeConfigurationText, error) {
 		return RuntimeConfigurationText{}, err
 	}
 	return RuntimeConfigurationText{
-		Source: runtimeConfigurationViewResolved, Contents: string(contents),
+		ChainProxyFingerprint: snapshot.Manifest.ChainProxyFingerprint,
+		Source:                runtimeConfigurationViewResolved, Contents: string(contents),
 		Fingerprint:    snapshot.Manifest.Fingerprint,
 		SubscriptionID: snapshot.Manifest.SubscriptionID, SubscriptionRevision: snapshot.Manifest.SubscriptionRevision,
 		LocalConfigID: snapshot.Manifest.LocalConfigID, LocalConfigRevision: snapshot.Manifest.LocalConfigRevision,

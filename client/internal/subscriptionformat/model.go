@@ -5,7 +5,7 @@ package subscriptionformat
 import "fmt"
 
 const (
-	Version             = 1
+	Version             = 3
 	MaxBytes            = 4 << 20
 	maxLines            = 20000
 	maxLineBytes        = 384 << 10 // cert:// can carry a bounded PEM chain.
@@ -62,10 +62,12 @@ type tlsOptions struct {
 type transportOptions struct{ Network, Path, Host, ServiceName, Mode string }
 
 type proxyNode struct {
+	Native                                map[string]any
 	Name, Protocol, Server                string
 	Port, Line                            int
 	Username, Password, UUID, Cipher, PSK string
 	UDP                                   *bool
+	TFO                                   *bool
 	TLS                                   tlsOptions
 	Transport                             transportOptions
 	IdleCheck, IdleTimeout, MinIdle       *int64

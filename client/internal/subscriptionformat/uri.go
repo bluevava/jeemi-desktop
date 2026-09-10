@@ -2,6 +2,7 @@ package subscriptionformat
 
 import (
 	"encoding/hex"
+	"errors"
 	"net"
 	"net/url"
 	"strconv"
@@ -23,13 +24,14 @@ func parseURIList(text string) (parsedDocument, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		if len(line) > maxLineBytes {
-			return p, failure("size_limit", index+1, "")
-		}
 		if !uriStart.MatchString(line) {
-			return p, failure("invalid_uri", index+1, "")
+			p.skip("invalid_uri", index+1, "")
+			continue
 		}
 		scheme, _, _ := strings.Cut(line, ":")
+		if len(line) > maxLineBytes && oneOf(strings.ToLower(scheme), "host", "cert") {
+			return p, failure("size_limit", index+1, "")
+		}
 		switch strings.ToLower(scheme) {
 		case "host":
 			policy, err := parseHostURI(line, index+1)
@@ -44,12 +46,19 @@ func parseURIList(text string) (parsedDocument, error) {
 			}
 			p.Certificates = append(p.Certificates, cert)
 		default:
-			if len(line) > 32<<10 {
-				return p, failure("size_limit", index+1, "")
+			if len(line) > 256<<10 {
+				p.skip("size_limit", index+1, "")
+				continue
 			}
 			node, unsupported, err := parseProxyURI(line, index+1)
 			if err != nil {
-				return p, err
+				var detail *Error
+				if errors.As(err, &detail) {
+					p.skip(detail.Code, index+1, detail.Field)
+				} else {
+					p.skip("invalid_uri", index+1, "")
+				}
+				continue
 			}
 			if unsupported != "" {
 				p.skip(unsupported, index+1, "")
@@ -61,7 +70,7 @@ func parseURIList(text string) (parsedDocument, error) {
 	return p, nil
 }
 
-func parseProxyURI(raw string, line int) (proxyNode, string, error) {
+func parseLegacyProxyURI(raw string, line int) (proxyNode, string, error) {
 	n := proxyNode{Line: line}
 	scheme, _, _ := strings.Cut(raw, ":")
 	switch strings.ToLower(scheme) {
@@ -156,6 +165,13 @@ func parseProxyURI(raw string, line int) (proxyNode, string, error) {
 		}
 		n.TLS = readTLS(r)
 		n.TLS.Enabled = true
+		// Some URI exporters spell out AnyTLS's intrinsic TCP/TLS transport.
+		// Consume those markers without emitting VLESS-only transport fields.
+		network, security := r.text("network"), r.text("security")
+		n.TFO = r.boolean("tcp_fast_open")
+		if !oneOf(network, "", "tcp") || !oneOf(security, "", "tls") {
+			return n, "unsupported_transport", r.err
+		}
 		n.UDP = r.boolean("udp")
 		if n.UDP == nil {
 			n.UDP = boolValue(true)

@@ -98,6 +98,16 @@ func renderMihomo(p *parsedDocument) ([]byte, string, error) {
 }
 
 func renderNode(n proxyNode) map[string]any {
+	if n.Native != nil {
+		result := make(map[string]any, len(n.Native))
+		for key, value := range n.Native {
+			result[key] = value
+		}
+		if n.TLS.LeafSHA256 != "" {
+			result["fingerprint"] = n.TLS.LeafSHA256
+		}
+		return result
+	}
 	p := map[string]any{"name": n.Name, "type": n.Protocol, "server": n.Server, "port": n.Port}
 	if n.UDP != nil && n.Protocol != "tuic" {
 		p["udp"] = *n.UDP
@@ -111,6 +121,9 @@ func renderNode(n proxyNode) map[string]any {
 		p["password"] = n.Password
 	case "anytls":
 		p["password"] = n.Password
+		if n.TFO != nil {
+			p["tfo"] = *n.TFO
+		}
 		if n.IdleCheck != nil {
 			p["idle-session-check-interval"] = *n.IdleCheck
 		}

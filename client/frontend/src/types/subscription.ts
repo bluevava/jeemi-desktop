@@ -1,3 +1,5 @@
+import type { ChainProxyComposition } from "./chainProxy";
+
 export interface FallbackSelection {
   mode: "none" | "direct" | "selector";
   selector: string;
@@ -56,6 +58,8 @@ export interface SubscriptionNormalizationReport {
 }
 
 export interface SubscriptionSummary {
+  chainProxyGroupIds: string[];
+  chainProxyRevision: number;
   fallback: FallbackSelection;
   fallbackResetTarget: string;
   id: string;
@@ -151,6 +155,8 @@ export interface SubscriptionRuleProvider {
 }
 
 export interface SubscriptionProjection {
+  chainProxyFingerprint: string;
+  chainProxy: ChainProxyComposition;
   normalizationFingerprint: string;
   fallback: FallbackState;
   subscriptionId: string;
@@ -220,6 +226,7 @@ export interface SubscriptionScreenImportResult {
 }
 
 export interface ProxyDelayCacheScope {
+  chainProxyFingerprint: string;
   normalizationFingerprint: string;
   subscriptionId: string;
   subscriptionRevision: string;

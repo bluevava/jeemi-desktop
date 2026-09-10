@@ -1,12 +1,16 @@
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { App, Button } from "antd";
+import { App, Button, Typography } from "antd";
 
 import appIcon from "../../assets/appicon.png";
 import { useRuntimeStatus } from "../../app/runtime/RuntimeStatusContext";
 import { FeatureCard } from "../../components/layout/FeatureCard";
-import { openJeemiRepository } from "../../services/appBridge";
+import {
+  jeemiCommunityURLs,
+  openJeemiCommunity,
+  openJeemiRepository,
+} from "../../services/appBridge";
 import { homeSettingsSectionPath } from "../../app/homeSettingsNavigation";
 import { JeemiUpdateButton } from "../update/JeemiUpdateButton";
 import { useAuthorizationHelperStatus } from "./useAuthorizationHelperStatus";
@@ -32,6 +36,14 @@ export function AboutJeemiCard() {
     }
   };
 
+  const openCommunity = async (destination: keyof typeof jeemiCommunityURLs) => {
+    try {
+      await openJeemiCommunity(destination);
+    } catch {
+      void message.error(t("home.about.community.error"));
+    }
+  };
+
   return (
     <FeatureCard
       className="home-about-card"
@@ -50,7 +62,33 @@ export function AboutJeemiCard() {
         src={appIcon}
       />
       <div className="home-about-content">
-        <p>{t("home.about.description")}</p>
+        <p>
+          {t("home.about.description")}{" "}
+          <Typography.Link
+            href={jeemiCommunityURLs.group}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t("home.about.community.groupLabel")}
+            onClick={(event) => {
+              event.preventDefault();
+              void openCommunity("group");
+            }}
+          >
+            {t("home.about.community.group")}
+          </Typography.Link>{" "}
+          <Typography.Link
+            href={jeemiCommunityURLs.channel}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t("home.about.community.channelLabel")}
+            onClick={(event) => {
+              event.preventDefault();
+              void openCommunity("channel");
+            }}
+          >
+            {t("home.about.community.channel")}
+          </Typography.Link>
+        </p>
         <dl className="home-about-facts">
           <AboutFact
             label={t("home.version")}

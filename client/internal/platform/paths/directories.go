@@ -134,6 +134,14 @@ func LocalConfigResourcesFileFromRoot(dataRoot string) (string, error) {
 	return filepath.Join(root, "resources", "library.json"), nil
 }
 
+func ChainProxyLibraryFileFromRoot(dataRoot string) (string, error) {
+	root, err := validateDataRoot(dataRoot)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, "chain-proxies", "library.json"), nil
+}
+
 // SubscriptionsDirectoryFromRoot returns the managed root for imported
 // subscription sources and their immutable revisions.
 func SubscriptionsDirectoryFromRoot(dataRoot string) (string, error) {

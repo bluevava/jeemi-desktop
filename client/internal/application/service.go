@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"jeemi/internal/appupdate"
+	"jeemi/internal/chainproxy"
 	configresolved "jeemi/internal/config/resolved"
 	configresources "jeemi/internal/config/resources"
 	configschema "jeemi/internal/config/schema"
@@ -60,28 +61,31 @@ type BootstrapState struct {
 }
 
 type Service struct {
-	mu                  sync.RWMutex
-	reconcileMu         sync.Mutex
-	associationMu       sync.Mutex
-	ctx                 context.Context
-	runtime             RuntimeStatus
-	versionManager      *core.VersionManager
-	geoDataManager      *geodata.Manager
-	settingsStore       *settings.Store
-	localConfigs        *profile.LocalConfigStore
-	localScripts        *localscript.Store
-	configResources     *configresources.Store
-	subscriptions       *subscription.Manager
-	runtimeManager      *mihomoruntime.Manager
-	resolvedConfigs     *configresolved.Store
-	delayCache          *delaycache.Store
-	uiDiagnostics       *uidiagnostics.Store
-	authorizeCore       func(context.Context, coreauth.Target) error
-	coreOperationCancel context.CancelFunc
-	pendingRefresh      *pendingSubscriptionRefresh
-	pendingPackage      *pendingLocalPackage
-	shuttingDown        bool
-	jeemiUpdater        *appupdate.Manager
+	mu                   sync.RWMutex
+	reconcileMu          sync.Mutex
+	associationMu        sync.Mutex
+	ctx                  context.Context
+	runtime              RuntimeStatus
+	versionManager       *core.VersionManager
+	geoDataManager       *geodata.Manager
+	settingsStore        *settings.Store
+	localConfigs         *profile.LocalConfigStore
+	localScripts         *localscript.Store
+	configResources      *configresources.Store
+	chainProxies         *chainproxy.Store
+	chainFetcher         subscription.Fetcher
+	chainOperationCancel context.CancelFunc
+	subscriptions        *subscription.Manager
+	runtimeManager       *mihomoruntime.Manager
+	resolvedConfigs      *configresolved.Store
+	delayCache           *delaycache.Store
+	uiDiagnostics        *uidiagnostics.Store
+	authorizeCore        func(context.Context, coreauth.Target) error
+	coreOperationCancel  context.CancelFunc
+	pendingRefresh       *pendingSubscriptionRefresh
+	pendingPackage       *pendingLocalPackage
+	shuttingDown         bool
+	jeemiUpdater         *appupdate.Manager
 }
 
 func NewService(dataDirectory string) (*Service, error) {
@@ -123,6 +127,10 @@ func NewService(dataDirectory string) (*Service, error) {
 		return nil, err
 	}
 	var service *Service
+	chainProxies, err := chainproxy.NewStore(dataDirectory)
+	if err != nil {
+		return nil, err
+	}
 	subscriptions, err := subscription.NewManager(subscription.ManagerOptions{
 		DataDirectory: dataDirectory,
 		ValidateImport: func(ctx context.Context, contents []byte) error {
@@ -166,6 +174,8 @@ func NewService(dataDirectory string) (*Service, error) {
 		localConfigs:    localConfigs,
 		localScripts:    localScripts,
 		configResources: configResources,
+		chainProxies:    chainProxies,
+		chainFetcher:    subscription.NewHTTPFetcher(),
 		subscriptions:   subscriptions,
 		runtimeManager:  runtimeManager,
 		resolvedConfigs: resolvedConfigs,
@@ -643,6 +653,7 @@ func (s *Service) Startup(ctx context.Context) {
 }
 
 func (s *Service) Shutdown(ctx context.Context) error {
+	s.CancelChainProxyRefresh()
 	if s.jeemiUpdater != nil {
 		s.jeemiUpdater.Cancel()
 	}

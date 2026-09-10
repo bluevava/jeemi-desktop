@@ -52,6 +52,7 @@ type Status struct {
 }
 
 type Source struct {
+	ChainProxyFingerprint        string `json:"chainProxyFingerprint"`
 	NormalizationFingerprint     string `json:"normalizationFingerprint"`
 	SubscriptionID               string `json:"subscriptionId"`
 	SubscriptionRevision         string `json:"subscriptionRevision"`

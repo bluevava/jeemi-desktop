@@ -23,6 +23,7 @@ var fields = map[string]fieldDefinition{
 	"skip_cert_verify":   {[]string{"skip-cert-verify", "allowInsecure", "insecure", "allow_insecure"}, "bool"},
 	"alpn":               {[]string{"alpn"}, "list"},
 	"udp":                {[]string{"udp", "udp-relay"}, "bool"},
+	"tcp_fast_open":      {[]string{"tfo"}, "bool"},
 	"idle_check":         {[]string{"idle_session_check_interval", "idle-session-check-interval"}, "seconds"},
 	"idle_timeout":       {[]string{"idle_session_timeout", "idle-session-timeout"}, "seconds"},
 	"min_idle":           {[]string{"min_idle_session", "min-idle-session"}, "integer"},

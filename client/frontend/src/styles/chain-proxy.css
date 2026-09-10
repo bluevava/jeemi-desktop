@@ -1,0 +1,28 @@
+.chain-proxy-toolbar, .chain-proxy-actions, .chain-proxy-group-title, .chain-proxy-source-title, .chain-proxy-node-footer {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+}
+.chain-proxy-toolbar, .chain-proxy-node-footer { justify-content: space-between; }
+.chain-proxy-toolbar { flex-wrap: wrap; }
+.chain-proxy-group-title { flex-wrap: wrap; }
+.chain-proxy-group-title > strong { overflow-wrap: anywhere; }
+.chain-proxy-group-title > span:last-child, .chain-proxy-node-footer, .chain-proxy-muted, .chain-proxy-source-meta { color: var(--color-text-secondary); font-size: var(--font-size-caption); }
+.chain-proxy-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.chain-proxy-filter-summary > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.chain-proxy-filter-summary span { color: var(--color-text-secondary); font-size: var(--font-size-caption); }
+.chain-proxy-filter-summary code { font-family: inherit; overflow-wrap: anywhere; }
+.chain-proxy-node-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 10px; }
+.chain-proxy-node { padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-muted); min-width: 0; }
+.chain-proxy-node > strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-body); margin-bottom: 6px; }
+.chain-proxy-node-footer > span:last-child { display: flex; }
+.chain-proxy-source { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--color-border); padding-top: 16px; }
+.chain-proxy-source-title { flex-wrap: wrap; }
+.chain-proxy-source-title > strong { overflow-wrap: anywhere; }
+.chain-proxy-source-title > .chain-proxy-actions { margin-left: auto; }
+.chain-proxy-source-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; overflow-wrap: anywhere; }
+.chain-proxy-text { font-family: monospace; font-size: var(--font-size-body); }
+.chain-proxy-association .ant-select { width: 100%; }
+.chain-proxy-association-group { border: 1px solid var(--color-border); border-radius: 10px; padding: 12px; margin-top: 12px; }
+.chain-proxy-association-group > div { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chain-proxy-composition summary { cursor: pointer; color: var(--color-text-secondary); }
+.chain-proxy-composition ul { padding-left: 20px; }
+@media (max-width: 650px) { .chain-proxy-filters { grid-template-columns: minmax(0, 1fr); } }

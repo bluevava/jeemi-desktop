@@ -51,6 +51,7 @@ export type RuntimeConfigurationState =
   | "failed";
 
 export interface RuntimeConfigurationStatus {
+  chainProxyFingerprint: string;
   state: RuntimeConfigurationState;
   trigger: string;
   desiredFingerprint: string;
@@ -71,6 +72,7 @@ export interface RuntimeConfigurationStatus {
 }
 
 export interface RuntimeConfigurationText {
+  chainProxyFingerprint: string;
   source: "active" | "resolved";
   contents: string;
   generationId: string;
@@ -121,6 +123,7 @@ export interface MihomoRuntimeStatus {
   subscriptionId: string;
   source: {
     normalizationFingerprint: string;
+    chainProxyFingerprint: string;
     subscriptionId: string;
     subscriptionRevision: string;
     localConfigId: string;

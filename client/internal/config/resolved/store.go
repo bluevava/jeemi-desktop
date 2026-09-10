@@ -28,6 +28,7 @@ var (
 )
 
 type Input struct {
+	ChainProxyFingerprint        string
 	NormalizationFingerprint     string
 	SubscriptionID               string
 	SubscriptionRevision         string
@@ -46,6 +47,7 @@ type Input struct {
 }
 
 type Manifest struct {
+	ChainProxyFingerprint        string                    `json:"chainProxyFingerprint"`
 	NormalizationFingerprint     string                    `json:"normalizationFingerprint"`
 	Version                      int                       `json:"version"`
 	Fingerprint                  string                    `json:"fingerprint"`
@@ -106,6 +108,7 @@ func (s *Store) Save(input Input) (Snapshot, error) {
 		return Snapshot{}, fmt.Errorf("create resolved runtime root: %w", err)
 	}
 	manifest := Manifest{
+		ChainProxyFingerprint:    input.ChainProxyFingerprint,
 		NormalizationFingerprint: input.NormalizationFingerprint,
 		Version:                  manifestVersion, Fingerprint: fingerprint,
 		GeneratedAt:    s.now().UTC().Format(time.RFC3339Nano),
@@ -192,6 +195,7 @@ func Fingerprint(input Input) (string, string, error) {
 	digest := sha256.Sum256(input.Configuration)
 	configurationDigest := hex.EncodeToString(digest[:])
 	identity := struct {
+		ChainProxyFingerprint        string                    `json:"chainProxyFingerprint"`
 		NormalizationFingerprint     string                    `json:"normalizationFingerprint"`
 		SubscriptionID               string                    `json:"subscriptionId"`
 		SubscriptionRevision         string                    `json:"subscriptionRevision"`
@@ -206,6 +210,7 @@ func Fingerprint(input Input) (string, string, error) {
 		GeoDataFingerprint           string                    `json:"geoDataFingerprint"`
 		ConfigurationSHA256          string                    `json:"configurationSha256"`
 	}{
+		ChainProxyFingerprint:    input.ChainProxyFingerprint,
 		NormalizationFingerprint: input.NormalizationFingerprint,
 		SubscriptionID:           input.SubscriptionID, SubscriptionRevision: input.SubscriptionRevision,
 		LocalConfigID: input.LocalConfigID, LocalConfigRevision: input.LocalConfigRevision,
@@ -225,6 +230,9 @@ func Fingerprint(input Input) (string, string, error) {
 }
 
 func validateInput(input Input) error {
+	if input.ChainProxyFingerprint != "" && !sha256Pattern.MatchString(input.ChainProxyFingerprint) {
+		return fmt.Errorf("chain proxy fingerprint is invalid")
+	}
 	if input.NormalizationFingerprint != "" && !sha256Pattern.MatchString(input.NormalizationFingerprint) {
 		return fmt.Errorf("subscription normalization fingerprint is invalid")
 	}

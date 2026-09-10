@@ -21,6 +21,24 @@ func (a *App) CheckJeemiUpdates() (appupdate.Result, error) {
 	return a.service.CheckJeemiUpdates()
 }
 
+func (a *App) OpenJeemiCommunity(destination string) error {
+	var address string
+	switch destination {
+	case "group":
+		address = "https://t.me/Jeemi_group"
+	case "channel":
+		address = "https://t.me/Jeemi_channel"
+	default:
+		return fmt.Errorf("unknown community destination")
+	}
+	ctx := a.context()
+	if ctx == nil {
+		return fmt.Errorf("application window is unavailable")
+	}
+	wailsRuntime.BrowserOpenURL(ctx, address)
+	return nil
+}
+
 func (a *App) GetJeemiUpdateState() appupdate.State { return a.service.JeemiUpdateState() }
 func (a *App) CancelJeemiUpdate()                   { a.service.CancelJeemiUpdate() }
 func (a *App) DismissJeemiUpdateResult(id string)   { a.service.DismissJeemiUpdateResult(id) }

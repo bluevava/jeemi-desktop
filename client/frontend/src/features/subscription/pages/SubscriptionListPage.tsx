@@ -12,6 +12,8 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Alert, App, Button, Input, Modal, Select, Spin, Tag } from "antd";
+import { ChainProxyAssociation } from "../../chain-proxy/ChainProxyAssociation";
+import { ChainProxyCompositionNotice } from "../../chain-proxy/ChainProxyCompositionNotice";
 import { normalizationErrorKey } from "../normalization";
 import type { MenuProps } from "antd";
 import { createPortal } from "react-dom";
@@ -159,6 +161,7 @@ export function SubscriptionListPage({
   const [scriptAssociationDraft, setScriptAssociationDraft] =
     useState(noLocalHandlerValue);
   const [associationError, setAssociationError] = useState("");
+  const [chainAssociationTarget, setChainAssociationTarget] = useState<SubscriptionSummary | null>(null);
   const [runtimeViewerSignal, setRuntimeViewerSignal] = useState(0);
   const [ruleProvidersOpen, setRuleProvidersOpen] = useState(false);
   const [fallbackBusy, setFallbackBusy] = useState(false);
@@ -232,6 +235,7 @@ export function SubscriptionListPage({
     controllerSession !== null &&
     runtime.mihomo.subscriptionId === state?.selectedSubscriptionId &&
     runtime.mihomo.source.normalizationFingerprint === state?.projection?.normalizationFingerprint &&
+    runtime.mihomo.source.chainProxyFingerprint === state?.projection?.chainProxyFingerprint &&
     runtime.mihomo.source.subscriptionRevision ===
       state?.projection?.revisionId &&
     runtime.mihomo.source.localConfigId === state?.projection?.localConfigId &&
@@ -326,6 +330,7 @@ export function SubscriptionListPage({
     if (!projection?.subscriptionId || !projection.revisionId) return null;
     return {
       normalizationFingerprint: projection.normalizationFingerprint,
+      chainProxyFingerprint: projection.chainProxyFingerprint,
       subscriptionId: projection.subscriptionId,
       subscriptionRevision: projection.revisionId,
       localConfigId: projection.localConfigId,
@@ -337,6 +342,7 @@ export function SubscriptionListPage({
   const delayCacheScopeKey = delayCacheScope
     ? [
         delayCacheScope.normalizationFingerprint,
+        delayCacheScope.chainProxyFingerprint,
         delayCacheScope.subscriptionId,
         delayCacheScope.subscriptionRevision,
         delayCacheScope.localConfigId,
@@ -999,6 +1005,7 @@ export function SubscriptionListPage({
         icon: <CodeOutlined />,
         label: t("subscription.menu.associateScript"),
       },
+      { key: "associate-chain", icon: <LinkOutlined />, label: t("chainProxy.associate") },
       { type: "divider" },
       {
         key: "delete",
@@ -1014,6 +1021,7 @@ export function SubscriptionListPage({
       else if (key === "runtime") setRuntimeViewerSignal((value) => value + 1);
       else if (key === "associate") openAssociation(subscription);
       else if (key === "associate-script") openScriptAssociation(subscription);
+      else if (key === "associate-chain") setChainAssociationTarget(subscription);
       else if (key === "delete") confirmDelete(subscription);
     },
   });
@@ -1099,6 +1107,7 @@ export function SubscriptionListPage({
       {overlayHost ? createPortal(subscriptionShelf, overlayHost) : null}
 
       <div className="page-stack subscription-page">
+        {chainAssociationTarget && <ChainProxyAssociation target={chainAssociationTarget} onClose={() => setChainAssociationTarget(null)} onSaved={setState} />}
         <RuntimeConfigurationViewer
           hideTrigger
           openSignal={runtimeViewerSignal}
@@ -1114,6 +1123,7 @@ export function SubscriptionListPage({
           />
         ) : null}
 
+        <ChainProxyCompositionNotice composition={state.projection?.chainProxy} />
         <SelectorWorkspace
           subscription={state.subscriptions.find(
             (item) => item.id === state.selectedSubscriptionId,

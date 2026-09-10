@@ -107,6 +107,12 @@ func TestFingerprintChangesWithSourceOrRuntimePreferences(t *testing.T) {
 		t.Fatal("normalization revision did not change the runtime fingerprint", err)
 	}
 	changed = base
+	changed.ChainProxyFingerprint = strings.Repeat("a", 64)
+	chainFingerprint, _, err := Fingerprint(changed)
+	if err != nil || chainFingerprint == first {
+		t.Fatal("chain proxy revision did not change the runtime fingerprint", err)
+	}
+	changed = base
 	changed.GeoDataPreferences.Source = geodata.SourceCustom
 	changed.GeoDataPreferences.CustomURLs.GeoSite = "https://example.test/geosite.dat"
 	fifth, _, err := Fingerprint(changed)

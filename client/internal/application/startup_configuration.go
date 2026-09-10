@@ -1,6 +1,7 @@
 package application
 
 import (
+	"jeemi/internal/chainproxy"
 	"jeemi/internal/config/resources"
 	"jeemi/internal/geodata"
 	"jeemi/internal/platform/paths"
@@ -26,6 +27,13 @@ func CheckStartupConfiguration(root string) error {
 		return err
 	}
 	if _, err := library.State(); err != nil {
+		return err
+	}
+	chains, err := chainproxy.NewStore(root)
+	if err != nil {
+		return err
+	}
+	if _, err := chains.Load(); err != nil {
 		return err
 	}
 	return geodata.CheckStartupConfiguration(root)

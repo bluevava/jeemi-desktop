@@ -23,6 +23,7 @@ export function TopBarRuntimeIndicators() {
       runtime.mihomo.controllerReady &&
       runtime.mihomo.subscriptionId === projection.subscriptionId &&
       runtime.mihomo.source.normalizationFingerprint === projection.normalizationFingerprint &&
+      runtime.mihomo.source.chainProxyFingerprint === projection.chainProxyFingerprint &&
       runtime.mihomo.source.subscriptionRevision === projection.revisionId &&
       runtime.mihomo.source.localConfigId === projection.localConfigId &&
       runtime.mihomo.source.localConfigRevision ===

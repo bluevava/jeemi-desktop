@@ -12,8 +12,10 @@ import { zhRuleSetEntry } from "./rule-set-entry";
 import { zhSubscriptionNormalization } from "./subscription-normalization";
 import { zhDNSQuery, zhDNSQueryHelp } from "./dns-query";
 import { zhAppUpdate } from "./app-update";
+import { zhChainProxy, zhChainProxyHelp, zhChainProxyFilterHelp, zhChainProxyImportHelp } from "./chain-proxy";
 
 export const zhCN = {
+  chainProxy: zhChainProxy,
   appUpdate: zhAppUpdate,
   dnsQuery: zhDNSQuery,
   ruleSetEntry: zhRuleSetEntry,
@@ -172,6 +174,13 @@ export const zhCN = {
       repository: "开源仓库",
       repositoryError: "无法打开开源仓库，请稍后重试。",
       description: "一个Mihomo内核管理客户端",
+      community: {
+        group: "官群",
+        channel: "频道",
+        groupLabel: "打开 Jeemi 官方 Telegram 群",
+        channelLabel: "打开 Jeemi 官方 Telegram 频道",
+        error: "无法打开 Telegram 链接，请稍后重试。",
+      },
       manageCore: "管理版本",
       helper: "授权助手",
       removeHelper: "卸载助手",
@@ -541,6 +550,7 @@ export const zhCN = {
       failed: "无法生成最终配置预览",
       status: {
         source_unavailable: "当前订阅原文不可用，请检查受管修订文件。",
+        chain_proxy_failed: "链式代理组合失败，请检查分组筛选、落地节点及 DNS 配置。",
         normalization_failed: "订阅格式转换失败，请检查转换详情或所选核心版本。",
         local_config_unavailable:
           "关联的本地配置不存在或不可读取，请重新关联。",
@@ -1445,6 +1455,9 @@ export const zhCN = {
       cautionsAndExample: "注意点与示例",
     },
     topics: {
+      chainProxy: zhChainProxyHelp,
+      chainProxyFilter: zhChainProxyFilterHelp,
+      chainProxyImport: zhChainProxyImportHelp,
       macNetworkAuthorization: zhMacNetworkHelp,
       proxyAuthorization: zhAuthorizationHelp,
       authorizationCleanup: zhAuthorizationCleanupHelp,
@@ -1562,7 +1575,7 @@ export const zhCN = {
       },
       config: {
         title: "配置",
-        purpose: "集中管理本地配置、main(config) 脚本、策略组与规则集，让多份订阅复用字段调整、节点转换和路由规则。",
+        purpose: "集中管理本地配置、main(config) 脚本、策略组、规则集和链式代理，让多份订阅复用字段调整、节点转换、路由规则和落地节点。",
         scenarios: "订阅内容不能满足本地网络需求，或不同订阅需要关联不同覆盖策略时使用。",
         cautions: "每份订阅最多关联一份本地配置或脚本，两者互斥。保存不等于已激活；被引用资源不能直接删除，最终运行配置仍须校验。",
       },

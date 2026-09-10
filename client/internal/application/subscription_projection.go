@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"fmt"
+	"jeemi/internal/chainproxy"
 
 	"jeemi/internal/config/compose"
 	"jeemi/internal/config/fallbackoverride"
@@ -22,6 +23,7 @@ import (
 )
 
 type composedSubscription struct {
+	ChainProxy             chainproxy.Composition
 	Normalization          subscriptionformat.Report
 	Fallback               fallbackoverride.State
 	Contents               []byte
@@ -37,6 +39,7 @@ const (
 	projectionLocalConfigUnavailable = "local_config_unavailable"
 	projectionLocalScriptUnavailable = "local_script_unavailable"
 	projectionScriptExecutionFailed  = "script_execution_failed"
+	projectionChainProxyFailed       = "chain_proxy_failed"
 	projectionCompositionFailed      = "composition_failed"
 	projectionInspectionFailed       = "inspection_failed"
 )
@@ -119,6 +122,8 @@ func (s *Service) subscriptionProjection(summary subscription.Summary, runtimePr
 	}
 	projection.LocalConfigRevision = composed.LocalConfigRevision
 	projection.LocalScriptRevision = composed.LocalScriptRevision
+	projection.ChainProxy = composed.ChainProxy
+	projection.ChainProxyFingerprint = composed.ChainProxy.Fingerprint
 	inspected, err := configinspect.Configuration(composed.Contents)
 	if err != nil {
 		projection.Status = projectionInspectionFailed
@@ -179,6 +184,7 @@ func (s *Service) composeSubscriptionWithScript(summary subscription.Summary, ru
 // Candidate inputs replace only the requested layer in memory. Preview and
 // validation must never publish a revision, association, or resolved snapshot.
 type compositionCandidate struct {
+	chains    *chainproxy.Library
 	source    []byte
 	local     *profile.LocalConfig
 	resources *configresources.State
@@ -272,6 +278,28 @@ func (s *Service) composeSubscriptionCandidate(summary subscription.Summary, run
 	result.Contents, result.Fallback, err = fallbackoverride.Apply(result.Contents, summary.Fallback)
 	if err != nil {
 		return composedSubscription{}, projectionCompositionFailed, fmt.Errorf("inject subscription fallback: %w", err)
+	}
+	if len(summary.ChainProxyGroupIDs) > 0 || summary.ChainProxyRevision > 0 {
+		library := candidate.chains
+		if library == nil {
+			loaded, loadErr := s.chainProxies.Load()
+			if loadErr != nil {
+				return result, projectionChainProxyFailed, loadErr
+			}
+			library = &loaded
+		}
+		groups, chainErr := chainproxy.SelectedGroups(*library, summary.ChainProxyGroupIDs)
+		if chainErr != nil {
+			return result, projectionChainProxyFailed, chainErr
+		}
+		settings, loadErr := s.settingsStore.Load()
+		if loadErr != nil {
+			return result, projectionChainProxyFailed, loadErr
+		}
+		result.Contents, result.ChainProxy, chainErr = chainproxy.Apply(result.Contents, groups, summary.ChainProxyRevision, settings.Mihomo.SelectedVersion)
+		if chainErr != nil {
+			return result, projectionChainProxyFailed, chainErr
+		}
 	}
 	result.Contents, err = runtimeoverride.Apply(result.Contents, runtimePreferences)
 	if err != nil {

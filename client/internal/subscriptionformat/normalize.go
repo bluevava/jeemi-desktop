@@ -47,6 +47,14 @@ func Normalize(raw []byte) (Result, error) {
 			// additionally validate JSON syntax at the persistence boundary.
 			ast, parseErr := document.Parse(contents)
 			if parseErr != nil {
+				// A malformed first node must not hide later valid URI lines.
+				// Only use this fallback after native YAML has failed, so URI
+				// text inside a valid YAML block scalar remains untouched.
+				if containsURILine(text) {
+					format = "uri"
+					parsed, err = parseURIList(text)
+					break
+				}
 				return Result{}, failure("invalid_native", 0, "")
 			}
 			root := document.Root(ast)
@@ -135,6 +143,15 @@ func decodeBase64(value string) ([]byte, bool) {
 	return nil, false
 }
 
+func containsURILine(text string) bool {
+	for _, line := range strings.Split(text, "\n") {
+		if uriStart.MatchString(strings.TrimSpace(line)) {
+			return true
+		}
+	}
+	return false
+}
+
 func decodeSubscription(text string) (string, bool) {
 	value := strings.NewReplacer("\r", "", "\n", "", " ", "", "\t", "").Replace(text)
 	b, ok := decodeBase64(value)
@@ -142,7 +159,7 @@ func decodeSubscription(text string) (string, bool) {
 		return "", false
 	}
 	decoded := strings.TrimSpace(string(bytes.TrimPrefix(b, []byte{0xef, 0xbb, 0xbf})))
-	return decoded, looksURIList(decoded)
+	return decoded, containsURILine(decoded)
 }
 
 // Advanced VLESS fields are verified against the official v1.19.30 adapter.

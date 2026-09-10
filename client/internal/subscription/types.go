@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"jeemi/internal/chainproxy"
 	"jeemi/internal/config/fallbackoverride"
 	"jeemi/internal/subscriptionformat"
 )
@@ -60,6 +61,8 @@ type CompositionSummary struct {
 }
 
 type Summary struct {
+	ChainProxyGroupIDs           []string                   `json:"chainProxyGroupIds"`
+	ChainProxyRevision           int                        `json:"chainProxyRevision"`
 	Fallback                     fallbackoverride.Selection `json:"fallback"`
 	FallbackResetTarget          string                     `json:"fallbackResetTarget"`
 	ID                           string                     `json:"id"`
@@ -148,6 +151,8 @@ type RuleProvider struct {
 // Projection is an offline view of subscription + local configuration
 // composition. It is not a mihomo-validated or active runtime generation.
 type Projection struct {
+	ChainProxyFingerprint        string                 `json:"chainProxyFingerprint"`
+	ChainProxy                   chainproxy.Composition `json:"chainProxy"`
 	NormalizationFingerprint     string                 `json:"normalizationFingerprint"`
 	Fallback                     fallbackoverride.State `json:"fallback"`
 	SubscriptionID               string                 `json:"subscriptionId"`
@@ -228,6 +233,8 @@ type revisionDocument struct {
 }
 
 type metadataDocument struct {
+	ChainProxyGroupIDs           []string                   `json:"chainProxyGroupIds"`
+	ChainProxyRevision           int                        `json:"chainProxyRevision"`
 	Fallback                     fallbackoverride.Selection `json:"fallback"`
 	FallbackResetTarget          string                     `json:"fallbackResetTarget,omitempty"`
 	ManifestVersion              int                        `json:"manifestVersion"`

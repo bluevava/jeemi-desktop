@@ -30,6 +30,7 @@ const (
 )
 
 type RuntimeConfigurationStatus struct {
+	ChainProxyFingerprint        string                    `json:"chainProxyFingerprint"`
 	State                        RuntimeConfigurationState `json:"state"`
 	Trigger                      string                    `json:"trigger"`
 	DesiredFingerprint           string                    `json:"desiredFingerprint"`
@@ -119,6 +120,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 					status.LocalConfigRevision = 0
 					status.LocalScriptID = ""
 					status.LocalScriptRevision = 0
+					status.ChainProxyFingerprint = ""
 					status.RuleProviderOverrideRevision = 0
 					status.FallbackOverrideRevision = 0
 					status.GeoDataFingerprint = ""
@@ -142,6 +144,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		status.LocalConfigRevision = candidate.resolved.LocalConfigRevision
 		status.LocalScriptID = candidate.resolved.LocalScriptID
 		status.LocalScriptRevision = candidate.resolved.LocalScriptRevision
+		status.ChainProxyFingerprint = candidate.resolved.ChainProxyFingerprint
 		status.RuleProviderOverrideRevision = candidate.resolved.RuleProviderOverrideRevision
 		status.FallbackOverrideRevision = candidate.resolved.FallbackOverrideRevision
 		status.GeoDataFingerprint = candidate.geoDataFingerprint
@@ -398,6 +401,7 @@ func (s *Service) buildRuntimeCandidate() (runtimeCandidate, error) {
 		return runtimeCandidate{}, err
 	}
 	input := configresolved.Input{
+		ChainProxyFingerprint:    composed.ChainProxy.Fingerprint,
 		NormalizationFingerprint: composed.Normalization.Fingerprint,
 		SubscriptionID:           selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
 		LocalConfigID: selected.LocalConfigID, LocalConfigRevision: composed.LocalConfigRevision,
@@ -417,6 +421,7 @@ func (s *Service) buildRuntimeCandidate() (runtimeCandidate, error) {
 			ExecutablePath: installed.ExecutablePath, CoreVersion: installed.Version,
 			Configuration: safeConfiguration, Preferences: document.Runtime,
 			Source: mihomoruntime.Source{
+				ChainProxyFingerprint:    composed.ChainProxy.Fingerprint,
 				NormalizationFingerprint: composed.Normalization.Fingerprint,
 				SubscriptionID:           selected.ID, SubscriptionRevision: selected.CurrentRevisionID,
 				LocalConfigID: selected.LocalConfigID, LocalConfigRevision: composed.LocalConfigRevision,
@@ -444,7 +449,7 @@ func onlyOutboundModeChanged(previous, next runtimeconfig.Preferences) bool {
 }
 
 func sameRuntimeSource(left, right mihomoruntime.Source) bool {
-	return left.NormalizationFingerprint == right.NormalizationFingerprint &&
+	return left.ChainProxyFingerprint == right.ChainProxyFingerprint && left.NormalizationFingerprint == right.NormalizationFingerprint &&
 		left.SubscriptionID == right.SubscriptionID &&
 		left.SubscriptionRevision == right.SubscriptionRevision &&
 		left.LocalConfigID == right.LocalConfigID &&

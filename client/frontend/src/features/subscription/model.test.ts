@@ -12,6 +12,8 @@ import {
 } from "./model";
 
 const subscription: SubscriptionSummary = {
+  chainProxyGroupIds: [],
+  chainProxyRevision: 0,
   id: "abcdef0123456789abcdef0123456789",
   name: "Test",
   description: "",

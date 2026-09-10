@@ -88,6 +88,12 @@ func TestStoreDoesNotReuseResultsAcrossProjectionRevisions(t *testing.T) {
 	if err != nil || len(loaded.Results) != 0 {
 		t.Fatal("changed normalization reused old delay observations", err)
 	}
+	changed = scope
+	changed.ChainProxyFingerprint = strings.Repeat("f", 64)
+	loaded, err = store.Load(changed)
+	if err != nil || len(loaded.Results) != 0 {
+		t.Fatal("changed landing credentials reused old delay observations", err)
+	}
 }
 
 func TestStoreRejectsInvalidInputAndDeletesCache(t *testing.T) {

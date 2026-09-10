@@ -1,0 +1,118 @@
+export const zhChainProxy = {
+  tab: "链式代理", addGroup: "新增分组", editGroup: "编辑分组",
+  manual: "手动组", subscription: "订阅组", name: "分组名称", kind: "分组类型", groupMenu: "{{name}} 的分组操作菜单",
+  selectorFilter: "目标选择器筛选", nodeFilter: "中继节点筛选", landingFilter: "落地节点筛选",
+  matchDefault: "留空：仅最终 MATCH 对应的选择器", allNodes: "留空：全部符合条件的节点",
+  addNodes: "添加节点", addSource: "添加订阅", editSource: "编辑订阅", editNode: "编辑节点",
+  text: "URI / YAML 节点", textPlaceholder: "一行一个 URI，或粘贴 YAML 节点对象、节点数组、proxies 列表",
+  url: "订阅 URL", refresh: "刷新本组", refreshAll: "刷新全部订阅组", refreshFailed: "部分来源未更新，已保留原有节点",
+  cancelRefresh: "取消刷新", empty: "先新增手动组或订阅组，再添加落地节点。", emptyGroup: "本组尚无落地节点",
+  nodeCount: "{{count}} 个节点", sources: "订阅来源", sourceLabel: "来源 {{index}} · {{label}}", updatedAt: "更新于 {{time}}", neverUpdated: "尚未更新",
+  deleteGroup: "删除分组", deleteNode: "删除节点", deleteSource: "删除订阅来源", deleteConfirm: "确认删除“{{name}}”？",
+  deleteImpact: "关联订阅的最终配置会随之重新生成。", saved: "已保存", importResult: "已解析 {{count}} 个节点，跳过 {{skipped}} 个不支持的节点",
+  dialerReplaced: "输入中的 dialer-proxy 已由分组中继规则接管。", normalizationDetails: "解析说明",
+  associate: "关联链式代理", associationTitle: "关联链式代理 · {{name}}", associationGroups: "选择分组",
+  associationPlaceholder: "选择要使用的分组，可多选", missingGroup: "分组已不存在", noGroups: "请先到“配置 → 链式代理”新增分组。",
+  associationTag: "[链式] {{count}} 组", linkedNodes: "使用所选分组的全部落地节点；订阅来源刷新后自动同步增删。",
+  composition: "链式代理：已生成 {{count}} 个节点", diagnostics: "生成详情", dirty: "当前链式代理编辑尚未保存，是否离开？",
+  viewNode: "查看节点", sourceEmpty: "此来源当前没有符合筛选条件的节点", loadRetry: "重新读取",
+  errors: {
+    unknown: "链式代理操作失败，请检查输入后重试。", desktop_unavailable: "请在 Jeemi 客户端中使用此功能。",
+    invalid_group: "分组名称、类型或筛选条件无效。", duplicate_group: "分组名称重复。", group_missing: "分组已不存在，请重新读取。",
+    group_in_use: "此分组仍被订阅配置关联，请先解除关联。", input_limit: "输入或计算量超过限制，请缩小范围。",
+    invalid_nodes: "节点配置无效，请检查名称、协议、服务器和端口。", no_nodes: "没有可导入的代理节点。",
+    duplicate_node_name: "同一手动组或来源内的节点名称不能重复。", single_node_required: "编辑节点时必须输入一个节点。",
+    node_missing: "节点已不存在，请重新读取。", source_missing: "订阅来源已不存在，请重新读取。",
+    invalid_source: "请输入有效的 HTTP/HTTPS 订阅 URL 和筛选条件。", fetch_failed: "拉取订阅失败，原有节点已保留。",
+    candidate_invalid: "新的链式配置未通过关联订阅校验，原有节点已保留。", revision_conflict: "配置已发生变化，请重新读取后再保存。",
+    cancelled: "刷新已取消，已完成的来源保留更新，其余来源保留原节点。", busy: "已有订阅请求正在进行。",
+    invalid_library: "链式代理配置文件无效。", read_failed: "无法读取链式代理配置。", write_failed: "保存失败，原配置已保留。",
+    identity_failed: "无法生成节点标识，请重试。", invalid_configuration: "最终配置结构无效。", invalid_selector: "目标选择器结构无效。",
+    group_filter_invalid: "选择器自身的正则筛选无效或执行超时。", name_conflict: "生成的节点名称与最终配置已有名称冲突。",
+    core_version_required: "所选核心版本不满足落地节点的协议要求，请更新核心。",
+    generation_limit: "生成节点超过 4096 个或配置大小限制，请缩小筛选范围。", dns_conflict: "落地节点 DNS 与已有同域名配置冲突，请统一解析设置。",
+  },
+  diagnostic: {
+    generated: "{{selector}}：生成 {{count}} 个链式节点", match_not_selector: "最终 MATCH 未指向选择器，已忽略此组。",
+    no_selectors_matched: "没有匹配的目标选择器。", no_nodes_matched: "{{selector}}：没有符合条件的中继或落地节点。",
+    provider_skipped: "{{selector}}：只使用配置中可直接确定的节点，不展开远程提供者。",
+    nodes_skipped: "{{selector}}：跳过 {{count}} 项已有链路或被选择器排除的节点。",
+  },
+};
+
+export const enChainProxy = {
+  tab: "Proxy chains", addGroup: "Add group", editGroup: "Edit group",
+  manual: "Manual group", subscription: "Subscription group", name: "Group name", kind: "Group type", groupMenu: "Group actions for {{name}}",
+  selectorFilter: "Target selector filter", nodeFilter: "Intermediary filter", landingFilter: "Landing node filter",
+  matchDefault: "Empty: only the final MATCH selector", allNodes: "Empty: all eligible nodes",
+  addNodes: "Add nodes", addSource: "Add subscription", editSource: "Edit subscription", editNode: "Edit node",
+  text: "URI / YAML nodes", textPlaceholder: "One URI per line, or a YAML proxy object, list of objects, or proxies list",
+  url: "Subscription URL", refresh: "Refresh group", refreshAll: "Refresh all subscription groups", refreshFailed: "Some sources were not updated; their previous nodes were retained",
+  cancelRefresh: "Cancel refresh", empty: "Create a manual or subscription group, then add landing nodes.", emptyGroup: "No landing nodes in this group",
+  nodeCount: "Nodes: {{count}}", sources: "Subscription sources", sourceLabel: "Source {{index}} · {{label}}", updatedAt: "Updated {{time}}", neverUpdated: "Not updated yet",
+  deleteGroup: "Delete group", deleteNode: "Delete node", deleteSource: "Delete subscription source", deleteConfirm: "Delete “{{name}}”?",
+  deleteImpact: "Final configurations of associated subscriptions will be regenerated.", saved: "Saved", importResult: "Parsed {{count}} nodes; skipped {{skipped}} unsupported nodes",
+  dialerReplaced: "The supplied dialer-proxy is now managed by the group’s intermediary rules.", normalizationDetails: "Parsing details",
+  associate: "Associate proxy chains", associationTitle: "Proxy chains · {{name}}", associationGroups: "Select groups",
+  associationPlaceholder: "Select one or more groups", missingGroup: "Group no longer exists", noGroups: "Create a group under Config → Proxy chains first.",
+  associationTag: "[Chains] {{count}} groups", linkedNodes: "Uses all landing nodes in the selected groups. Source refreshes automatically synchronize additions and removals.",
+  composition: "Proxy chains: {{count}} generated nodes", diagnostics: "Generation details", dirty: "Proxy chain edits have not been saved. Leave this page?",
+  viewNode: "View node", sourceEmpty: "No nodes currently match this source’s filter", loadRetry: "Reload",
+  errors: {
+    unknown: "Proxy chain operation failed. Check the input and retry.", desktop_unavailable: "Use this feature in the Jeemi desktop client.",
+    invalid_group: "Invalid group name, type, or filters.", duplicate_group: "Group name already exists.", group_missing: "Group no longer exists. Reload the list.",
+    group_in_use: "Subscriptions still reference this group. Unlink it first.", input_limit: "Input or computation limit exceeded. Narrow the scope.",
+    invalid_nodes: "Invalid node configuration. Check its name, protocol, server, and port.", no_nodes: "No proxy nodes to import.",
+    duplicate_node_name: "Node names must be unique within a manual group or source.", single_node_required: "Enter exactly one node when editing.",
+    node_missing: "Node no longer exists. Reload the list.", source_missing: "Subscription source no longer exists. Reload the list.",
+    invalid_source: "Enter a valid HTTP/HTTPS subscription URL and filter.", fetch_failed: "Subscription fetch failed. Previous nodes were retained.",
+    candidate_invalid: "The candidate failed validation for an associated subscription. Previous nodes were retained.", revision_conflict: "Configuration changed. Reload before saving.",
+    cancelled: "Refresh cancelled. Completed sources remain updated; other sources retain their previous nodes.", busy: "A subscription request is already in progress.",
+    invalid_library: "Invalid proxy chain configuration file.", read_failed: "Cannot read proxy chain configuration.", write_failed: "Save failed. Previous configuration was retained.",
+    identity_failed: "Cannot create a node identity. Retry.", invalid_configuration: "Invalid final configuration structure.", invalid_selector: "Invalid target selector structure.",
+    group_filter_invalid: "A selector’s regular expression is invalid or timed out.", name_conflict: "A generated node name conflicts with an existing name.",
+    core_version_required: "The selected core version does not support a landing node’s required features. Update the core.",
+    generation_limit: "More than 4096 generated nodes or the configuration size limit was reached. Narrow the filters.", dns_conflict: "Landing node DNS conflicts with an existing policy for the same hostname. Align the resolver settings.",
+  },
+  diagnostic: {
+    generated: "{{selector}}: {{count}} chain nodes generated", match_not_selector: "Final MATCH does not target a selector. This group was skipped.",
+    no_selectors_matched: "No matching target selectors.", no_nodes_matched: "{{selector}}: no eligible intermediary or landing nodes.",
+    provider_skipped: "{{selector}}: only directly known configuration nodes are used; remote providers are not expanded.",
+    nodes_skipped: "{{selector}}: skipped {{count}} existing chains or nodes excluded by the selector.",
+  },
+};
+
+export const zhChainProxyHelp = {
+  title: "链式代理", purpose: "把落地节点 B 经中继节点 A 连接，形成 本机 → A → B → 目标。手动组和订阅组管理落地节点，以及加入选择器、中继节点的筛选规则。",
+  scenarios: "已有机场节点作为中继，希望通过自己的 VPS 或其他代理作为最终出口；可为不同用途建立多个分组。",
+  cautions: "目标选择器留空时只使用最终 MATCH 对应的选择器，目标不是选择器则忽略。链式节点追加到原选择器，原节点仍可选择，自动选择器也可能选择原节点。中继仅匹配顶层真实节点，不递归展开内嵌组或远程提供者；已有 dialer-proxy 链路的中继会跳过。UDP 等协议还要求中继支持相应传输。",
+};
+export const enChainProxyHelp = {
+  title: "Proxy chains", purpose: "Connect landing node B through intermediary A: this device → A → B → destination. Manual and subscription groups own landing nodes and target-selector/intermediary filters.",
+  scenarios: "Use an existing provider node as transit and your VPS or another proxy as the final exit. Create separate groups for different uses.",
+  cautions: "An empty selector filter uses only the final MATCH selector; a non-selector target skips injection. Chain nodes are appended, so original nodes remain selectable, including by automatic groups. Only top-level real nodes are intermediaries; nested groups and remote providers are not expanded. Intermediaries with an existing dialer-proxy chain are skipped. UDP-based protocols also require matching intermediary transport support.",
+};
+export const zhChainProxyFilterHelp = {
+  title: "链式代理筛选", purpose: "先按名称筛选最终选择器，再在每个选择器内按名称筛选中继 A；URL 的落地筛选只决定导入哪些 B。",
+  scenarios: "只给指定业务选择器加入经香港或日本优质中继连接的落地节点，避免对每个节点逐一设置。",
+  cautions: "条件执行顺序为 | 或 → & 与 → ! 排除，与书写顺序无关。不区分大小写，忽略条件首尾空白；内部空格按字面匹配，不支持括号或正则。选择器自身的排除条件仍会生效。",
+  example: "hk | jp & gm & !ev 与 hk & gm & !ev | jp 等价：名称包含 hk 或 jp，同时包含 gm，最后排除包含 ev 的节点。",
+};
+export const enChainProxyFilterHelp = {
+  title: "Proxy chain filters", purpose: "Match final selector names, then intermediary A names within each selector. A URL’s landing filter only controls which B nodes are imported.",
+  scenarios: "Add landing exits to selected application groups through matching Hong Kong or Japan intermediaries without configuring each node separately.",
+  cautions: "Priority is | OR → & AND → ! exclusion, independent of term order. Matching ignores case and trims surrounding whitespace; internal spaces are literal. Parentheses and regex are not supported. The selector’s own exclusions still apply.",
+  example: "hk | jp & gm & !ev equals hk & gm & !ev | jp: names contain hk or jp, also contain gm, and do not contain ev.",
+};
+export const zhChainProxyImportHelp = {
+  title: "导入落地节点", purpose: "手动组接受多个 URI 或标准 YAML 节点对象；订阅组从 URL 按订阅格式解析并筛选落地节点。保留节点协议参数和自定义节点 DNS。",
+  scenarios: "粘贴自建落地 URI，或从 mihomo YAML 订阅复制节点；批量维护来源时使用订阅组并手动刷新。",
+  cautions: "优先使用 mihomo YAML。多个 YAML 节点使用数组或 proxies 列表，不混用 URI 与 YAML。URI 支持范围与订阅解析器一致，跳过的协议会显示诊断。输入中的 dialer-proxy 由分组规则替换；订阅原有规则、选择器和全局配置不导入。URL 仅手动添加、修改或刷新时拉取，失败保留原节点。",
+  example: "- {name: 落地 B, type: socks5, server: 192.0.2.10, port: 1080, username: demo, password: demo}",
+};
+export const enChainProxyImportHelp = {
+  title: "Import landing nodes", purpose: "Manual groups accept multiple URIs or standard YAML proxy objects. Subscription groups parse URLs using the subscription parser and filter landing nodes. Protocol options and custom node DNS are retained.",
+  scenarios: "Paste a self-hosted exit URI or copy proxy objects from a mihomo YAML subscription. Use subscription groups and manual refresh for managed sources.",
+  cautions: "Prefer mihomo YAML. Use a YAML array or proxies list for multiple objects; do not mix URI and YAML. URI support matches the subscription parser, with diagnostics for skipped protocols. Group rules replace supplied dialer-proxy values. Source routing, selectors, and global settings are not imported. URLs are fetched only on explicit add, edit, or refresh; failures retain previous nodes.",
+  example: "- {name: Landing B, type: socks5, server: 192.0.2.10, port: 1080, username: demo, password: demo}",
+};

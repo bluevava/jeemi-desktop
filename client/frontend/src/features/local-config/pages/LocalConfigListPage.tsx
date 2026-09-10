@@ -31,13 +31,20 @@ import {
   StrategyGroupLibraryPanel,
 } from "../components/LocalConfigResourcePanels";
 import { useLocalPackageTransfer } from "../components/useLocalPackageTransfer";
+import { useNavigationGuard } from "../../../app/navigationGuard/NavigationGuardContext";
+import { ChainProxyWorkspace } from "../../chain-proxy/ChainProxyWorkspace";
+import { isConfigSection, useConfigPageState } from "../ConfigPageStateContext";
 
 export function LocalConfigListPage() {
   const { t, i18n } = useTranslation();
   const { modal } = App.useApp();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedTab = searchParams.get("section") ?? "scripts";
+  const guard = useNavigationGuard();
+  const { section, setSection } = useConfigPageState();
+  const requestedTab = searchParams.get("section") ?? section;
+  const selectedTab = isConfigSection(requestedTab) ? requestedTab : "scripts";
+  useEffect(() => setSection(selectedTab), [selectedTab, setSection]);
   const [state, setState] = useState<LocalConfigState | null>(null);
   const [resources, setResources] = useState<LocalConfigResourceState | null>(
     null,
@@ -169,12 +176,13 @@ export function LocalConfigListPage() {
       ) : null}
 
       <Tabs
-        activeKey={
-          ["scripts", "configs", "groups", "ruleSets"].includes(selectedTab)
-            ? selectedTab
-            : "scripts"
-        }
-        onChange={(section) => setSearchParams({ section }, { replace: true })}
+        activeKey={selectedTab}
+        onChange={(nextSection) => {
+          if (guard.canLeave() && isConfigSection(nextSection)) {
+            setSection(nextSection);
+            setSearchParams({ section: nextSection }, { replace: true });
+          }
+        }}
         className="local-config-library-tabs"
         items={[
           {
@@ -346,6 +354,12 @@ export function LocalConfigListPage() {
                 state={resources}
               />
             ),
+          },
+          {
+            key: "chains",
+            label: t("chainProxy.tab"),
+            children: <ChainProxyWorkspace />,
+            destroyOnHidden: true,
           },
         ]}
       />

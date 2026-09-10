@@ -1,4 +1,5 @@
 import type { MacNetworkAuthorizationStatus } from "../types/macNetwork";
+import type { ChainProxyAPI } from "./chainProxyBridge";
 import type { ProxyAuthorizationStatus } from "../types/authorization";
 import type { JeemiUpdateResult, JeemiUpdateState } from "../types/appUpdate";
 import type {
@@ -74,13 +75,14 @@ declare global {
   interface Window {
     go?: {
       desktop?: {
-        App?: {
+        App?: ChainProxyAPI & {
           InitializeClient: (language: string) => Promise<void>;
           GetBootstrapState: () => Promise<BootstrapState>;
           GetDNSQueryPreferences: () => Promise<DNSQueryPreferences>;
           QueryDNS: (input: DNSQueryRequest) => Promise<DNSQueryResponse>;
           CancelDNSQuery: (id: string) => Promise<void>;
           OpenJeemiRepository: () => Promise<void>;
+          OpenJeemiCommunity: (destination: "group" | "channel") => Promise<void>;
           CheckJeemiUpdates: () => Promise<JeemiUpdateResult>;
           GetJeemiUpdateState: () => Promise<JeemiUpdateState>;
           InstallJeemiUpdate: (version: string) => Promise<void>;
@@ -301,6 +303,7 @@ const browserFallback: BootstrapState = {
       generationId: "",
       subscriptionId: "",
       source: {
+        chainProxyFingerprint: "",
         normalizationFingerprint: "",
         subscriptionId: "",
         subscriptionRevision: "",
@@ -324,6 +327,7 @@ const browserFallback: BootstrapState = {
       lastError: null,
     },
     configuration: {
+      chainProxyFingerprint: "",
       state: "idle",
       trigger: "",
       desiredFingerprint: "",
@@ -592,6 +596,17 @@ export async function importMihomoCore(
 
 export async function openJeemiRepository(): Promise<void> {
   return requireAppBinding().OpenJeemiRepository();
+}
+
+export const jeemiCommunityURLs = {
+  group: "https://t.me/Jeemi_group",
+  channel: "https://t.me/Jeemi_channel",
+} as const;
+
+export async function openJeemiCommunity(
+  destination: keyof typeof jeemiCommunityURLs,
+): Promise<void> {
+  return requireAppBinding().OpenJeemiCommunity(destination);
 }
 
 export async function checkJeemiUpdates(): Promise<JeemiUpdateResult> {

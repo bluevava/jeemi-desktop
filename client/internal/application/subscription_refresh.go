@@ -3,7 +3,9 @@ package application
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"jeemi/internal/chainproxy"
 	"time"
 
 	"jeemi/internal/subscription"
@@ -44,6 +46,10 @@ func (s *Service) CheckSubscriptionRefresh(id string) (SubscriptionRefreshResult
 	_, combinedErr := s.validateSubscriptionCandidate(ctx, summary, compositionCandidate{source: candidate.Fetched.Contents})
 	if combinedErr == nil {
 		return s.commitSubscriptionRefresh(candidate, false)
+	}
+	var chainFailure *chainproxy.Error
+	if errors.As(combinedErr, &chainFailure) {
+		return SubscriptionRefreshResult{}, candidateValidationError(summary, combinedErr)
 	}
 	if summary.LocalConfigID == "" && summary.LocalScriptID == "" {
 		return SubscriptionRefreshResult{}, candidateValidationError(summary, combinedErr)

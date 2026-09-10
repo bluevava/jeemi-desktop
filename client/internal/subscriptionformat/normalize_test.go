@@ -276,6 +276,10 @@ func TestLeafCertificateMetadataAndPinConflict(t *testing.T) {
 	if _, err := Normalize([]byte(header + node + "&fingerprint=" + strings.Repeat("ab", 32))); err == nil {
 		t.Fatal("conflicting certificate accepted")
 	}
+	native := standardURI("trojan", map[string]any{"server": "node.entry.example.invalid", "port": 443, "password": "fixture", "sni": "node.tls.example.invalid", "tfo": false})
+	if got := proxy(t, normalize(t, header+native), 0); got["fingerprint"] != hex.EncodeToString(digest[:]) || got["tfo"] != false {
+		t.Fatal("native fields bypassed shared certificate metadata")
+	}
 }
 
 func TestAdvancedVLESSRequiresVerifiedCore(t *testing.T) {

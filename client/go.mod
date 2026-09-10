@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
+	github.com/dlclark/regexp2/v2 v2.5.2
 	github.com/dop251/goja v0.0.0-20260903201622-f87b40ad7341
 	github.com/energye/systray v1.0.3
 	github.com/godbus/dbus/v5 v5.1.0
@@ -20,7 +21,6 @@ require (
 require (
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
-	github.com/dlclark/regexp2/v2 v2.5.2 // indirect
 	github.com/gen2brain/shm v0.1.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect

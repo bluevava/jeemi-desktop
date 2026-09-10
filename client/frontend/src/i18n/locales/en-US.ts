@@ -12,8 +12,10 @@ import { enRuleSetEntry } from "./rule-set-entry";
 import { enSubscriptionNormalization } from "./subscription-normalization";
 import { enDNSQuery, enDNSQueryHelp } from "./dns-query";
 import { enAppUpdate } from "./app-update";
+import { enChainProxy, enChainProxyHelp, enChainProxyFilterHelp, enChainProxyImportHelp } from "./chain-proxy";
 
 export const enUS = {
+  chainProxy: enChainProxy,
   appUpdate: enAppUpdate,
   dnsQuery: enDNSQuery,
   ruleSetEntry: enRuleSetEntry,
@@ -183,6 +185,13 @@ export const enUS = {
         "Could not open the source repository. Please try again.",
       description:
         "A configuration management client powered by the Mihomo core",
+      community: {
+        group: "Group",
+        channel: "Channel",
+        groupLabel: "Open the official Jeemi Telegram group",
+        channelLabel: "Open the official Jeemi Telegram channel",
+        error: "Could not open the Telegram link. Please try again.",
+      },
       manageCore: "Manage",
       helper: "Helper",
       removeHelper: "Uninstall",
@@ -569,6 +578,7 @@ export const enUS = {
     projection: {
       failed: "Could not build the final-configuration preview",
       status: {
+        chain_proxy_failed: "Proxy chain composition failed. Check group filters, landing nodes, and DNS configuration.",
         source_unavailable:
           "The saved subscription source is unavailable. Check the managed revision files.",
         normalization_failed: "Subscription conversion failed. Check conversion details or the selected core version.",
@@ -1521,6 +1531,9 @@ export const enUS = {
       cautionsAndExample: "Notes and example",
     },
     topics: {
+      chainProxy: enChainProxyHelp,
+      chainProxyFilter: enChainProxyFilterHelp,
+      chainProxyImport: enChainProxyImportHelp,
       macNetworkAuthorization: enMacNetworkHelp,
       proxyAuthorization: enAuthorizationHelp,
       authorizationCleanup: enAuthorizationCleanupHelp,
@@ -1638,7 +1651,7 @@ export const enUS = {
       },
       config: {
         title: "Config",
-        purpose: "Manage local configurations, main(config) scripts, policy groups, and rule sets so subscriptions can share field changes, node transformations, and routing rules.",
+        purpose: "Manage local configurations, main(config) scripts, policy groups, rule sets, and proxy chains so subscriptions can share field changes, node transformations, routing rules, and landing nodes.",
         scenarios: "Use it when subscription content cannot cover local network needs or different subscriptions require different overrides.",
         cautions: "Each subscription can associate at most one local configuration or script; the two are mutually exclusive. Saving is not activation, referenced resources cannot be deleted, and final runtime configurations still require validation.",
       },

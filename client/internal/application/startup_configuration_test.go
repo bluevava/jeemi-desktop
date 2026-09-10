@@ -22,7 +22,7 @@ func TestStartupCheckDoesNotCreateData(t *testing.T) {
 
 func TestStartupRecoveryUsesActualReadersAndKeepsUnrelatedData(t *testing.T) {
 	root := t.TempDir()
-	paths := []string{"settings.json", "local-configs/resources/library.json", "geodata/manifest.json"}
+	paths := []string{"settings.json", "local-configs/resources/library.json", "chain-proxies/library.json", "geodata/manifest.json"}
 	for _, relative := range paths {
 		path := filepath.Join(root, filepath.FromSlash(relative))
 		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
@@ -61,6 +61,7 @@ func TestStartupCheckIdentifiesSemanticErrorsWithoutWriting(t *testing.T) {
 		{"local-configs/resources/library.json", `{"version":99,"revision":1}`},
 		{"local-configs/resources/library.json", `{"version":1,"revision":1,"updatedAt":"invalid"}`},
 		{"geodata/manifest.json", `{"version":99}`},
+		{"chain-proxies/library.json", `{"version":99,"revision":1,"groups":[]}`},
 		{"geodata/manifest.json", `{"version":1,"desired":{"geoip":"invalid"}}`},
 		{"settings.json", `{"runtime":{"listenPort":"invalid"}}`},
 	} {

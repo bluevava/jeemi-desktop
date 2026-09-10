@@ -6,9 +6,9 @@ export const zhSubscriptionNormalization = {
   requiredCore: "此订阅的高级 VLESS 字段需要 mihomo {{version}} 或更新的稳定版。",
   help: {
     title: "订阅格式转换",
-    purpose: "自动识别 Surge、明文或 Base64 URI 订阅，转换节点与可识别的 DNS；节点加入一个手动选择器作为兜底出口，再应用关联的本地配置或脚本及主页运行参数。",
+    purpose: "自动识别 Surge、明文或 Base64 URI 订阅。URI 推荐沿用 mihomo 代理字段名，数组和对象使用编码后的 JSON，兼容已有别名；转换节点与 DNS 后，再应用关联的本地配置或脚本及主页运行参数。",
     scenarios: "导入其他客户端的订阅，或检查节点缺失、证书 PIN 和 DNS 字段的转换结果。",
-    cautions: "原文保持不变。来源路由规则不转换；不支持的节点会列出原因，证书 PIN 冲突或 DNS 元数据损坏会拒绝本次更新。主页启用的 DNS 覆盖仍按所选方式生效。",
+    cautions: "原文保持不变，来源路由不转换。无法识别或字段错误的 URI 节点会跳过并列出原因；没有可用节点、公共 DNS/证书元数据错误或最终配置校验失败时保留旧订阅。解析成功不等于节点连通，主页 DNS 覆盖仍按所选方式生效。",
   },
   codes: {
     unknown: "订阅转换失败，请检查来源格式。",
@@ -52,9 +52,9 @@ export const enSubscriptionNormalization = {
   requiredCore: "Advanced VLESS fields in this subscription require mihomo {{version}} or a newer stable release.",
   help: {
     title: "Subscription conversion",
-    purpose: "Detect Surge, plain URI, or Base64 URI subscriptions and convert nodes and recognized DNS settings. Nodes enter one manual selector used as the fallback, before applying the linked local configuration or script and Home runtime settings.",
+    purpose: "Detect Surge, plain URI, or Base64 URI subscriptions. URIs use mihomo proxy field names and encoded JSON for arrays and objects, while retaining existing aliases. Convert nodes and DNS before applying the linked local configuration or script and Home runtime settings.",
     scenarios: "Import subscriptions from other clients or inspect missing nodes, certificate pins and DNS conversion results.",
-    cautions: "The source is unchanged. Source routing rules are omitted. Unsupported nodes have explanations; conflicting pins or invalid DNS metadata reject the update. Enabled home DNS overrides still apply as configured.",
+    cautions: "The source is unchanged and source routing is omitted. Unrecognized or malformed URI nodes are skipped with reasons. No usable nodes, invalid shared DNS/certificate metadata or failed final validation preserve the previous subscription. Parsing does not verify connectivity; Home DNS overrides still apply as configured.",
   },
   codes: {
     unknown: "Subscription conversion failed. Check the source format.",

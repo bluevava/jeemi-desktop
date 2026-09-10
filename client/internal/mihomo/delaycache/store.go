@@ -36,6 +36,7 @@ var (
 )
 
 type Scope struct {
+	ChainProxyFingerprint    string `json:"chainProxyFingerprint"`
 	NormalizationFingerprint string `json:"normalizationFingerprint"`
 	SubscriptionID           string `json:"subscriptionId"`
 	SubscriptionRevision     string `json:"subscriptionRevision"`
@@ -256,6 +257,9 @@ func (s *Store) filePath(subscriptionID string) string {
 }
 
 func validateScope(scope Scope) error {
+	if scope.ChainProxyFingerprint != "" && !revisionIDPattern.MatchString(scope.ChainProxyFingerprint) {
+		return fmt.Errorf("chain proxy fingerprint is invalid")
+	}
 	if scope.NormalizationFingerprint != "" && !revisionIDPattern.MatchString(scope.NormalizationFingerprint) {
 		return fmt.Errorf("subscription normalization fingerprint is invalid")
 	}
