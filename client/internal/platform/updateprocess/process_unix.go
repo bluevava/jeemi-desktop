@@ -8,6 +8,8 @@ import (
 	"syscall"
 )
 
-func configure(command *exec.Cmd) { command.SysProcAttr = &syscall.SysProcAttr{Setsid: true} }
+func configure(command *exec.Cmd, _ bool) {
+	command.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+}
 
 func Rename(from, to string) error { return os.Rename(from, to) }

@@ -16,23 +16,40 @@ import (
 // Subprocesses are copies of the test executable, never the installed client.
 // The simulated GUI only acknowledges startup; no Wails or network is used.
 func TestMain(m *testing.M) {
-	if os.Getenv("JEEMI_UPDATER_TEST_PROCESS") == "1" && len(os.Args) == 3 {
+	if os.Getenv("JEEMI_UPDATER_TEST_PROCESS") == "1" {
+		// A failed simulated restart may launch the restored executable without
+		// arguments. Never let that child recursively run the test suite.
+		if len(os.Args) == 1 {
+			os.Exit(0)
+		}
+		if len(os.Args) != 3 {
+			os.Exit(2)
+		}
 		switch os.Args[1] {
 		case workerArgument:
+			if !updateProcessPresentationOK(true) {
+				os.Exit(2)
+			}
 			_, err := RunIfRequested()
 			if err != nil {
 				os.Exit(2)
 			}
 			os.Exit(0)
 		case "--jeemi-update-restarted":
+			if !updateProcessPresentationOK(false) {
+				os.Exit(2)
+			}
 			dataRoot, err := paths.DataDirectory()
 			if err != nil {
 				os.Exit(2)
 			}
-			NewManager(dataRoot, "1.2.3").AcknowledgeRestart()
+			if !NewManager(dataRoot, "1.2.3").AcknowledgeRestart() {
+				os.Exit(2)
+			}
 			time.Sleep(time.Second)
 			os.Exit(0)
 		}
+		os.Exit(2)
 	}
 	os.Exit(m.Run())
 }

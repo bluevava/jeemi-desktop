@@ -1,3 +1,6 @@
+// 作者：bluevava 及贡献者
+// 开源仓库：https://github.com/bluevava/jeemi-android
+
 package compose
 
 import (

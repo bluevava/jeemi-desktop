@@ -45,6 +45,15 @@ Windows/Linux 包中的 `Jeemi` 与 `jeemi-authorizer` 必须共同保留，Wind
 
 Linux 当前系统代理适配 Ubuntu/GNOME。公开二进制使用 Ubuntu 22.04 和 WebKitGTK 4.1 构建，目标系统需要对应运行库；其他桌面环境的系统代理及全部发行版兼容性尚未保证。Windows 发布包目前没有 Authenticode 签名或安装器。
 
+### Windows 字体建议
+
+建议 Windows 用户安装 [Flag Emojis for Windows 提供的 Emoji 字体](https://github.com/Chasmical/flag-emojis-for-windows/releases)，以便正常显示 Jeemi 中的区域 / 国旗图标。
+
+1. 打开上面的下载页面，下载 Emoji 字体文件。
+2. 双击下载的字体文件，打开字体预览窗口。
+3. 点击 **“安装”**，完成字体安装。
+4. 通过系统托盘菜单退出 Jeemi，再重新启动客户端，使新字体生效。
+
 ### Linux 首次运行
 
 1. 下载匹配 CPU 架构的 Linux 发布包并解压，保留同目录中的 `Jeemi` 和 `jeemi-authorizer`。

@@ -84,7 +84,12 @@ func (a *App) InitializeClient(language string) error {
 		a.service = service
 		service.Startup(ctx)
 		if !a.quitRequested.Load() {
-			service.AcknowledgeJeemiRestart()
+			if service.AcknowledgeJeemiRestart() {
+				// Older update workers start the GUI with SW_HIDE on Windows.
+				// Restore once after initialization, including the first upgrade
+				// from those versions, through the normal window activity flow.
+				a.showMainWindow(ctx)
+			}
 			a.startTray(ctx)
 		}
 	})

@@ -1,3 +1,6 @@
+// 作者：bluevava 及贡献者
+// 开源仓库：https://github.com/bluevava/jeemi-android
+
 import { HashRouter } from "react-router-dom";
 
 import { AppProviders } from "./AppProviders";

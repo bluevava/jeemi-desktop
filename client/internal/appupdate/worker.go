@@ -183,7 +183,7 @@ func runWorker() error {
 		// Old files have been restored. Launch them without the update argument.
 		command := exec.Command(job.Executable)
 		command.Dir = filepath.Dir(job.Executable)
-		_ = updateprocess.Start(command)
+		_ = updateprocess.StartGUI(command)
 	}
 	// Retain a small receipt and the worker (Windows holds its image open).
 	// The downloaded archive and extracted duplicate are no longer needed.
@@ -219,7 +219,7 @@ func restartAndWait(jobRoot string, job installJob) error {
 	_ = os.Remove(filepath.Join(jobRoot, "started"))
 	command := exec.Command(job.Executable, "--jeemi-update-restarted", job.ID)
 	command.Dir = filepath.Dir(job.Executable)
-	if updateprocess.Start(command) != nil {
+	if updateprocess.StartGUI(command) != nil {
 		return ErrRestart
 	}
 	done := make(chan error, 1)

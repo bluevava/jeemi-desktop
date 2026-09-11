@@ -14,7 +14,7 @@ func (s *Service) CheckJeemiUpdates() (appupdate.Result, error) {
 
 func (s *Service) JeemiUpdateState() appupdate.State  { return s.jeemiUpdater.State() }
 func (s *Service) CancelJeemiUpdate()                 { s.jeemiUpdater.Cancel() }
-func (s *Service) AcknowledgeJeemiRestart()           { s.jeemiUpdater.AcknowledgeRestart() }
+func (s *Service) AcknowledgeJeemiRestart() bool      { return s.jeemiUpdater.AcknowledgeRestart() }
 func (s *Service) DismissJeemiUpdateResult(id string) { s.jeemiUpdater.DismissResult(id) }
 
 func (s *Service) InstallJeemiUpdate(version string) error {

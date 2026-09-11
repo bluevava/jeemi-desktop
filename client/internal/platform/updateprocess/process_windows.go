@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
-func configure(command *exec.Cmd) {
-	command.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000}
+func configure(command *exec.Cmd, hideWindow bool) {
+	// CREATE_NO_WINDOW suppresses consoles; HideWindow additionally overrides
+	// the GUI's first ShowWindow call with SW_HIDE and is only for the worker.
+	command.SysProcAttr = &syscall.SysProcAttr{HideWindow: hideWindow, CreationFlags: 0x08000000}
 }
 func VerifyBundle(context.Context, string) error { return nil }
 

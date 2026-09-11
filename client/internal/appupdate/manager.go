@@ -217,30 +217,34 @@ func (m *Manager) Commit() error {
 	return m.worker.commit()
 }
 
-// Acknowledged only from the main instance's OnStartup, after the old process
-// has exited and Wails has acquired its single-instance lock.
-func (m *Manager) AcknowledgeRestart() {
+// AcknowledgeRestart runs only from the main instance's InitializeClient, after
+// the native window is ready and startup configuration checks have passed.
+// It reports a confirmed update restart so the caller can restore the window.
+func (m *Manager) AcknowledgeRestart() bool {
 	if len(os.Args) != 3 || os.Args[1] != "--jeemi-update-restarted" || !idPattern.MatchString(os.Args[2]) {
-		return
+		return false
 	}
 	jobRoot := filepath.Join(m.root, os.Args[2])
 	var job installJob
 	data, err := readBounded(filepath.Join(jobRoot, "job.json"), 16384)
 	if err != nil || json.Unmarshal(data, &job) != nil || job.ID != os.Args[2] {
-		return
+		return false
 	}
 	executable, err := os.Executable()
 	if err != nil {
-		return
+		return false
 	}
 	executable, err = filepath.EvalSymlinks(executable)
 	if err != nil || executable != job.Executable {
-		return
+		return false
+	}
+	if err = os.WriteFile(filepath.Join(jobRoot, "started"), []byte(m.current), 0600); err != nil {
+		return false
 	}
 	m.mu.Lock()
 	m.state = State{Phase: "idle", Version: job.Version, JobID: job.ID}
 	m.mu.Unlock()
-	_ = os.WriteFile(filepath.Join(jobRoot, "started"), []byte(m.current), 0600)
+	return true
 }
 
 // Consuming a displayed receipt is separate from the read-only state API.
