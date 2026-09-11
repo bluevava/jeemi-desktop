@@ -559,18 +559,19 @@ export const enUS = {
       nested: {
         path: "Proxy group navigation",
         open: "View members of {{name}}",
+        delayNavigation: "Shows the final exit node's latest delay; click to view this group's members, even before testing",
         unavailable: "This proxy group is unavailable",
         balanced: "Exit chosen per connection",
         help: {
           title: "Nested proxy groups",
-          purpose: "A proxy group can select a node or another group to determine the final exit. Cards and headers show the full Selector · Nested selector · Final node path; hover to read a long path.",
-          scenarios: "For example, choose Japan for TikTok, then open Japan to inspect automatic routing or individual nodes. Click a card to select it, its arrow to view members, and the breadcrumbs to return.",
-          cautions: "Groups can be shared by several routing groups, so changing one affects all traffic using it. Browsing does not change selections. Automatic selection, fallback, and load balancing are controlled by the core; their members can only be inspected and tested. Offline values are configuration defaults.",
+          purpose: "A proxy group can select a node or another group to determine the final exit. Each card shows its name and type, with the selected final node's latest delay in the badge. Selector headers show only the final exit name.",
+          scenarios: "For example, choose Japan for TikTok, then open Japan to inspect automatic routing or individual nodes. Click the card body to select it and a nested group's delay badge to browse its members. Breadcrumbs appear after entering a subgroup so you can return.",
+          cautions: "Browsing does not change selections or test delay. An untested group or one without a fixed exit shows — and can still be opened. Groups can be shared, so changing one affects all traffic using it. Automatic groups are controlled by the core. Offline values use configuration defaults; cached delays are for reference.",
         },
       },
       egress: {
         live: "Runtime exit: {{path}}",
-        offline: "Configuration default path (runtime state unavailable): {{path}}",
+        offline: "Configuration default exit (runtime state unavailable): {{path}}",
         relay: "Relay in configured order",
         cycle: "Circular reference",
       },
@@ -1849,8 +1850,8 @@ export const enUS = {
       selectorPreview: {
         title: "Proxy selector preview",
         purpose: "Preview selectors and resolvable nodes after local configuration or script processing, even before starting the core. The adjacent rule, global, and direct mode controls share Home settings.",
-        scenarios: "Inspect results after importing, refreshing, switching subscriptions, or changing an association. Search group names in the selector toolbar, or node names and hidden groups in the collapsed shelf. Scroll the tab bar to browse selectors; the fish icon configures fallback traffic. A card's arrow opens its members, breadcrumbs return, and the card itself selects the exit.",
-        cautions: "Global hides ordinary selectors and Direct shows none. The two searches match node or group names independently, excluding protocol and provider names. Exit summaries follow selections through nested groups; offline paths are configuration defaults and load balancing chooses per connection. External-provider nodes, delay, and real selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
+        scenarios: "Inspect results after importing, refreshing, switching subscriptions, or changing an association. Search group names in the selector toolbar, or node names and hidden groups in the collapsed shelf. Scroll the tab bar to browse selectors; the fish icon configures fallback traffic. A nested group's delay badge opens its members, then breadcrumbs appear for returning. The card body selects the exit.",
+        cautions: "Global hides ordinary selectors and Direct shows none. The two searches match node or group names independently, excluding protocol and provider names. Headers show only the final exit; offline values use configuration defaults and load balancing chooses per connection. Nested groups display the selected final node's latest delay and their badges only browse; ordinary node badges test delay. External-provider nodes, fresh delays, and real selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
       },
       ruleProviderRefresh: {
         title: "Rule-provider update",

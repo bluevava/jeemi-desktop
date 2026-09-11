@@ -19,7 +19,7 @@ function remoteIconURL(value: string): string | null {
   }
   try {
     const parsed = new URL(value);
-    return parsed.protocol === "http:" || parsed.protocol === "https:"
+    return (parsed.protocol === "http:" || parsed.protocol === "https:") && !parsed.username && !parsed.password
       ? parsed.href
       : null;
   } catch {

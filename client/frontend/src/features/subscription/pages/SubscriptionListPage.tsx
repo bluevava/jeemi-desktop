@@ -77,6 +77,7 @@ import type {
 import { useSubscriptionPageStateField } from "../SubscriptionPageStateContext";
 import { RuleProviderDrawer } from "../components/RuleProviderDrawer";
 import { SelectorWorkspace } from "../components/SelectorWorkspace";
+import { SelectorIconProvider } from "../useSelectorIcon";
 import { ScriptAssociationModal } from "../components/ScriptAssociationModal";
 import { SubscriptionShelf } from "../components/SubscriptionShelf";
 import { SubscriptionIconEditor } from "../components/SubscriptionIconEditor";
@@ -1127,48 +1128,50 @@ export function SubscriptionListPage({
         ) : null}
 
         <ChainProxyCompositionNotice composition={state.projection?.chainProxy} />
-        <SelectorWorkspace
-          subscription={state.subscriptions.find(
-            (item) => item.id === state.selectedSubscriptionId,
-          )}
-          fallbackBusy={
-            fallbackBusy || busyAction !== null || busyRuleProviderToggle !== ""
-          }
-          onFallbackChange={changeFallback}
-          activeSelections={
-            runtimeInteractive ? activeSelections : emptySelections
-          }
-          busyDelayNodes={delayQueue.busyNodes}
-          busySelection={busySelection}
-          density={state.preferences.selectorDensity}
-          delayQueueActive={delayQueue.queueActive}
-          delayResults={delayQueue.results}
-          displayPreferencesBusy={selectorDisplayPreferencesBusy}
-          selectors={visibleSelectors}
-          outboundMode={outboundMode}
-          outboundModeBusy={preferencesBusy || runtimePreferences === null}
-          onOutboundModeChange={switchOutboundMode}
-          onDensityChange={saveSelectorDensity}
-          onSelect={switchProxy}
-          onSortModeChange={(mode) =>
-            saveSelectorDisplayPreferences(
-              mode,
-              state.preferences.selectorViewMode,
-            )
-          }
-          onTestDelay={delayQueue.testNode}
-          onViewModeChange={(mode) =>
-            saveSelectorDisplayPreferences(
-              state.preferences.selectorSortMode,
-              mode,
-            )
-          }
-          projection={state.projection}
-          query={selectorQuery}
-          runtimeReady={runtimeInteractive}
-          sortMode={state.preferences.selectorSortMode}
-          viewMode={state.preferences.selectorViewMode}
-        />
+        <SelectorIconProvider active={isWindowVisible} retryKey={runtime?.mihomo.controllerReady ? runtime.mihomo.generationId : ""}>
+          <SelectorWorkspace
+            subscription={state.subscriptions.find(
+              (item) => item.id === state.selectedSubscriptionId,
+            )}
+            fallbackBusy={
+              fallbackBusy || busyAction !== null || busyRuleProviderToggle !== ""
+            }
+            onFallbackChange={changeFallback}
+            activeSelections={
+              runtimeInteractive ? activeSelections : emptySelections
+            }
+            busyDelayNodes={delayQueue.busyNodes}
+            busySelection={busySelection}
+            density={state.preferences.selectorDensity}
+            delayQueueActive={delayQueue.queueActive}
+            delayResults={delayQueue.results}
+            displayPreferencesBusy={selectorDisplayPreferencesBusy}
+            selectors={visibleSelectors}
+            outboundMode={outboundMode}
+            outboundModeBusy={preferencesBusy || runtimePreferences === null}
+            onOutboundModeChange={switchOutboundMode}
+            onDensityChange={saveSelectorDensity}
+            onSelect={switchProxy}
+            onSortModeChange={(mode) =>
+              saveSelectorDisplayPreferences(
+                mode,
+                state.preferences.selectorViewMode,
+              )
+            }
+            onTestDelay={delayQueue.testNode}
+            onViewModeChange={(mode) =>
+              saveSelectorDisplayPreferences(
+                state.preferences.selectorSortMode,
+                mode,
+              )
+            }
+            projection={state.projection}
+            query={selectorQuery}
+            runtimeReady={runtimeInteractive}
+            sortMode={state.preferences.selectorSortMode}
+            viewMode={state.preferences.selectorViewMode}
+          />
+        </SelectorIconProvider>
 
         <RuleProviderDrawer
           busyProvider={busyRuleProvider}

@@ -4,6 +4,7 @@ package runtime
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -50,11 +51,29 @@ func TestLinuxStopEscalatesForWholeProcessGroup(t *testing.T) {
 	default:
 		t.Fatal("Stop did not reap the process")
 	}
-	contents, err := os.ReadFile("/proc/" + strconv.Itoa(child) + "/stat")
-	if err == nil {
-		_, tail, _ := strings.Cut(string(contents), ") ")
-		if !strings.HasPrefix(tail, "Z ") {
+	// Stop reaps the direct child. Group members receive SIGKILL together,
+	// but Linux may still be finishing the descendant's exit after that Wait.
+	// Wait for its exit too; an orphan zombie is already stopped and is reaped
+	// by init. A still-running descendant must continue to fail this test.
+	deadline = time.Now().Add(2 * time.Second)
+	for {
+		contents, err := os.ReadFile("/proc/" + strconv.Itoa(child) + "/stat")
+		if errors.Is(err, os.ErrNotExist) || errors.Is(err, syscall.ESRCH) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("read descendant state: %v", err)
+		}
+		_, tail, found := strings.Cut(string(contents), ") ")
+		if !found {
+			t.Fatalf("invalid descendant stat: %q", contents)
+		}
+		if strings.HasPrefix(tail, "Z ") {
+			break
+		}
+		if !time.Now().Before(deadline) {
 			t.Fatalf("descendant survived forced stop: %s", tail)
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

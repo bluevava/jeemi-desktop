@@ -25,7 +25,10 @@ vi.mock("../SubscriptionPageStateContext", async (importOriginal) => ({
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en-US" } }),
 }));
-vi.mock("../../../components/help/FeatureHelp", () => ({ FeatureHelp: () => null }));
+vi.mock("../../../components/help/FeatureHelp", () => ({
+  FeatureHelp: ({ translationBase }: { translationBase?: string }) =>
+    translationBase ? createElement("span", { "data-help": translationBase }) : null,
+}));
 vi.mock("./FallbackControl", () => ({ FallbackControl: () => null }));
 vi.mock("./NormalizationNotice", () => ({ NormalizationNotice: () => null }));
 vi.mock("../selectorSort", async (importOriginal) => {
@@ -62,6 +65,14 @@ function render(viewMode: "tabs" | "panel", items = selectors, warnings: string[
 
 function renderedNodeCount(html: string) {
   return (html.match(/class="selector-node(?: |")/g) ?? []).length;
+}
+
+function nestedCard(html: string) {
+  return html.match(/<div class="selector-node selector-group-member[^\"]*">[\s\S]*?<\/div>/)?.[0] ?? "";
+}
+
+function delayResult(delay: number) {
+  return { status: "success" as const, source: "manual" as const, testedAt: "2026-09-11T00:00:00Z", delay };
 }
 
 describe("selector rendering cost", () => {
@@ -110,7 +121,10 @@ describe("selector rendering cost", () => {
     const html = render("tabs", [root, child]);
     expect(renderedNodeCount(html)).toBe(1);
     expect(html).toContain("subscription.selector.groupTypes.urlTest");
-    expect(html).toContain('class="selector-node-open"');
+    expect(html).toContain('aria-label="subscription.selector.nested.open" class="selector-node-delay">—</button>');
+    expect(html).not.toContain('class="selector-node-open"');
+    expect(html).not.toContain('class="selector-nested-heading"');
+    expect(html).not.toContain('data-help="subscription.selector.nested.help"');
     expect(html).not.toContain('title="Node 1-1"');
   });
 
@@ -123,6 +137,7 @@ describe("selector rendering cost", () => {
     expect(html).toContain('title="Node 1-1"');
     expect(html).toContain('class="selector-node-select" disabled=""');
     expect(html).toContain('class="selector-breadcrumb"');
+    expect(html).toContain('data-help="subscription.selector.nested.help"');
     expect(sortSelectorMembers).toHaveBeenCalledTimes(1);
   });
 
@@ -135,7 +150,7 @@ describe("selector rendering cost", () => {
     expect(render("tabs", selectors, warnings)).toContain("subscription.selector.dynamicFiltersPending");
   });
 
-  it.each(["tabs", "panel"] as const)("shows complete egress paths in %s without current labels", (view) => {
+  it.each(["tabs", "panel"] as const)("shows only the final exit in %s and uses its delay on nested cards", (view) => {
     const root = { ...selectors[0], name: "Google", defaultSelection: "Manual",
       members: [{ name: "Manual", type: "group", source: "group" as const, providerName: "" }] };
     const manual = { ...root, name: "Manual", defaultSelection: "Automatic", hidden: true,
@@ -144,9 +159,19 @@ describe("selector rendering cost", () => {
     session.expanded = ["Google"];
     const html = render(view, [root, manual, automatic], [], true, {
       activeSelections: { Google: "Manual", Manual: "Automatic", Automatic: "Node 1-5" },
+      delayResults: { Manual: delayResult(999), Automatic: delayResult(888),
+        "Node 1-0": delayResult(32), "Node 1-5": delayResult(96) },
     });
-    expect(html).toContain("Manual · Automatic · Node 1-5");
-    expect(html).toContain("Automatic · Node 1-5</span>");
+    expect(html).toContain(">Node 1-5</");
+    expect(html).not.toContain("Manual · Automatic");
+    expect(html).not.toContain("Automatic · Node 1-5");
+    const card = nestedCard(html);
+    expect(card).toContain('class="selector-node-delay fast">96 ms</button>');
+    expect(card).not.toContain("888 ms");
+    expect(card).not.toContain("999 ms");
+    expect(card).not.toContain("32 ms");
+    expect(card).not.toContain("Node 1-5");
+    expect(html).not.toContain('class="selector-nested-heading"');
     expect(html).not.toContain("subscription.selector.currentSelection");
     expect(html).not.toContain("subscription.selector.nested.current");
     expect(html).not.toContain("subscription.selector.nested.default");
@@ -161,12 +186,66 @@ describe("selector rendering cost", () => {
     const html = render("panel", [root, child]);
     expect(html.match(/<details /g)).toHaveLength(1);
     expect(html).toContain('title="Manual"');
-    expect(html).toContain("Manual · Node 1-0");
+    expect(html).toContain(">Node 1-0</strong>");
+    expect(html).not.toContain("Manual · Node 1-0");
     expect(html).toContain("subscription.selector.nameSearch");
   });
 
   it("shows a distinct empty result for selector search", () => {
     session.nameQuery = "No such selector";
     expect(render("tabs")).toContain("subscription.selector.noSelectorSearchResults");
+  });
+
+  it.each(["small", "medium", "large"] as const)("keeps two-line nested cards in %s density with and without proxy siblings", (density) => {
+    const child = { ...selectors[1], name: "Automatic", type: "url-test", hidden: true };
+    const group = { name: child.name, type: "group", source: "group" as const, providerName: "" };
+    for (const members of [[group], [group, selectors[0].members[0]]]) {
+      const root = { ...selectors[0], members };
+      const card = nestedCard(render("tabs", [root, child], [], false, { density }));
+      expect(card).toContain('class="selector-group-member-name">Automatic</span>');
+      expect(card).toContain("subscription.selector.groupTypes.urlTest");
+      expect(card).not.toContain("selector-group-member-current");
+      expect(card).not.toContain("Node 1-0");
+      expect(card).toContain('class="selector-node-delay">—</button>');
+    }
+  });
+
+  it.each(["load-balance", "relay"])("keeps %s browsable while testing without inventing an exit delay", (type) => {
+    const root = { ...selectors[0], defaultSelection: "Child",
+      members: [{ name: "Child", type: "group", source: "group" as const, providerName: "" }] };
+    const child = { ...selectors[1], name: "Child", type, hidden: true };
+    const card = nestedCard(render("tabs", [root, child], [], true, {
+      activeSelections: { [root.name]: child.name, Child: "Node 1-0" },
+      delayResults: { Child: delayResult(21), "Node 1-0": delayResult(50) },
+      delayQueueActive: true,
+    }));
+    expect(card).toContain('class="selector-node-delay">—</button>');
+    expect(card).not.toContain(" ms");
+  });
+
+  it("does not borrow stale delay from a builtin exit or fall back to an offline default when live selection is missing", () => {
+    const root = { ...selectors[0], defaultSelection: "Child",
+      members: [{ name: "Child", type: "group", source: "group" as const, providerName: "" }] };
+    const child = { ...selectors[1], name: "Child", hidden: true, defaultSelection: "DIRECT",
+      members: [{ name: "DIRECT", type: "direct", source: "builtin" as const, providerName: "" }] };
+    for (const activeSelections of [{ [root.name]: child.name, Child: "DIRECT" }, { [root.name]: child.name }]) {
+      const card = nestedCard(render("tabs", [root, child], [], true, {
+        activeSelections, delayResults: { Child: delayResult(21), DIRECT: delayResult(50) },
+      }));
+      expect(card).toContain('class="selector-node-delay">—</button>');
+      expect(card).not.toContain(" ms");
+    }
+  });
+
+  it("sorts a nested group using the final node delay displayed on its badge", () => {
+    const root = { ...selectors[0], members: [selectors[0].members[0],
+      { name: "Automatic", type: "group", source: "group" as const, providerName: "" }] };
+    const child = { ...selectors[1], name: "Automatic", type: "url-test", hidden: true };
+    const html = render("tabs", [root, child], [], true, {
+      sortMode: "delay", activeSelections: { Automatic: "Node 1-4" },
+      delayResults: { Automatic: delayResult(999), "Node 1-4": delayResult(50), "Node 0-0": delayResult(90) },
+    });
+    const grid = html.slice(html.indexOf('class="selector-node-grid"'));
+    expect(grid.indexOf('title="Automatic"')).toBeLessThan(grid.indexOf('title="Node 0-0"'));
   });
 });

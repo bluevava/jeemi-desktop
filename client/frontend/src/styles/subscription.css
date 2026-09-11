@@ -1019,35 +1019,22 @@
 .selector-breadcrumb-separator,
 .selector-nested-meta { color: var(--color-text-secondary); font-size: var(--font-size-caption); }
 
-.selector-group-member .selector-node-select {
-  padding: 8px 30px 8px 10px;
-  gap: 4px;
-}
-.selector-group-member .selector-node-select > span { max-width: 100%; line-height: 1.3; }
 .selector-group-member-heading { display: flex; align-items: center; gap: 6px; }
-.selector-group-member-heading strong { min-width: 0; }
+.selector-group-member-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .selector-group-member-heading .selector-group-icon {
-  width: 22px;
-  height: 22px;
-  flex-basis: 22px;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.selector-node-open {
-  position: absolute;
-  inset: 0 0 0 auto;
-  width: 26px;
-  display: grid;
-  place-items: center;
+  width: 1em;
+  height: 1em;
+  flex-basis: 1em;
   border: 0;
-  border-left: 1px solid var(--color-border);
-  border-radius: 0 8px 8px 0;
+  border-radius: 3px;
   background: transparent;
-  color: var(--color-accent);
-  cursor: pointer;
+  font-size: inherit;
 }
-.selector-node-open:not(:disabled):hover { background: var(--color-accent-soft); }
-.selector-node-open:disabled { color: var(--color-text-secondary); cursor: default; }
+
+.selector-group-member-heading .selector-group-icon img {
+  background: transparent;
+  object-fit: contain;
+}
 
 .subscription-association-progress {
   display: flex;

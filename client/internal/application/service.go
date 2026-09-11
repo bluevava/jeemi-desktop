@@ -19,6 +19,7 @@ import (
 	"jeemi/internal/core"
 	"jeemi/internal/externalui"
 	"jeemi/internal/geodata"
+	"jeemi/internal/iconcache"
 	"jeemi/internal/localscript"
 	"jeemi/internal/mihomo/delaycache"
 	mihomoruntime "jeemi/internal/mihomo/runtime"
@@ -86,6 +87,10 @@ type Service struct {
 	resolvedConfigs      *configresolved.Store
 	delayCache           *delaycache.Store
 	uiDiagnostics        *uidiagnostics.Store
+	selectorIcons        *iconcache.Cache
+	iconMu               sync.Mutex
+	iconCancels          map[string]context.CancelFunc
+	iconsStopped         bool
 	authorizeCore        func(context.Context, coreauth.Target) error
 	coreOperationCancel  context.CancelFunc
 	pendingRefresh       *pendingSubscriptionRefresh
@@ -189,6 +194,8 @@ func NewService(dataDirectory string) (*Service, error) {
 		resolvedConfigs: resolvedConfigs,
 		delayCache:      delayCache,
 		uiDiagnostics:   uidiagnostics.New(dataDirectory, appVersion),
+		selectorIcons:   iconcache.New(dataDirectory, runtimeManager.NewDownloadClient),
+		iconCancels:     make(map[string]context.CancelFunc),
 		authorizeCore:   coreauth.Authorize,
 		jeemiUpdater:    appupdate.NewManager(dataDirectory, appVersion),
 	}
@@ -661,6 +668,7 @@ func (s *Service) Startup(ctx context.Context) {
 }
 
 func (s *Service) Shutdown(ctx context.Context) error {
+	s.cancelSelectorIcons()
 	s.CancelChainProxyRefresh()
 	if s.zashboard != nil {
 		s.zashboard.Cancel()

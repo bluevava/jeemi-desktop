@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SubscriptionSelector, SubscriptionSelectorMember } from "../../types/subscription";
-import { createSelectorEgressDescription, resolveSelectorEgress } from "./selectorEgress";
+import { createSelectorEgressResolver, resolveSelectorEgress } from "./selectorEgress";
 
 function group(name: string, selected: string, source: SubscriptionSelectorMember["source"] = "group"): SubscriptionSelector {
   return {
@@ -35,7 +35,7 @@ describe("selected egress paths", () => {
       .toEqual(["Manual", "Japan", "JP default"]);
     const direct = group("Direct group", "DIRECT", "builtin");
     expect(resolveSelectorEgress(direct, new Map(), {}, false))
-      .toEqual({ names: ["DIRECT"], end: "node" });
+      .toEqual({ names: ["DIRECT"], end: "builtin" });
   });
 
   it.each(["url-test", "fallback"])("follows %s using its actual selection", (type) => {
@@ -74,13 +74,13 @@ describe("selected egress paths", () => {
       .toEqual(["Google", "Manual", "Japan", "JP live"]);
   });
 
-  it("formats shared paths consistently and refreshes them when selections change", () => {
-    const labels = { balanced: "按连接分配出口", relay: "顺序中继", unavailable: "—", cycle: "循环引用" };
-    const describe = createSelectorEgressDescription(index, live, true, labels);
-    expect(describe(google)).toBe("Manual · Japan · JP live");
-    expect(describe(manual)).toBe("Japan · JP live");
-    expect(createSelectorEgressDescription(index, { ...live, Japan: "JP new" }, true, labels)(google))
-      .toBe("Manual · Japan · JP new");
+  it("shares resolved exits and refreshes them when selections change, preserving literal node names", () => {
+    const resolve = createSelectorEgressResolver(index, live, true);
+    expect(resolve(google).names.at(-1)).toBe("JP live");
+    expect(resolve(manual).names.at(-1)).toBe("JP live");
+    expect(resolve(google)).toBe(resolve(google));
+    expect(createSelectorEgressResolver(index, { ...live, Japan: "JP · new" }, true)(google).names.at(-1))
+      .toBe("JP · new");
   });
 
   it("traverses a deep configuration without recursive stack growth", () => {

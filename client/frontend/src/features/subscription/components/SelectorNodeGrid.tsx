@@ -1,5 +1,3 @@
-import { LoadingOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,14 +7,15 @@ import type {
 } from "../../../types/subscription";
 import { sortSelectorMembers } from "../selectorSort";
 import type { SelectorIndex } from "../selectorNavigation";
-import type { DescribeSelectorEgress } from "../selectorEgress";
+import type { ResolveSelectorEgress } from "../selectorEgress";
 import type { ProxyDelayResult } from "../useProxyDelayQueue";
 import { SelectorGroupMember } from "./SelectorGroupMember";
+import { SelectorDelayBadge } from "./SelectorDelayBadge";
 
 const emptyDelayResults: Readonly<Record<string, ProxyDelayResult>> = {};
 
 interface SelectorNodeGridProps {
-  describeEgress: DescribeSelectorEgress;
+  resolveEgress: ResolveSelectorEgress;
   selectorsByName: SelectorIndex;
   onOpenGroup: (name: string) => void;
   selectionEnabled: boolean;
@@ -34,7 +33,7 @@ interface SelectorNodeGridProps {
 }
 
 export function SelectorNodeGrid({
-  describeEgress,
+  resolveEgress,
   selectorsByName,
   onOpenGroup,
   selectionEnabled,
@@ -51,7 +50,22 @@ export function SelectorNodeGrid({
   sortMode,
 }: SelectorNodeGridProps) {
   const { t, i18n } = useTranslation();
-  const sortingDelays = sortMode === "delay" ? delayResults : emptyDelayResults;
+  const delayNodes = useMemo(() => new Map(members.map((member) => {
+    if (member.source !== "group") {
+      return [member.name, member.source === "builtin" ? undefined : member.name];
+    }
+    const selector = selectorsByName.get(member.name);
+    const egress = selector ? resolveEgress(selector) : undefined;
+    return [member.name, egress?.end === "node" ? egress.names.at(-1) : undefined];
+  })), [members, selectorsByName, resolveEgress]);
+  const sortingDelays = useMemo(() => {
+    if (sortMode !== "delay") return emptyDelayResults;
+    const results: Record<string, ProxyDelayResult> = {};
+    for (const [name, node] of delayNodes) {
+      if (node && delayResults[node]) results[name] = delayResults[node];
+    }
+    return results;
+  }, [sortMode, delayNodes, delayResults]);
   const sortedMembers = useMemo(
     () => sortSelectorMembers(members, sortMode, sortingDelays, i18n.language),
     [members, sortMode, sortingDelays, i18n.language],
@@ -61,14 +75,15 @@ export function SelectorNodeGrid({
       {sortedMembers.map((member) => {
         if (member.source === "group") {
           const selector = selectorsByName.get(member.name);
+          const delayNode = delayNodes.get(member.name);
           return <SelectorGroupMember
             key={`group-${member.name}`}
             name={member.name}
             selector={selector}
-            egress={selector ? describeEgress(selector) : "—"}
+            delay={delayNode ? delayResults[delayNode] : undefined}
+            delayBusy={!!delayNode && busyDelayNodes.has(delayNode)}
             selected={currentSelection === member.name}
             selectionDisabled={!runtimeReady || !selectionEnabled || busySelection === groupName}
-            runtimeReady={runtimeReady}
             onSelect={() => void onSelect(groupName, member.name)}
             onOpen={() => onOpenGroup(member.name)}
           />;
@@ -77,15 +92,6 @@ export function SelectorNodeGrid({
           member.source === "proxy" || member.source === "provider";
         const result = delayResults[member.name];
         const delayBusy = busyDelayNodes.has(member.name);
-        const delayClass = result
-          ? result.status === "error"
-            ? " error"
-            : result.delay <= 200
-              ? " fast"
-              : result.delay <= 500
-                ? " medium"
-                : " slow"
-          : "";
         return (
           <div
             className={`selector-node${
@@ -107,7 +113,15 @@ export function SelectorNodeGrid({
               </span>
             </button>
             {delaySupported ? (
-              <Tooltip
+              <SelectorDelayBadge
+                result={result}
+                busy={delayBusy}
+                disabled={!runtimeReady || delayQueueActive}
+                onClick={() => void onTestDelay(member.name)}
+                label={t(
+                  result ? "subscription.delay.retestNode" : "subscription.delay.testNode",
+                  { name: member.name },
+                )}
                 title={t(
                   !runtimeReady
                     ? "subscription.delay.requiresCore"
@@ -119,32 +133,7 @@ export function SelectorNodeGrid({
                           ? "subscription.delay.retestCached"
                           : "subscription.delay.test",
                 )}
-              >
-                <span className="selector-node-delay-wrap">
-                  <button
-                    aria-label={t(
-                      result
-                        ? "subscription.delay.retestNode"
-                        : "subscription.delay.testNode",
-                      { name: member.name },
-                    )}
-                    className={`selector-node-delay${delayClass}`}
-                    disabled={!runtimeReady || delayQueueActive}
-                    onClick={() => void onTestDelay(member.name)}
-                    type="button"
-                  >
-                    {delayBusy ? (
-                      <LoadingOutlined spin />
-                    ) : result?.status === "success" ? (
-                      `${result.delay} ms`
-                    ) : result?.status === "error" ? (
-                      t("subscription.delay.failed")
-                    ) : (
-                      <ThunderboltOutlined />
-                    )}
-                  </button>
-                </span>
-              </Tooltip>
+              />
             ) : null}
           </div>
         );

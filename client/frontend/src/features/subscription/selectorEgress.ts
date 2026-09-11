@@ -3,7 +3,7 @@ import { selectorSelection, type SelectorIndex } from "./selectorNavigation";
 
 export interface SelectorEgress {
   names: string[];
-  end: "node" | "balanced" | "relay" | "unavailable" | "cycle";
+  end: "node" | "builtin" | "balanced" | "relay" | "unavailable" | "cycle";
 }
 
 /** Follow selections, never the panel's filtered members or its browsing path. */
@@ -28,6 +28,7 @@ export function resolveSelectorEgress(
     // Live selections may contain provider nodes absent from the offline projection.
     if (!runtimeReady && !member) return { names, end: "unavailable" };
     names.push(selected);
+    if (member?.source === "builtin") return { names, end: "builtin" };
     if (member && member.source !== "group") return { names, end: "node" };
     const child = selectors.get(selected);
     if (!child) return { names, end: member?.source === "group" ? "unavailable" : "node" };
@@ -37,22 +38,20 @@ export function resolveSelectorEgress(
   return { names, end: "cycle" };
 }
 
-export type DescribeSelectorEgress = (selector: SubscriptionSelector, name?: string) => string;
+export type ResolveSelectorEgress = (selector: SubscriptionSelector, name?: string) => SelectorEgress;
 
 /** Shared groups are resolved once per projection/selection snapshot. */
-export function createSelectorEgressDescription(
+export function createSelectorEgressResolver(
   selectors: SelectorIndex,
   selections: Readonly<Record<string, string>>,
   runtimeReady: boolean,
-  labels: Record<Exclude<SelectorEgress["end"], "node">, string>,
-): DescribeSelectorEgress {
-  const cache = new Map<string, string>();
+): ResolveSelectorEgress {
+  const cache = new Map<string, SelectorEgress>();
   return (selector, name = selector.name) => {
     const cached = cache.get(name);
     if (cached !== undefined) return cached;
-    const { names, end } = resolveSelectorEgress(selector, selectors, selections, runtimeReady, name);
-    const text = (end === "node" ? names : [...names, labels[end]]).join(" · ");
-    cache.set(name, text);
-    return text;
+    const result = resolveSelectorEgress(selector, selectors, selections, runtimeReady, name);
+    cache.set(name, result);
+    return result;
   };
 }

@@ -1,6 +1,7 @@
 import type { MacNetworkAuthorizationStatus } from "../types/macNetwork";
 import type { ChainProxyAPI } from "./chainProxyBridge";
 import type { ExternalUIAPI } from "./externalUIBridge";
+import type { SelectorIconAPI } from "./selectorIconBridge";
 import type { ProxyAuthorizationStatus } from "../types/authorization";
 import type { JeemiUpdateResult, JeemiUpdateState } from "../types/appUpdate";
 import type {
@@ -76,7 +77,7 @@ declare global {
   interface Window {
     go?: {
       desktop?: {
-        App?: ChainProxyAPI & ExternalUIAPI & {
+        App?: ChainProxyAPI & ExternalUIAPI & SelectorIconAPI & {
           InitializeClient: (language: string) => Promise<void>;
           GetBootstrapState: () => Promise<BootstrapState>;
           GetDNSQueryPreferences: () => Promise<DNSQueryPreferences>;

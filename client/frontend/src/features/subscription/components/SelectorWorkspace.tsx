@@ -28,7 +28,7 @@ import {
 } from "../SubscriptionPageStateContext";
 import { selectorPresentation } from "../selectorPresentation";
 import { filterSelectorsByName, hasNodeNameSearch } from "../selectorSearch";
-import { createSelectorEgressDescription } from "../selectorEgress";
+import { createSelectorEgressResolver } from "../selectorEgress";
 import { FallbackControl } from "./FallbackControl";
 import { NormalizationNotice } from "./NormalizationNotice";
 import { SelectorGroupContent } from "./SelectorGroupContent";
@@ -115,15 +115,20 @@ export function SelectorWorkspace({
     () => new Map((projection?.selectors ?? []).map((selector) => [selector.name, selector])),
     [projection?.selectors],
   );
-  const describeEgress = useMemo(
-    () => createSelectorEgressDescription(selectorsByName, activeSelections, runtimeReady, {
+  const resolveEgress = useMemo(
+    () => createSelectorEgressResolver(selectorsByName, activeSelections, runtimeReady),
+    [selectorsByName, activeSelections, runtimeReady],
+  );
+  const describeEgress = (selector: SubscriptionSelector, name: string) => {
+    const { names, end } = resolveEgress(selector, name);
+    if (end === "node" || end === "builtin") return names.at(-1) ?? "—";
+    return {
       balanced: t("subscription.selector.nested.balanced"),
       relay: t("subscription.selector.egress.relay"),
       unavailable: "—",
       cycle: t("subscription.selector.egress.cycle"),
-    }),
-    [selectorsByName, activeSelections, runtimeReady, t],
-  );
+    }[end];
+  };
   const egressTitle = (path: string) => t(
     runtimeReady ? "subscription.selector.egress.live" : "subscription.selector.egress.offline",
     { path },
@@ -292,7 +297,7 @@ export function SelectorWorkspace({
         rootGroupName={groupName}
         workspaceKey={workspaceKey}
         activeSelections={activeSelections}
-        describeEgress={describeEgress}
+        resolveEgress={resolveEgress}
         selectorsByName={selectorsByName}
         busyDelayNodes={busyDelayNodes}
         busySelection={busySelection}
