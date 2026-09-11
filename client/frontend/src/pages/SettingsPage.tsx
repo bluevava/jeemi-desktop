@@ -19,6 +19,9 @@ import { FeatureCard } from "../components/layout/FeatureCard";
 import { MihomoVersionSettings } from "../features/mihomo/MihomoVersionSettings";
 import { JeemiUpdateButton } from "../features/update/JeemiUpdateButton";
 import { GeoDataSettings } from "../features/geodata/GeoDataSettings";
+import { ZashboardSettings } from "../features/external-ui/ZashboardSettings";
+import { selectZashboardVersion } from "../services/externalUIBridge";
+import type { ZashboardState } from "../types/externalUI";
 import { geoDataPreferencesEqual } from "../features/geodata/model";
 import type { AppLanguage } from "../i18n/resources";
 import {
@@ -113,6 +116,12 @@ export function SettingsPage({ page }: SettingsPageProps) {
   const [persistedCoreVersion, setPersistedCoreVersion] = useState("");
   const [coreBusy, setCoreBusy] = useState(false);
   const [geoDataBusy, setGeoDataBusy] = useState(false);
+  const [zashboardBusy, setZashboardBusy] = useState(false);
+  const [draftZashboardVersion, setDraftZashboardVersion] = useState("");
+  const [persistedZashboardVersion, setPersistedZashboardVersion] = useState("");
+  const [zashboardSectionReady, setZashboardSectionReady] = useState(false);
+  const zashboardDraftInitialised = useRef(false);
+  const zashboardSectionRef = useRef<HTMLDivElement | null>(null);
   const [draftGeoDataPreferences, setDraftGeoDataPreferences] =
     useState<GeoDataPreferences>(defaultGeoDataPreferences);
   const [persistedGeoDataPreferences, setPersistedGeoDataPreferences] =
@@ -144,14 +153,14 @@ export function SettingsPage({ page }: SettingsPageProps) {
       ? resolveHomeSettingsSection(location.search, location.hash)
       : null;
   const autoCheck = settingsSearch.get("check") === "1";
-  const homeSettingsLayoutReady = mihomoSectionReady && geoDataSectionReady;
+  const homeSettingsLayoutReady = mihomoSectionReady && geoDataSectionReady && zashboardSectionReady;
 
   useEffect(() => {
     if (!focusTarget || !homeSettingsLayoutReady) return;
     const target =
       focusTarget === "mihomo"
         ? mihomoSectionRef.current
-        : geoDataSectionRef.current;
+        : focusTarget === "zashboard" ? zashboardSectionRef.current : geoDataSectionRef.current;
     if (!target) return;
 
     let innerFrame = 0;
@@ -176,6 +185,15 @@ export function SettingsPage({ page }: SettingsPageProps) {
 
   const handleGeoDataInitialLoadComplete = useCallback(() => {
     setGeoDataSectionReady(true);
+  }, []);
+
+  const handleZashboardInitialLoadComplete = useCallback(() => setZashboardSectionReady(true), []);
+  const handleZashboardStateLoaded = useCallback((state: ZashboardState) => {
+    setPersistedZashboardVersion(state.selectedVersion);
+    if (!zashboardDraftInitialised.current) {
+      zashboardDraftInitialised.current = true;
+      setDraftZashboardVersion(state.selectedVersion);
+    }
   }, []);
 
   useEffect(() => {
@@ -246,6 +264,10 @@ export function SettingsPage({ page }: SettingsPageProps) {
     setSaving(true);
     try {
       if (page === "home") {
+        if (draftZashboardVersion && draftZashboardVersion !== persistedZashboardVersion) {
+          await selectZashboardVersion(draftZashboardVersion);
+          await refresh();
+        }
         if (
           draftCoreVersion &&
           draftCoreVersion !== persistedCoreVersion
@@ -367,6 +389,11 @@ export function SettingsPage({ page }: SettingsPageProps) {
               onStateLoaded={handleGeoDataStateLoaded}
               selectedCoreVersion={persistedCoreVersion}
             />
+          </div>
+          <div className="settings-focus-target" id={homeSettingsSectionIds.zashboard} ref={zashboardSectionRef}>
+            <ZashboardSettings draftVersion={draftZashboardVersion} onDraftVersionChange={setDraftZashboardVersion}
+              onBusyChange={setZashboardBusy} onStateLoaded={handleZashboardStateLoaded}
+              onInitialLoadComplete={handleZashboardInitialLoadComplete} />
           </div>
         </>
       ) : null}
@@ -512,7 +539,7 @@ export function SettingsPage({ page }: SettingsPageProps) {
       >
         <div className="settings-action-bar">
           <Button
-            disabled={coreBusy || geoDataBusy || subscriptionBusy || saving}
+            disabled={coreBusy || geoDataBusy || zashboardBusy || subscriptionBusy || saving}
             icon={<CloseOutlined />}
             onClick={cancel}
             size="large"
@@ -520,7 +547,7 @@ export function SettingsPage({ page }: SettingsPageProps) {
             {t("settings.cancel")}
           </Button>
           <Button
-            disabled={coreBusy || geoDataBusy || subscriptionBusy}
+            disabled={coreBusy || geoDataBusy || zashboardBusy || subscriptionBusy}
             icon={<CheckOutlined />}
             loading={saving}
             onClick={() => void confirm()}

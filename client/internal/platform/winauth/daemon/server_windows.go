@@ -235,6 +235,11 @@ func (s *server) handle(connection net.Conn) {
 			err = failure("authorization_busy")
 			break
 		}
+		// A new start can arrive before the owner watcher observes an exited
+		// core. Flush its rules and close its retained token before replacing it.
+		if err = s.cores.stop(ctx); err != nil {
+			break
+		}
 		// A kernel process handle binds the lifetime, avoiding PID reuse.
 		var owner windows.Handle
 		err = windows.DuplicateHandle(windows.CurrentProcess(), caller, windows.CurrentProcess(), &owner, 0, false, windows.DUPLICATE_SAME_ACCESS)
@@ -257,7 +262,12 @@ func (s *server) handle(connection net.Conn) {
 			var binary *winauth.LockedCore
 			binary, err = openCallerCore(ctx, caller, *request.Target)
 			if err == nil {
-				err = s.cores.start(binary, workspace, request.Configuration)
+				err = s.cores.prepareRuleCache(caller, *request.Target, workspace, request.Configuration)
+				if err == nil {
+					err = s.cores.start(binary, workspace, request.Configuration)
+				} else {
+					binary.Close()
+				}
 			}
 		}
 		if err != nil {
@@ -400,6 +410,9 @@ func (c *serviceCores) snapshot(directory string, request Request, input io.Read
 	_, err := io.Copy(io.Discard, limited)
 	if err != nil || limited.N != 0 {
 		return failure("authorization_snapshot_unsafe_path")
+	}
+	if !initial {
+		return c.prepareRuleCacheFiles(request.Configuration)
 	}
 	return nil
 }

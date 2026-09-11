@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"jeemi/internal/externalui"
 )
 
 const (
@@ -133,6 +135,8 @@ type Preferences struct {
 
 	LogLevel                      string   `json:"logLevel"`
 	FindProcessMode               string   `json:"findProcessMode"`
+	ExternalUIEnabled             bool     `json:"externalUIEnabled"`
+	ExternalUIVersion             string   `json:"externalUIVersion"`
 	IPv6                          bool     `json:"ipv6"`
 	DNSEnabled                    bool     `json:"dnsEnabled"`
 	DNSListen                     string   `json:"dnsListen"`
@@ -329,6 +333,9 @@ func Validate(preferences Preferences) error {
 	}
 	if !validFindProcessMode(preferences.FindProcessMode) {
 		return fmt.Errorf("find process mode is invalid")
+	}
+	if preferences.ExternalUIVersion != "" && !externalui.ValidVersion(preferences.ExternalUIVersion) {
+		return fmt.Errorf("external UI version is invalid")
 	}
 	if err := validateListenAddress(preferences.DNSListen, preferences.ListenPort, preferences.DNSEnabled); err != nil {
 		return err

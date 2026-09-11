@@ -164,7 +164,8 @@ export function RuntimeStatusProvider({ children }: PropsWithChildren) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const runtime = await refreshRuntimeStatus();
+      const [runtime, preferences] = await Promise.all([refreshRuntimeStatus(), getRuntimePreferences()]);
+      setRuntimePreferences(preferences);
       setBootstrap((current) =>
         current
           ? { ...current, runtime }

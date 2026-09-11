@@ -1,5 +1,6 @@
 import type { MacNetworkAuthorizationStatus } from "../types/macNetwork";
 import type { ChainProxyAPI } from "./chainProxyBridge";
+import type { ExternalUIAPI } from "./externalUIBridge";
 import type { ProxyAuthorizationStatus } from "../types/authorization";
 import type { JeemiUpdateResult, JeemiUpdateState } from "../types/appUpdate";
 import type {
@@ -75,7 +76,7 @@ declare global {
   interface Window {
     go?: {
       desktop?: {
-        App?: ChainProxyAPI & {
+        App?: ChainProxyAPI & ExternalUIAPI & {
           InitializeClient: (language: string) => Promise<void>;
           GetBootstrapState: () => Promise<BootstrapState>;
           GetDNSQueryPreferences: () => Promise<DNSQueryPreferences>;
@@ -195,6 +196,7 @@ declare global {
             input: SaveLocalScriptInput,
           ) => Promise<LocalScript>;
           DeleteLocalScript: (id: string) => Promise<LocalScriptState>;
+          RefreshLocalScript: (id: string) => Promise<LocalScriptState>;
           GetLocalConfigResources: () => Promise<LocalConfigResourceState>;
           SaveStrategyGroup: (
             input: StrategyGroupResource,
@@ -381,6 +383,8 @@ const browserRuntimePreferencesFallback: RuntimePreferences = {
   tunStack: "mixed",
   logLevel: "silent",
   findProcessMode: "strict",
+  externalUIEnabled: false,
+  externalUIVersion: "",
   ipv6: true,
   dnsEnabled: true,
   dnsListen: "127.0.0.1:1053",
@@ -802,6 +806,10 @@ export async function saveLocalScript(
 
 export async function deleteLocalScript(id: string): Promise<LocalScriptState> {
   return requireAppBinding().DeleteLocalScript(id);
+}
+
+export async function refreshLocalScript(id: string): Promise<LocalScriptState> {
+  return requireAppBinding().RefreshLocalScript(id);
 }
 
 export async function getLocalConfigResources(): Promise<LocalConfigResourceState> {

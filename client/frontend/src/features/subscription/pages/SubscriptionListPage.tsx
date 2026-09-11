@@ -77,6 +77,7 @@ import type {
 import { useSubscriptionPageStateField } from "../SubscriptionPageStateContext";
 import { RuleProviderDrawer } from "../components/RuleProviderDrawer";
 import { SelectorWorkspace } from "../components/SelectorWorkspace";
+import { ScriptAssociationModal } from "../components/ScriptAssociationModal";
 import { SubscriptionShelf } from "../components/SubscriptionShelf";
 import { SubscriptionIconEditor } from "../components/SubscriptionIconEditor";
 import { RuntimeConfigurationViewer } from "../../runtime/RuntimeConfigurationViewer";
@@ -742,7 +743,7 @@ export function SubscriptionListPage({
   };
 
   const saveScriptAssociation = async () => {
-    if (!scriptAssociationTarget) return;
+    if (!scriptAssociationTarget || busyAction === "script-association") return;
     setBusyAction("script-association");
     setAssociationError("");
     try {
@@ -780,11 +781,11 @@ export function SubscriptionListPage({
     }
   };
 
-  const changeFallback = async (input: FallbackSelection) => {
+  const changeFallback = async (input: FallbackSelection): Promise<boolean> => {
     const subscription = state?.subscriptions.find(
       (item) => item.id === state.selectedSubscriptionId,
     );
-    if (!subscription || fallbackBusy || busyAction) return;
+    if (!subscription || fallbackBusy || busyAction) return false;
     setFallbackBusy(true);
     setErrorKey(null);
     try {
@@ -797,6 +798,7 @@ export function SubscriptionListPage({
       if (result.connectionResetFailed) {
         setOperationError("subscription.fallback.connectionResetFailed");
       }
+      return true;
     } catch {
       setOperationError("subscription.fallback.saveFailed");
       // A concurrent reset may have changed the independent fallback revision.
@@ -805,6 +807,7 @@ export function SubscriptionListPage({
       } catch {
         /* Keep the saved UI snapshot. */
       }
+      return false;
     } finally {
       setFallbackBusy(false);
     }
@@ -1489,45 +1492,21 @@ export function SubscriptionListPage({
           </div>
         </Modal>
 
-        <Modal
-          cancelText={t("common.cancel")}
-          confirmLoading={busyAction === "script-association"}
-          okText={t("subscription.scriptAssociation.save")}
+        <ScriptAssociationModal
+          busy={busyAction === "script-association"}
+          open={scriptAssociationTarget !== null}
+          targetName={scriptAssociationTarget?.name ?? ""}
+          error={associationError}
+          value={scriptAssociationDraft}
+          options={localScriptOptions}
+          noScripts={localScripts.scripts.length === 0}
+          onChange={setScriptAssociationDraft}
           onCancel={() => {
             setScriptAssociationTarget(null);
             setAssociationError("");
           }}
-          onOk={() => void saveScriptAssociation()}
-          open={scriptAssociationTarget !== null}
-          title={
-            <span className="subscription-modal-title">
-              {t("subscription.scriptAssociation.title")}
-              <FeatureHelp compact topic="subscriptionAssociation" />
-            </span>
-          }
-        >
-          <div className="subscription-association-form">
-            {associationError && scriptAssociationTarget ? (
-              <Alert description={associationError} showIcon type="error" />
-            ) : null}
-            <strong className="subscription-association-target">
-              {scriptAssociationTarget?.name}
-            </strong>
-            <Select
-              aria-label={t("subscription.scriptAssociation.title")}
-              onChange={setScriptAssociationDraft}
-              options={localScriptOptions}
-              value={scriptAssociationDraft}
-            />
-            {localScripts.scripts.length === 0 ? (
-              <Alert
-                description={t("subscription.scriptAssociation.empty")}
-                showIcon
-                type="info"
-              />
-            ) : null}
-          </div>
-        </Modal>
+          onSave={() => void saveScriptAssociation()}
+        />
       </div>
     </>
   );

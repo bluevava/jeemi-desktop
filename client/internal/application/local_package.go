@@ -112,7 +112,7 @@ func (s *Service) PreviewLocalPackage(kind, id string, contents []byte) (result 
 			return LocalPackagePreview{}, err
 		}
 		pending.revision, preview.TargetName, preview.ImportedName = current.Revision, current.Name, p.Script.Name
-		pending.script = localscript.SaveInput{ID: id, Name: p.Script.Name, Description: p.Script.Description, Contents: p.Script.Contents}
+		pending.script = localscript.SaveInput{ID: id, Name: p.Script.Name, Description: p.Script.Description, Contents: p.Script.Contents, SourceURL: p.Script.SourceURL}
 	}
 	configs, subscriptions, err := s.validateLocalPackage(pending)
 	if err != nil {

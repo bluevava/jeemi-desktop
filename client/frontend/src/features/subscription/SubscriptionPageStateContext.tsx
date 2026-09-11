@@ -13,7 +13,10 @@ export interface SubscriptionPageSessionState {
   fallbackResetNotices: Record<string, number>;
   activeTabByWorkspace: Record<string, string>;
   expandedSelectorsByWorkspace: Record<string, string[]>;
+  nestedSelectorPaths: Record<string, string[]>;
+  dismissedWarnings: Record<string, true>;
   selectorQuery: string;
+  selectorNameQuery: string;
   shelfExpanded: boolean;
   showHiddenSelectors: boolean;
 }
@@ -22,7 +25,10 @@ const initialState: SubscriptionPageSessionState = {
   fallbackResetNotices: {},
   activeTabByWorkspace: {},
   expandedSelectorsByWorkspace: {},
+  nestedSelectorPaths: {},
+  dismissedWarnings: {},
   selectorQuery: "",
+  selectorNameQuery: "",
   shelfExpanded: false,
   showHiddenSelectors: false,
 };

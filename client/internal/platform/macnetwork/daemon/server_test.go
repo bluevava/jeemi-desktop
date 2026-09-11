@@ -135,12 +135,31 @@ func TestCoreCrashRestoresAndNeverAutostarts(t *testing.T) {
 func TestProtocolRejectsUnknownCommandsAndFields(t *testing.T) {
 	server, _, _, _ := fixtureServer()
 	defer server.Close()
-	for _, input := range []string{`{"protocol":2,"operation":"exec","command":"id"}`, `{"protocol":2,"operation":"stop","pid":99}`, `{"protocol":1,"operation":"start"}`, `{"protocol":2,"operation":"ping"} {}`} {
+	for _, input := range []string{`{"protocol":3,"operation":"exec","command":"id"}`, `{"protocol":3,"operation":"stop","pid":99}`, `{"protocol":1,"operation":"start"}`, `{"protocol":2,"operation":"ping"}`, `{"protocol":3,"operation":"ping"} {}`} {
 		var response macnetwork.Response
 		_ = json.Unmarshal(server.Handle(1, 501, 77, []byte(input)), &response)
 		if response.Code != "invalid_request" {
 			t.Fatal(input, response)
 		}
+	}
+}
+
+func TestRestartCleansExitedSessionBeforeCreatingNext(t *testing.T) {
+	server, cores, _, _ := fixtureServer()
+	defer server.Close()
+	if request(t, server, 1, "start").Code != "ok" {
+		t.Fatal("start failed")
+	}
+	cores.process.running = false
+	cleaned := false
+	cores.process.onStop = func() {
+		if cores.starts != 1 {
+			t.Fatal("old session cache saved after new session started")
+		}
+		cleaned = true
+	}
+	if request(t, server, 1, "start").Code != "ok" || !cleaned || cores.starts != 2 {
+		t.Fatal("new start lost cleanup of the exited session")
 	}
 }
 

@@ -5,14 +5,16 @@ import {
   ExportOutlined,
   ImportOutlined,
   MoreOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
-import { App, Button, Card, Dropdown } from "antd";
+import { App, Button, Card, Dropdown, Tooltip } from "antd";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
 import { LibraryCreateCard } from "../../../components/layout/LibraryCreateCard";
-import { deleteLocalScript } from "../../../services/appBridge";
+import { deleteLocalScript, refreshLocalScript } from "../../../services/appBridge";
 import type {
   LocalScriptState,
   LocalScriptSummary,
@@ -38,8 +40,27 @@ export function LocalScriptLibraryPanel({
   state,
 }: LocalScriptLibraryPanelProps) {
   const { t, i18n } = useTranslation();
-  const { modal } = App.useApp();
+  const { modal, message } = App.useApp();
   const navigate = useNavigate();
+  const [refreshingID, setRefreshingID] = useState("");
+  const refreshing = useRef(false);
+
+  const refresh = async (script: LocalScriptSummary) => {
+    if (busyID !== null || refreshing.current || script.sourceType !== "url") return;
+    refreshing.current = true;
+    setRefreshingID(script.id);
+    onBusyChange(script.id);
+    try {
+      onStateChange(await refreshLocalScript(script.id));
+      void message.success(t("localScript.list.redownloaded"));
+    } catch (error) {
+      onError(error);
+    } finally {
+      refreshing.current = false;
+      setRefreshingID("");
+      onBusyChange(null);
+    }
+  };
 
   const confirmDelete = (script: LocalScriptSummary) => {
     modal.confirm({
@@ -68,7 +89,8 @@ export function LocalScriptLibraryPanel({
         <Card
           className="local-config-card local-script-card"
           key={script.id}
-          loading={busyID === script.id}
+          loading={busyID === script.id && refreshingID !== script.id}
+          aria-busy={busyID === script.id}
           variant="borderless"
         >
           <div className="local-config-card-heading">
@@ -83,52 +105,74 @@ export function LocalScriptLibraryPanel({
                 </small>
               </span>
             </div>
-            <Dropdown
-              disabled={busyID !== null}
-              menu={{
-                items: [
-                  {
-                    key: "edit",
-                    icon: <EditOutlined />,
-                    label: t("localScript.list.edit"),
+            <div className="local-script-card-actions">
+              {script.sourceType === "url" ? (
+                <Tooltip title={t("localScript.list.redownload")}>
+                  <Button
+                    aria-label={t("localScript.list.redownloadNamed", { name: script.name })}
+                    disabled={busyID !== null}
+                    icon={<ReloadOutlined />}
+                    loading={refreshingID === script.id}
+                    onClick={() => void refresh(script)}
+                    type="text"
+                  />
+                </Tooltip>
+              ) : null}
+              <Dropdown
+                disabled={busyID !== null}
+                menu={{
+                  items: [
+                    ...(script.sourceType === "url" ? [{
+                      key: "redownload",
+                      icon: <ReloadOutlined />,
+                      label: t("localScript.list.redownload"),
+                    }] : []),
+                    {
+                      key: "edit",
+                      icon: <EditOutlined />,
+                      label: t("localScript.list.edit"),
+                    },
+                    {
+                      key: "export",
+                      icon: <ExportOutlined />,
+                      label: t("localPackage.export"),
+                    },
+                    {
+                      key: "import",
+                      icon: <ImportOutlined />,
+                      label: t("localPackage.import"),
+                    },
+                    {
+                      key: "delete",
+                      danger: true,
+                      icon: <DeleteOutlined />,
+                      label: t("localScript.list.delete"),
+                    },
+                  ],
+                  onClick: ({ key }) => {
+                    if (key === "redownload") {
+                      void refresh(script);
+                    } else if (key === "edit") {
+                      navigate(`/config/scripts/${script.id}/edit`);
+                    } else if (key === "delete") {
+                      confirmDelete(script);
+                    } else if (key === "export") {
+                      onExport(script.id);
+                    } else if (key === "import") {
+                      onImport(script.id);
+                    }
                   },
-                  {
-                    key: "export",
-                    icon: <ExportOutlined />,
-                    label: t("localPackage.export"),
-                  },
-                  {
-                    key: "import",
-                    icon: <ImportOutlined />,
-                    label: t("localPackage.import"),
-                  },
-                  {
-                    key: "delete",
-                    danger: true,
-                    icon: <DeleteOutlined />,
-                    label: t("localScript.list.delete"),
-                  },
-                ],
-                onClick: ({ key }) => {
-                  if (key === "edit") {
-                    navigate(`/config/scripts/${script.id}/edit`);
-                  } else if (key === "delete") {
-                    confirmDelete(script);
-                  } else if (key === "export") {
-                    onExport(script.id);
-                  } else if (key === "import") {
-                    onImport(script.id);
-                  }
-                },
-              }}
-              trigger={["click"]}
-            >
-              <Button
-                aria-label={t("localScript.list.menu", { name: script.name })}
-                icon={<MoreOutlined />}
-                type="text"
-              />
-            </Dropdown>
+                }}
+                trigger={["click"]}
+              >
+                <Button
+                  aria-label={t("localScript.list.menu", { name: script.name })}
+                  disabled={busyID !== null}
+                  icon={<MoreOutlined />}
+                  type="text"
+                />
+              </Dropdown>
+            </div>
           </div>
           <div className="local-config-card-facts">
             <span>

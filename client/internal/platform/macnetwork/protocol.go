@@ -13,7 +13,7 @@ import (
 	"jeemi/internal/platform/requirements"
 )
 
-const ProtocolVersion = 2 // Includes helper-owned memory and scoped WebKit fallback.
+const ProtocolVersion = 3 // Retains per-UID HTTP rule-provider caches across sessions.
 const HelperName = "jeemi-authorizer"
 const MaxMessageBytes = 1 << 20
 

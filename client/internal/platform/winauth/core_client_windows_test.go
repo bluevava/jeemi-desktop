@@ -15,7 +15,7 @@ import (
 
 func TestCoreCheckExchangesOnlyMetadataAndReportsOldHelperAsUpdate(t *testing.T) {
 	_, target := coreFixture()
-	for _, protocol := range []int{Protocol, 5, 4, 3, 2, helperstate.Protocol} {
+	for _, protocol := range []int{Protocol, 6, 5, 4, 3, 2, helperstate.Protocol} {
 		client, server := net.Pipe()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		done := make(chan error, 1)

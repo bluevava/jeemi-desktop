@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ import (
 
 	"jeemi/internal/core"
 	"jeemi/internal/platform/macnetwork"
+	"jeemi/internal/platform/rulecache"
 )
 
 type protectedCores struct {
@@ -25,6 +27,7 @@ type protectedCores struct {
 	workspace string
 	uid       uint32
 	digests   map[string]string
+	ruleCache *rulecache.Session
 }
 
 func (c *protectedCores) Prepare(ctx context.Context, target macnetwork.Target) error {
@@ -88,6 +91,10 @@ func (c *protectedCores) Start(uid uint32, target macnetwork.Target, relative st
 	if err = snapshotAsUser(uid, relative, workspace, true, digests); err != nil {
 		return nil, err
 	}
+	cache, err := newRuleCache(rootDirectory, workspace, uid, relative)
+	if err != nil {
+		return nil, err
+	}
 	configuration := filepath.Join(workspace, filepath.FromSlash(relative))
 	if info, err := os.Lstat(configuration); err != nil || !info.Mode().IsRegular() {
 		return nil, macnetwork.Failure("unsafe_path")
@@ -115,8 +122,9 @@ func (c *protectedCores) Start(uid uint32, target macnetwork.Target, relative st
 	c.pid = command.Process.Pid
 	c.workspace = workspace
 	c.uid = uid
+	c.ruleCache = cache
 	c.digests = digests
-	p := &helperProcess{command: command, done: make(chan struct{}), workspace: workspace}
+	p := &helperProcess{command: command, done: make(chan struct{}), workspace: workspace, ruleCache: cache}
 	go func() { _ = command.Wait(); close(p.done) }()
 	return p, nil
 }
@@ -160,6 +168,7 @@ type helperProcess struct {
 	command   *exec.Cmd
 	done      chan struct{}
 	workspace string
+	ruleCache *rulecache.Session
 }
 
 func (p *helperProcess) PID() int { return p.command.Process.Pid }
@@ -185,6 +194,14 @@ func (p *helperProcess) Stop() error {
 			}
 		}
 	}
+	if p.ruleCache != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		if err := p.ruleCache.Save(ctx); err != nil {
+			log.Print("Jeemi: rule-provider cache save failed")
+		}
+		cancel()
+		p.ruleCache = nil
+	}
 	removeWorkspace(p.workspace)
 	return nil
 }
@@ -194,6 +211,9 @@ func (c *protectedCores) Stage(configuration string) (string, error) {
 		return "", macnetwork.Failure("unsafe_path")
 	}
 	if err := snapshotAsUser(c.uid, configuration, c.workspace, false, c.digests); err != nil {
+		return "", err
+	}
+	if err := prepareRuleCacheFiles(c.ruleCache, configuration); err != nil {
 		return "", err
 	}
 	path := filepath.Join(c.workspace, filepath.FromSlash(configuration))

@@ -1,10 +1,12 @@
 package localscript
 
 type SaveInput struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Contents    string `json:"contents"`
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Contents         string `json:"contents"`
+	SourceURL        string `json:"sourceUrl,omitempty"`
+	ExpectedRevision int    `json:"expectedRevision,omitempty"`
 }
 
 type Summary struct {
@@ -16,11 +18,13 @@ type Summary struct {
 	SizeBytes   int64  `json:"sizeBytes"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
+	SourceType  string `json:"sourceType"`
 }
 
 type Script struct {
 	Summary
-	Contents string `json:"contents"`
+	Contents  string `json:"contents"`
+	SourceURL string `json:"sourceUrl"`
 }
 
 type State struct {
@@ -50,4 +54,5 @@ type manifestDocument struct {
 	SizeBytes       int64  `json:"sizeBytes"`
 	CreatedAt       string `json:"createdAt"`
 	UpdatedAt       string `json:"updatedAt"`
+	SourceURL       string `json:"sourceUrl,omitempty"`
 }

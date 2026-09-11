@@ -4,6 +4,7 @@ import type { SubscriptionSelector } from "../../types/subscription";
 import {
   delayTargetsForSearch,
   filterSelectorsByNodeName,
+  filterSelectorsByName,
   hasNodeNameSearch,
 } from "./selectorSearch";
 
@@ -208,5 +209,36 @@ describe("batch delay targets for quick search", () => {
       query,
     )).toEqual(["HK GM 01", "JP gm 02"]);
     expect(compoundSelector.members).toHaveLength(7);
+  });
+});
+
+describe("selector name search", () => {
+  const groups = ["Google Auto", "YouTube Auto", "Google Auto Backup", "YouTube Manual", "Other Auto"]
+    .map((name) => ({ ...selector, name }));
+
+  it.each([
+    " Google | YouTube & Auto & !Backup ",
+    "google&auto&!backup|youtube",
+    "!backup & auto | google | youtube",
+    "  google     |   youtube  &  auto ! backup  ",
+  ])("reuses the same union, intersection and exclusion semantics (%j)", (query) => {
+    const matched = filterSelectorsByName(groups, query);
+    expect(matched).toEqual([groups[0], groups[1]]);
+    expect(matched[0]).toBe(groups[0]);
+    expect(matched[0].members).toBe(selector.members);
+  });
+
+  it("matches only group names, not nodes or protocols", () => {
+    expect(filterSelectorsByName(groups, "Tokyo|wireguard|provider-alpha")).toEqual([]);
+    expect(filterSelectorsByName(groups, "!backup")).toHaveLength(4);
+    expect(filterSelectorsByName(groups, "&auto")).toHaveLength(4);
+    expect(filterSelectorsByName(groups, " | & !  ")).toBe(groups);
+  });
+
+  it("composes with independent node search without restoring excluded groups or nodes", () => {
+    const byNode = filterSelectorsByNodeName(groups, "Tokyo");
+    expect(filterSelectorsByName(byNode, "YouTube !manual").map((item) => [item.name, item.members.map((node) => node.name)]))
+      .toEqual([["YouTube Auto", ["Tokyo node"]]]);
+    expect(delayTargetsForSearch(["Tokyo node", "London node"], byNode, "Tokyo")).toEqual(["Tokyo node"]);
   });
 });

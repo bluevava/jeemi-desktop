@@ -167,7 +167,9 @@ func (s *Server) handle(client uint64, uid uint32, clientPID int, data []byte) (
 		if req.Target == nil {
 			return macnetwork.Response{}, macnetwork.Failure("core_unverified")
 		}
-		if err := s.restore(); err != nil {
+		// Complete an exited session before replacing it, even when its periodic
+		// exit check has not run yet. Stop also saves its HTTP rule files.
+		if err := s.stop(); err != nil {
 			return macnetwork.Response{}, err
 		}
 		process, err := s.cores.Start(uid, *req.Target, req.Configuration)

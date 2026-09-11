@@ -7,10 +7,12 @@ export interface LocalScriptSummary {
   sizeBytes: number;
   createdAt: string;
   updatedAt: string;
+  sourceType: "text" | "url";
 }
 
 export interface LocalScript extends LocalScriptSummary {
   contents: string;
+  sourceUrl: string;
 }
 
 export interface LocalScriptState {
@@ -23,6 +25,8 @@ export interface SaveLocalScriptInput {
   name: string;
   description: string;
   contents: string;
+  sourceUrl?: string;
+  expectedRevision?: number;
 }
 
 export interface TestLocalScriptInput extends SaveLocalScriptInput {

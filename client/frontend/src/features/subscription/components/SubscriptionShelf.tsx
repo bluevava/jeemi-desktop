@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
 import { RuntimeConfigurationViewer } from "../../runtime/RuntimeConfigurationViewer";
+import { ZashboardButton } from "../../external-ui/ZashboardButton";
 import type {
   SubscriptionState,
   SubscriptionSummary,
@@ -140,6 +141,7 @@ export function SubscriptionShelf({
                   />
                 </span>
               </Tooltip>
+              <ZashboardButton />
               <RuntimeConfigurationViewer />
             </div>
             <button

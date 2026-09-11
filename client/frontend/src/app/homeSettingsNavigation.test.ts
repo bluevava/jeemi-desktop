@@ -11,6 +11,9 @@ describe("home settings section navigation", () => {
     expect(homeSettingsSectionPath("geodata", { check: true })).toBe(
       "/home/settings?focus=geodata&check=1#home-settings-geodata",
     );
+    expect(homeSettingsSectionPath("zashboard")).toBe("/home/settings?focus=zashboard#home-settings-zashboard");
+    expect(resolveHomeSettingsSection("?focus=zashboard", "")).toBe("zashboard");
+    expect(resolveHomeSettingsSection("", "#home-settings-zashboard")).toBe("zashboard");
   });
 
   it("prefers the anchor while retaining compatibility with old focus links", () => {

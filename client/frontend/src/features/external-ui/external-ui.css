@@ -1,0 +1,20 @@
+.zashboard-controls,
+.zashboard-progress,
+.zashboard-progress > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.zashboard-progress {
+  flex-wrap: wrap;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.zashboard-progress .ant-progress { flex: 1 1 100px; margin: 0; }
+.zashboard-settings { display: grid; gap: 16px; min-width: 0; }
+.zashboard-settings-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.zashboard-settings-row > strong { min-width: 95px; }
+.zashboard-settings-row .ant-select,
+.zashboard-settings-row .ant-auto-complete { flex: 1 1 200px; min-width: 0; max-width: 400px; }
+.external-ui-preference > .ant-typography { display: block; padding: 0 12px 12px; }

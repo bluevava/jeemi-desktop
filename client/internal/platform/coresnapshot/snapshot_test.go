@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestWindowsFilePathsCannotLeaveProtectedSession(t *testing.T) {
@@ -45,6 +46,13 @@ func TestSnapshotCopiesIndependentBytesAndPreservesUpdatedCache(t *testing.T) {
 	os.WriteFile(filepath.Join(generation, "bootstrap.yaml"), []byte(testController+"mode: rule\n"), 0600)
 	os.WriteFile(filepath.Join(generation, "config.yaml"), []byte(testController+"mode: global\n"), 0600)
 	os.WriteFile(filepath.Join(source, "cache.db"), []byte("original"), 0600)
+	modified := time.Now().Add(-48 * time.Hour).Truncate(time.Second)
+	if err := os.WriteFile(filepath.Join(source, "rules.yaml"), []byte("payload: [cached.example]\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(filepath.Join(source, "rules.yaml"), modified, modified); err != nil {
+		t.Fatal(err)
+	}
 	destination := t.TempDir()
 	digests := map[string]string{}
 	transfer := func() {
@@ -58,6 +66,10 @@ func TestSnapshotCopiesIndependentBytesAndPreservesUpdatedCache(t *testing.T) {
 		}
 	}
 	transfer()
+	info, err := os.Stat(filepath.Join(destination, "rules.yaml"))
+	if err != nil || !info.ModTime().Equal(modified) {
+		t.Fatal("snapshot reset the age of a rule-provider file")
+	}
 	os.WriteFile(filepath.Join(destination, "cache.db"), []byte("live update"), 0600)
 	transfer()
 	data, _ := os.ReadFile(filepath.Join(destination, "cache.db"))

@@ -28,6 +28,7 @@ describe("translation resources", () => {
       // Include nested and imported help, not only page topics and field descriptions.
       expect(topics.map(([key]) => key)).toEqual(expect.arrayContaining([
         "help.topics.subscriptionNodeSearch",
+        "help.topics.subscriptionSelectorSearch",
         "localConfig.fieldHelp.generic",
         "localConfig.resources.groups.help.namePatterns",
         "localConfig.resources.ruleSets.help.payload",
@@ -113,13 +114,6 @@ describe("translation resources", () => {
     }
   });
 
-  it("keeps selector header node counts unit-free in every language", () => {
-    for (const locale of Object.values(resources)) {
-      expect(locale.translation.subscription.selector.nodeCount).toBe(
-        "{{count}}",
-      );
-    }
-  });
 });
 
 function helpTopics(root: unknown, prefix = ""): [string, Record<string, unknown>][] {

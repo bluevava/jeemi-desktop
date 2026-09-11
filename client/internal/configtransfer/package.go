@@ -37,6 +37,7 @@ type Script struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Contents    string `json:"contents"`
+	SourceURL   string `json:"sourceUrl,omitempty"`
 }
 
 type Package struct {
@@ -58,7 +59,7 @@ func FromConfig(local profile.LocalConfig, state resources.State) (Package, erro
 }
 
 func FromScript(script localscript.Script) Package {
-	return Package{Format: format, Version: version, Kind: ScriptKind, Script: &Script{Name: script.Name, Description: script.Description, Contents: script.Contents}}
+	return Package{Format: format, Version: version, Kind: ScriptKind, Script: &Script{Name: script.Name, Description: script.Description, Contents: script.Contents, SourceURL: script.SourceURL}}
 }
 
 func Encode(p Package) ([]byte, error) {

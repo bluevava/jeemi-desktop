@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"time"
 	"unsafe"
 
+	"jeemi/internal/platform/rulecache"
 	"jeemi/internal/platform/winauth"
 
 	"golang.org/x/sys/windows"
@@ -31,6 +33,8 @@ type serviceCores struct {
 	done                     chan struct{}
 	workspace, configuration string
 	digests                  map[string]string
+	ruleCache                *rulecache.Session
+	cacheToken               windows.Token
 }
 
 func newServiceCores(root string) (*serviceCores, error) {
@@ -58,6 +62,7 @@ func (c *serviceCores) start(binary *winauth.LockedCore, workspace, configuratio
 	defer func() {
 		if !successful {
 			binary.Close()
+			c.closeRuleCache()
 		}
 	}()
 	if _, running := c.state(); running {
@@ -141,6 +146,14 @@ func (c *serviceCores) stop(ctx context.Context) error {
 		c.job = 0
 	}
 	c.command = nil
+	if c.ruleCache != nil {
+		cacheContext, cancel := context.WithTimeout(ctx, 3*time.Second)
+		if err := c.ruleCache.Save(cacheContext); err != nil {
+			log.Print("Jeemi: rule-provider cache save failed")
+		}
+		cancel()
+		c.closeRuleCache()
+	}
 	if c.workspace != "" {
 		if err := removeWorkspace(c.root, c.workspace); err != nil {
 			return err

@@ -13,6 +13,7 @@ export function platformFailureMessageKey(code: string): string | null {
     return `macNetwork.status.${Object.hasOwn(zhMacNetwork.status, key) ? key : "helper_failed"}`;
   }
   switch (code) {
+    case "external_ui_prepare_failed": return "externalUI.prepareFailed";
     case "linux_core_privileges_blocked": return "runtime.platformErrors.corePrivilegesBlocked";
     case "linux_system_proxy_unavailable": return "runtime.platformErrors.systemProxyUnavailable";
     case "linux_tun_permission_required":

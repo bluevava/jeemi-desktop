@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"jeemi/internal/externalui"
+
 	"gopkg.in/yaml.v3"
 	"jeemi/internal/platform/requirements"
 	"path/filepath"
@@ -45,6 +47,28 @@ func WriteSnapshot(root, configuration string, initial bool, output io.Writer) e
 		return err
 	}
 	defer source.Close()
+	uiDirectory := ""
+	if initial {
+		file, err := source.Open(configuration)
+		if err != nil {
+			return err
+		}
+		data, err := io.ReadAll(io.LimitReader(file, MaxConfigurationBytes+1))
+		file.Close()
+		if err != nil || len(data) > MaxConfigurationBytes {
+			return failure("invalid_request")
+		}
+		var fields struct {
+			ExternalUI string `yaml:"external-ui"`
+		}
+		if yaml.Unmarshal(data, &fields) != nil {
+			return failure("invalid_request")
+		}
+		parts := strings.Split(fields.ExternalUI, "/")
+		if len(parts) == 4 && parts[0] == "external-ui" && parts[1] == "zashboard" && externalui.ValidVersion(parts[2]) && parts[3] == "dist" {
+			uiDirectory = fields.ExternalUI
+		}
+	}
 	archive := tar.NewWriter(output)
 	defer archive.Close()
 	total := int64(0)
@@ -55,6 +79,17 @@ func WriteSnapshot(root, configuration string, initial bool, output io.Writer) e
 		}
 		if name == "." {
 			return nil
+		}
+		// The persistent UI cache may contain several versions. Send only the
+		// active release at process start, and no UI files during hot reloads.
+		if name == "external-ui" || strings.HasPrefix(name, "external-ui/") {
+			include := uiDirectory != "" && (name == uiDirectory || strings.HasPrefix(name, uiDirectory+"/") || (entry.IsDir() && strings.HasPrefix(uiDirectory, name+"/")))
+			if !include {
+				if entry.IsDir() {
+					return fs.SkipDir
+				}
+				return nil
+			}
 		}
 		if entry.IsDir() {
 			if name == "resolved" || (strings.HasPrefix(name, "generations/") && name != path.Dir(configuration)) {
@@ -88,7 +123,7 @@ func WriteSnapshot(root, configuration string, initial bool, output io.Writer) e
 			return err
 		}
 		defer file.Close()
-		if err = archive.WriteHeader(&tar.Header{Name: name, Size: info.Size(), Mode: 0600, Typeflag: tar.TypeReg}); err != nil {
+		if err = archive.WriteHeader(&tar.Header{Name: name, Size: info.Size(), Mode: 0600, Typeflag: tar.TypeReg, ModTime: info.ModTime()}); err != nil {
 			return err
 		}
 		_, err = io.CopyN(archive, file, info.Size())
@@ -174,6 +209,12 @@ func Receive(directory, userRuntime string, input io.Reader, previous map[string
 		if previous[name] == digest {
 			root.Remove(temp)
 			continue
+		}
+		if !ConfigurationName(name) && !header.ModTime.IsZero() {
+			if err = root.Chtimes(temp, header.ModTime, header.ModTime); err != nil {
+				root.Remove(temp)
+				return err
+			}
 		}
 		if err = root.Rename(temp, name); err != nil {
 			root.Remove(temp)

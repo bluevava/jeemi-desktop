@@ -201,6 +201,8 @@ export interface RuntimePreferences {
   tunStack: TunStack;
   logLevel: LogLevel;
   findProcessMode: FindProcessMode;
+  externalUIEnabled: boolean;
+  externalUIVersion: string;
   ipv6: boolean;
   dnsEnabled: boolean;
   dnsListen: string;

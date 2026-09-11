@@ -104,6 +104,9 @@ var catalog = Catalog{
 			DocumentationURL: docsBase + "/general/#_7",
 			Fields: []Field{
 				lockedField("external-controller", "/external-controller", KindScalar),
+				lockedField("external-ui", "/external-ui", KindScalar),
+				lockedField("external-ui-url", "/external-ui-url", KindScalar),
+				lockedField("external-ui-name", "/external-ui-name", KindScalar),
 				lockedField("secret", "/secret", KindScalar),
 				lockedField("external-controller-cors", "/external-controller-cors", KindMapping),
 				lockedField("external-controller-unix", "/external-controller-unix", KindScalar),

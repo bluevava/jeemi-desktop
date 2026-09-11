@@ -12,9 +12,11 @@ import { zhRuleSetEntry } from "./rule-set-entry";
 import { zhSubscriptionNormalization } from "./subscription-normalization";
 import { zhDNSQuery, zhDNSQueryHelp } from "./dns-query";
 import { zhAppUpdate } from "./app-update";
+import { zhExternalUI, zhExternalUIHelp } from "./external-ui";
 import { zhChainProxy, zhChainProxyHelp, zhChainProxyFilterHelp, zhChainProxyImportHelp } from "./chain-proxy";
 
 export const zhCN = {
+  externalUI: zhExternalUI,
   chainProxy: zhChainProxy,
   appUpdate: zhAppUpdate,
   dnsQuery: zhDNSQuery,
@@ -431,6 +433,7 @@ export const zhCN = {
     normalization: zhSubscriptionNormalization,
     fallback: {
       title: "漏网之鱼",
+      configure: "配置漏网之鱼",
       preserve: "不覆写（{{target}}）",
       direct: "直连",
       undefined: "未定义",
@@ -490,11 +493,14 @@ export const zhCN = {
       showHiddenSelectors: "显示标记为 hidden 的选择器",
       hideHiddenSelectors: "隐藏标记为 hidden 的选择器",
     },
+    dismissWarning: "关闭此警告，本次运行不再显示",
     selector: {
       title: "代理选择器",
       tools: "代理选择器快捷工具栏",
       search: "搜索节点名称",
       searchPlaceholder: "搜索节点，如 hk | jp & gm & !ev",
+      nameSearch: "搜索代理选择器名称",
+      nameSearchPlaceholder: "搜索选择器，支持 | & !",
       outboundMode: "切换出站方式",
       outboundModes: {
         rule: "规则模式",
@@ -514,10 +520,32 @@ export const zhCN = {
       empty: "最终配置中没有代理选择器",
       hiddenOnly: "当前没有可见选择器，可在订阅栏开启显示 hidden 选择器",
       noSearchResults: "没有匹配的节点",
+      noSelectorSearchResults: "没有符合当前搜索条件的代理选择器",
       unknownType: "未知类型",
-      nodeCount: "{{count}}",
-      defaultSelection: "配置默认项",
-      currentSelection: "当前选择",
+      memberCount: "{{count}} 项",
+      memberBreakdown: "共 {{count}} 项：{{nodes}} 个节点、{{groups}} 个代理组、{{actions}} 个内置动作",
+      groupTypes: {
+        select: "手动选择", urlTest: "自动选择", fallback: "自动回退",
+        loadBalance: "负载均衡", relay: "链式代理", other: "代理组",
+      },
+      nested: {
+        path: "代理组浏览路径",
+        open: "查看“{{name}}”的成员",
+        unavailable: "此代理组暂不可用",
+        balanced: "按连接分配出口",
+        help: {
+          title: "嵌套代理组",
+          purpose: "代理组可以选择节点或其他代理组，再逐级决定最终出口。卡片与标题摘要显示完整的“选择器 · 下级选择器 · 最终节点”路径，过长时悬停查看。",
+          scenarios: "例如 TikTok 选择日本组，再进入日本组选择自动选路或某个节点。点击卡片选择出口，点击右侧箭头查看成员，通过上方面包屑返回。",
+          cautions: "同一组可能被多个分流组共用，修改它会影响所有使用它的流量。查看成员不会改变选择；自动选择、自动回退和负载均衡由内核决定出口，只能查看与测速。离线仅显示配置默认项。",
+        },
+      },
+      egress: {
+        live: "运行出口：{{path}}",
+        offline: "配置默认路径（未取得运行状态）：{{path}}",
+        relay: "按配置顺序中继",
+        cycle: "循环引用",
+      },
       providersPending:
         "{{names}} 的节点由外部代理提供者提供，需要 mihomo 加载后才能显示完整列表。",
       dynamicFiltersPending:
@@ -636,6 +664,8 @@ export const zhCN = {
       none: "不关联本地脚本",
       empty: "当前还没有本地脚本；可以先到配置页面创建并运行测试。",
       save: "校验并保存关联",
+      saving: "正在处理脚本关联…",
+      waiting: "正在校验配置并处理关联。首次加载规则集可能需要一些时间，请稍候。",
       conflictTitle: "不能同时关联两种本地处理方式",
       unlinkConfigFirst:
         "这份订阅已关联本地配置，请先在“关联本地配置”中取消关联。",
@@ -732,6 +762,9 @@ export const zhCN = {
       edit: "编辑",
       delete: "删除",
       menu: "{{name}} 的脚本操作菜单",
+      redownload: "重新下载",
+      redownloadNamed: "重新下载“{{name}}”脚本",
+      redownloaded: "脚本已更新到本地。",
       deleteTitle: "删除本地脚本？",
       deleteDescription: "将删除“{{name}}”。仍被订阅关联时会阻止删除。",
       noDescription: "没有说明",
@@ -745,7 +778,11 @@ export const zhCN = {
       namePlaceholder: "例如：移除不可用节点",
       description: "说明",
       descriptionPlaceholder: "说明脚本修改内容和适用订阅。",
-      source: "JavaScript 源码",
+      source: "JavaScript 源码或脚本 URL",
+      sourcePlaceholder: "粘贴 main(config) 脚本，或完整的 HTTP(S) JavaScript 文件链接。",
+      urlSource: "URL 脚本",
+      urlHint: "首次保存、测试或更换 URL 时下载源码；已有相同 URL 使用本地缓存，可从卡片“重新下载”更新。",
+      cachedSource: "查看已下载的源码",
       testTarget: "测试订阅：{{name}}",
       noTestSubscription:
         "当前没有可用于运行测试的订阅。脚本仍可保存，但关联前必须完成最终配置校验。",
@@ -1455,6 +1492,7 @@ export const zhCN = {
       cautionsAndExample: "注意点与示例",
     },
     topics: {
+      externalUI: zhExternalUIHelp,
       chainProxy: zhChainProxyHelp,
       chainProxyFilter: zhChainProxyFilterHelp,
       chainProxyImport: zhChainProxyImportHelp,
@@ -1703,8 +1741,8 @@ export const zhCN = {
       localScript: {
         title: "本地脚本转换",
         purpose: "通过同步 main(config) 函数转换订阅配置对象，返回的对象继续参与最终配置生成，适合按条件调整节点、策略组或规则。",
-        scenarios: "先用当前订阅运行测试并查看最终配置预览，通过后再关联；编辑已被引用的脚本时会逐份验证关联订阅。",
-        cautions: "脚本在 Go 隔离运行时中执行，不提供文件、网络、进程、环境变量或 Wails API；时钟与随机源固定，单次执行限时且结果必须是有效的顶层配置对象。脚本仍是可执行逻辑，只应使用自己信任的内容。",
+        scenarios: "可粘贴源码或纯 HTTP(S) JavaScript 文件 URL。首次保存或测试时下载，已保存的 URL 脚本默认使用本地源码；卡片菜单的“重新下载”和菜单左侧刷新图标都可手动更新。先用当前订阅运行测试并查看最终配置预览，通过后再关联。",
+        cautions: "来源必须返回定义同步 main(config) 的 JavaScript 正文，不能是网页或异步模块。下载上限 256 KiB、最长 30 秒；重新下载覆盖本地源码前验证全部关联订阅，失败保留旧来源和源码。打开列表、编辑和启动代理不会刷新；更换 URL 才重新下载，粘贴源码保存可转为文本脚本。脚本在无文件、网络、进程、环境变量或 Wails API 的隔离环境中限时执行，时钟与随机源固定；只应使用自己信任的来源，URL 可能含凭据。",
       },
       subscriptionShelf: {
         title: "订阅配置面板",
@@ -1719,17 +1757,24 @@ export const zhCN = {
         cautions: "运算顺序固定为 | 或 → & 与 → ! 排除。首个无前缀关键词及 | 后的关键词属于同一或集合；& 后的条件须全部满足；! 条件始终在最后排除，移动条件时保留其前缀。关键词首尾空白和空条件会忽略，内部空格按原样匹配；没有或条件时从全部节点开始筛选。只搜索真实节点名称，不搜索选择器、协议或提供者名称。",
         example: "输入 hk | jp & gm & !ev：先选出名称包含 hk 或 jp 的节点，再保留包含 gm 的节点，最后排除包含 ev 的节点。改写为 hk & gm & !ev | jp，结果相同。",
       },
+      subscriptionSelectorSearch: {
+        title: "选择器名称搜索",
+        purpose: "按代理选择器名称筛选面板或标签，支持 | 或、& 与、! 排除，不区分大小写。",
+        scenarios: "脚本生成很多分流组时，可快速定位 Google、YouTube 等选择器；订阅栏的节点搜索仍独立使用。",
+        cautions: "顺序固定为 | 或 → & 与 → ! 排除。首个无前缀词与 | 后的词属于或集合；所有 & 条件必须满足，最后排除 ! 条件。移动条件时保留前缀，关键词首尾空白和空条件会忽略；没有或条件时从全部组开始。只匹配组名，不修改成员、真实出口或批量测速范围；节点搜索和 hidden 开关继续生效。",
+        example: "Google | YouTube & 自动 & !备用：先选名称包含 Google 或 YouTube 的组，再保留包含“自动”的组，排除包含“备用”的组。Google & 自动 & !备用 | YouTube 的结果相同。",
+      },
       fallbackTraffic: {
         title: "漏网之鱼",
         purpose: "按订阅设置未命中前置规则的兜底出口，可沿用本地处理后的目标、直连或指定选择器，不改写订阅原文和已命中规则的目标。",
-        scenarios: "不同订阅需要不同兜底出口，或希望漏网流量直连时使用。设置按订阅保存，仅在规则模式下参与路由；手动切换生效后，按订阅设置的“切换重置链接”处理旧出口链接。",
+        scenarios: "不同订阅需要不同兜底出口，或希望漏网流量直连时，点击选择器标题栏的鱼形图标，在弹窗选择并保存。设置按订阅保存，仅在规则模式下参与路由；手动切换生效后，按订阅设置的“切换重置链接”处理旧出口链接。",
         cautions: "不覆写括号内显示注入前首条 MATCH / FINAL 的目标，不是当前节点。刷新、切换或编辑配置后，所选选择器须按完整名称匹配，失效会自动保存为不覆写；拉取或组合失败不会清除选择。覆写只原位修改首条顶层终结规则，无终结规则时追加 MATCH；不覆写不会修复来源中已有的无效目标。",
       },
       selectorPreview: {
         title: "代理选择器预览",
         purpose: "查看订阅经本地配置或脚本处理后的选择器与可解析节点，无需先启动核心。标题旁可切换规则、全局或直连方式，与主页共用设置。",
-        scenarios: "导入、刷新、切换订阅或修改本地配置关联后检查组合结果；搜索和临时显示 hidden 组从收起订阅栏操作，出站方式直接在选择器标题旁切换。",
-        cautions: "全局模式隐藏普通选择器，直连模式不显示选择器。搜索只匹配节点名称，不匹配选择器、协议或规则/代理提供者名称；外部 provider 节点、延迟和真实当前选择需要运行中的 mihomo。远程组图标仅允许 HTTP(S) 且不发送 Referer。",
+        scenarios: "导入、刷新、切换订阅或修改本地配置关联后检查组合结果。选择器标题栏搜索组名，收起订阅栏搜索节点或临时显示 hidden 组。标签栏滚轮可左右浏览；鱼形图标配置漏网之鱼。代理组卡片右侧箭头查看子组，面包屑返回；点击卡片本身才选择出口。",
+        cautions: "全局模式隐藏普通选择器，直连模式不显示选择器。两处搜索各自只匹配节点名或组名，均不匹配协议和提供者名称；出口摘要逐级显示选择路径，离线仅是配置默认路径，负载均衡按连接决定出口。外部 provider 节点、延迟和真实选择需要运行中的 mihomo。远程组图标仅允许 HTTP(S) 且不发送 Referer。",
       },
       ruleProviderRefresh: {
         title: "规则提供者更新",

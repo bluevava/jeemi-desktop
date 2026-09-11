@@ -1,16 +1,14 @@
 import {
-  AimOutlined,
   ApartmentOutlined,
   AppstoreOutlined,
   ArrowRightOutlined,
   DownOutlined,
   GlobalOutlined,
-  LoadingOutlined,
+  SearchOutlined,
   TagsOutlined,
-  ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Alert, Empty, Segmented, Tabs, Tooltip } from "antd";
-import { useEffect } from "react";
+import { Empty, Input, Segmented, Tabs, Tooltip } from "antd";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
@@ -23,23 +21,26 @@ import type {
   SelectorViewMode,
   SubscriptionProjection,
   SubscriptionSelector,
-  SubscriptionSelectorMember,
 } from "../../../types/subscription";
 import {
   setSelectorExpanded,
   useSubscriptionPageStateField,
 } from "../SubscriptionPageStateContext";
 import { selectorPresentation } from "../selectorPresentation";
-import { hasNodeNameSearch } from "../selectorSearch";
+import { filterSelectorsByName, hasNodeNameSearch } from "../selectorSearch";
+import { createSelectorEgressDescription } from "../selectorEgress";
 import { FallbackControl } from "./FallbackControl";
 import { NormalizationNotice } from "./NormalizationNotice";
-import { sortSelectorMembers } from "../selectorSort";
+import { SelectorGroupContent } from "./SelectorGroupContent";
+import { SelectorIcon } from "./SelectorIcon";
+import { SubscriptionWarning } from "./SubscriptionWarning";
+import { selectorMemberCounts, selectorTypeKey } from "../selectorNavigation";
 import type { ProxyDelayResult } from "../useProxyDelayQueue";
 
 interface SelectorWorkspaceProps {
   subscription?: SubscriptionSummary;
   fallbackBusy: boolean;
-  onFallbackChange: (selection: FallbackSelection) => Promise<void>;
+  onFallbackChange: (selection: FallbackSelection) => Promise<boolean>;
   activeSelections: Record<string, string>;
   busyDelayNodes: ReadonlySet<string>;
   busySelection: string;
@@ -87,16 +88,46 @@ export function SelectorWorkspace({
   sortMode,
   viewMode,
 }: SelectorWorkspaceProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [activeTabByWorkspace, setActiveTabByWorkspace] =
     useSubscriptionPageStateField("activeTabByWorkspace");
   const [expandedSelectorsByWorkspace, setExpandedSelectorsByWorkspace] =
     useSubscriptionPageStateField("expandedSelectorsByWorkspace");
+  const [selectorNameQuery, setSelectorNameQuery] =
+    useSubscriptionPageStateField("selectorNameQuery");
+  const visibleSelectors = useMemo(
+    () => filterSelectorsByName(selectors, selectorNameQuery),
+    [selectors, selectorNameQuery],
+  );
   const workspaceKey = `${projection?.subscriptionId || "none"}:${outboundMode}`;
   const activeTab = activeTabByWorkspace[workspaceKey] ?? "";
-  const expandedSelectors =
-    expandedSelectorsByWorkspace[workspaceKey] ?? [];
+  const effectiveActiveTab = visibleSelectors.some((selector) => selector.name === activeTab)
+    ? activeTab
+    : (visibleSelectors[0]?.name ?? "");
+  const expandedSelectors = expandedSelectorsByWorkspace[workspaceKey];
+  const expandedSelectorNames = useMemo(
+    () => new Set(expandedSelectors),
+    [expandedSelectors],
+  );
   const searchingNodes = hasNodeNameSearch(query);
+  const searchingSelectors = hasNodeNameSearch(selectorNameQuery);
+  const selectorsByName = useMemo(
+    () => new Map((projection?.selectors ?? []).map((selector) => [selector.name, selector])),
+    [projection?.selectors],
+  );
+  const describeEgress = useMemo(
+    () => createSelectorEgressDescription(selectorsByName, activeSelections, runtimeReady, {
+      balanced: t("subscription.selector.nested.balanced"),
+      relay: t("subscription.selector.egress.relay"),
+      unavailable: "—",
+      cycle: t("subscription.selector.egress.cycle"),
+    }),
+    [selectorsByName, activeSelections, runtimeReady, t],
+  );
+  const egressTitle = (path: string) => t(
+    runtimeReady ? "subscription.selector.egress.live" : "subscription.selector.egress.offline",
+    { path },
+  );
 
   const toolbar = (
     <div className="selector-toolbar">
@@ -135,6 +166,17 @@ export function SelectorWorkspace({
           value={outboundMode}
         />
         <FallbackControl subscription={subscription} projection={projection} busy={fallbackBusy} onChange={onFallbackChange} />
+      </div>
+      <div className="selector-name-search">
+        <FeatureHelp compact topic="subscriptionSelectorSearch" />
+        <Input
+          allowClear
+          aria-label={t("subscription.selector.nameSearch")}
+          onChange={(event) => setSelectorNameQuery(event.target.value)}
+          placeholder={t("subscription.selector.nameSearchPlaceholder")}
+          prefix={<SearchOutlined />}
+          value={selectorNameQuery}
+        />
       </div>
       <div
         aria-label={t("subscription.selector.tools")}
@@ -208,15 +250,13 @@ export function SelectorWorkspace({
   );
 
   useEffect(() => {
-    const next = selectors.some((selector) => selector.name === activeTab)
-      ? activeTab
-      : (selectors[0]?.name ?? "");
-    if (next === activeTab) return;
+    // A temporary search must not overwrite the remembered tab.
+    if (searchingNodes || searchingSelectors || effectiveActiveTab === activeTab) return;
     setActiveTabByWorkspace((current) => ({
       ...current,
-      [workspaceKey]: next,
+      [workspaceKey]: effectiveActiveTab,
     }));
-  }, [activeTab, selectors, setActiveTabByWorkspace, workspaceKey]);
+  }, [activeTab, effectiveActiveTab, searchingNodes, searchingSelectors, setActiveTabByWorkspace, workspaceKey]);
 
   if (!projection) {
     return (
@@ -235,11 +275,10 @@ export function SelectorWorkspace({
       <section className={`selector-workspace density-${density}`}>
         {toolbar}
         <NormalizationNotice summary={projection.summary} />
-        <Alert
+        <SubscriptionWarning
+          noticeKey={`projection:${projection.status}`}
           description={t(`subscription.projection.status.${projection.status}`)}
-          message={t("subscription.projection.failed")}
-          showIcon
-          type="warning"
+          title={t("subscription.projection.failed")}
         />
       </section>
     );
@@ -247,39 +286,25 @@ export function SelectorWorkspace({
 
   const nodeGrid = (selector: SubscriptionSelector) => {
     const groupName = outboundMode === "global" ? "GLOBAL" : selector.name;
-    const currentSelection =
-      activeSelections[groupName] || selector.defaultSelection;
     return (
-      <SelectorNodeGrid
+      <SelectorGroupContent
+        root={selector}
+        rootGroupName={groupName}
+        workspaceKey={workspaceKey}
+        activeSelections={activeSelections}
+        describeEgress={describeEgress}
+        selectorsByName={selectorsByName}
         busyDelayNodes={busyDelayNodes}
         busySelection={busySelection}
-        currentSelection={currentSelection}
         delayQueueActive={delayQueueActive}
         delayResults={delayResults}
-        groupName={groupName}
-        members={sortSelectorMembers(
-          selector.members,
-          sortMode,
-          delayResults,
-          i18n.language,
-        )}
         onSelect={onSelect}
         onTestDelay={onTestDelay}
         runtimeReady={runtimeReady}
+        sortMode={sortMode}
       />
     );
   };
-
-  const providerWarning = (selector: SubscriptionSelector) =>
-    selector.unresolvedProviderNames.length > 0 ? (
-      <Alert
-        description={t("subscription.selector.providersPending", {
-          names: selector.unresolvedProviderNames.join(", "),
-        })}
-        showIcon
-        type="warning"
-      />
-    ) : null;
 
   return (
     <section className={`selector-workspace density-${density}`}>
@@ -288,10 +313,9 @@ export function SelectorWorkspace({
       {outboundMode === "rule" && projection.warnings.includes(
         "selector_dynamic_filter_not_evaluated",
       ) ? (
-        <Alert
+        <SubscriptionWarning
+          noticeKey="selector-dynamic-filters"
           description={t("subscription.selector.dynamicFiltersPending")}
-          showIcon
-          type="warning"
         />
       ) : null}
 
@@ -300,42 +324,44 @@ export function SelectorWorkspace({
           description={t("subscription.selector.directMode")}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
-      ) : selectors.length === 0 ? (
+      ) : visibleSelectors.length === 0 ? (
         <Empty
           description={t(
-            searchingNodes
-              ? "subscription.selector.noSearchResults"
-              : outboundMode === "global"
-                ? "subscription.selector.globalEmpty"
-                : projection.selectors.some((selector) => selector.hidden)
-                  ? "subscription.selector.hiddenOnly"
-                  : "subscription.selector.empty",
+            searchingSelectors
+              ? "subscription.selector.noSelectorSearchResults"
+              : searchingNodes
+                ? "subscription.selector.noSearchResults"
+                : outboundMode === "global"
+                  ? "subscription.selector.globalEmpty"
+                  : projection.selectors.some((selector) => selector.hidden)
+                    ? "subscription.selector.hiddenOnly"
+                    : "subscription.selector.empty",
           )}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       ) : viewMode === "tabs" ? (
         <Tabs
-          activeKey={activeTab || selectors[0]?.name}
+          activeKey={effectiveActiveTab}
           className="selector-tabs"
-          items={selectors.map((selector) => {
+          destroyOnHidden
+          items={visibleSelectors.map((selector) => {
             const groupName =
               outboundMode === "global" ? "GLOBAL" : selector.name;
-            const currentSelection =
-              activeSelections[groupName] || selector.defaultSelection;
+            const egress = describeEgress(selector, groupName);
             return {
               key: selector.name,
               label: (
                 <SelectorTabLabel
-                  currentSelection={currentSelection}
+                  egress={egress}
+                  egressTitle={egressTitle(egress)}
                   selector={selector}
                 />
               ),
-              children: (
+              children: selector.name === effectiveActiveTab ? (
                 <div className="selector-tab-panel">
-                  {providerWarning(selector)}
                   {nodeGrid(selector)}
                 </div>
-              ),
+              ) : null,
             };
           })}
           onChange={(value) =>
@@ -348,13 +374,13 @@ export function SelectorWorkspace({
         />
       ) : (
         <div className="selector-groups">
-          {selectors.map((selector) => {
+          {visibleSelectors.map((selector) => {
             const groupName =
               outboundMode === "global" ? "GLOBAL" : selector.name;
-            const currentSelection =
-              activeSelections[groupName] || selector.defaultSelection;
+            const egress = describeEgress(selector, groupName);
             const selectorStateKey =
               outboundMode === "global" ? "GLOBAL" : selector.name;
+            const expanded = expandedSelectorNames.has(selectorStateKey);
             const presentation = selectorPresentation(
               selector.name,
               selector.icon,
@@ -374,7 +400,7 @@ export function SelectorWorkspace({
                     ),
                   );
                 }}
-                open={expandedSelectors.includes(selectorStateKey)}
+                open={expanded}
               >
                 <summary>
                   <span className="selector-summary-main">
@@ -383,30 +409,23 @@ export function SelectorWorkspace({
                       <strong title={selector.name}>
                         {presentation.displayName}
                       </strong>
-                      <small>
-                        {selector.type ||
-                          t("subscription.selector.unknownType")}
+                      <small title={t("subscription.selector.memberBreakdown", selectorMemberCounts(selector))}>
+                        {t(selectorTypeKey(selector.type))}
                         {" · "}
-                        {t("subscription.selector.nodeCount", {
+                        {t("subscription.selector.memberCount", {
                           count: selector.members.length,
                         })}
                       </small>
                     </span>
                   </span>
                   <span className="selector-summary-side">
-                    <span className="selector-current">
-                      {t(
-                        runtimeReady
-                          ? "subscription.selector.currentSelection"
-                          : "subscription.selector.defaultSelection",
-                      )}
-                      <strong>{currentSelection || "—"}</strong>
+                    <span className="selector-current" title={egressTitle(egress)}>
+                      <strong>{egress}</strong>
                     </span>
                     <DownOutlined className="selector-toggle-icon" />
                   </span>
                 </summary>
-                {providerWarning(selector)}
-                {nodeGrid(selector)}
+                {expanded ? nodeGrid(selector) : null}
               </details>
             );
           })}
@@ -416,31 +435,13 @@ export function SelectorWorkspace({
   );
 }
 
-function SelectorIcon({ selector }: { selector: SubscriptionSelector }) {
-  const presentation = selectorPresentation(selector.name, selector.icon);
-  return (
-    <span aria-hidden="true" className="selector-group-icon">
-      {presentation.emoji || <AimOutlined />}
-      {presentation.iconUrl ? (
-        <img
-          alt=""
-          loading="lazy"
-          onError={(event) => {
-            event.currentTarget.hidden = true;
-          }}
-          referrerPolicy="no-referrer"
-          src={presentation.iconUrl}
-        />
-      ) : null}
-    </span>
-  );
-}
-
 function SelectorTabLabel({
-  currentSelection,
+  egress,
+  egressTitle,
   selector,
 }: {
-  currentSelection: string;
+  egress: string;
+  egressTitle: string;
   selector: SubscriptionSelector;
 }) {
   const { t } = useTranslation();
@@ -451,125 +452,16 @@ function SelectorTabLabel({
       <span className="selector-tab-copy">
         <span className="selector-tab-title">
           <strong title={selector.name}>{presentation.displayName}</strong>
-          <small>
-            {t("subscription.selector.nodeCount", {
+          <small title={t("subscription.selector.memberBreakdown", selectorMemberCounts(selector))}>
+            {t("subscription.selector.memberCount", {
               count: selector.members.length,
             })}
           </small>
         </span>
-        <span className="selector-tab-current" title={currentSelection}>
-          {currentSelection || "—"}
+        <span className="selector-tab-current" title={egressTitle}>
+          {egress}
         </span>
       </span>
     </span>
-  );
-}
-
-interface SelectorNodeGridProps {
-  busyDelayNodes: ReadonlySet<string>;
-  busySelection: string;
-  currentSelection: string;
-  delayQueueActive: boolean;
-  delayResults: Readonly<Record<string, ProxyDelayResult>>;
-  groupName: string;
-  members: SubscriptionSelectorMember[];
-  onSelect: (group: string, proxy: string) => Promise<void>;
-  onTestDelay: (proxy: string) => Promise<void>;
-  runtimeReady: boolean;
-}
-
-function SelectorNodeGrid({
-  busyDelayNodes,
-  busySelection,
-  currentSelection,
-  delayQueueActive,
-  delayResults,
-  groupName,
-  members,
-  onSelect,
-  onTestDelay,
-  runtimeReady,
-}: SelectorNodeGridProps) {
-  const { t } = useTranslation();
-  return (
-    <div className="selector-node-grid">
-      {members.map((member) => {
-        const delaySupported =
-          member.source === "proxy" || member.source === "provider";
-        const result = delayResults[member.name];
-        const delayBusy = busyDelayNodes.has(member.name);
-        const delayClass = result
-          ? result.status === "error"
-            ? " error"
-            : result.delay <= 200
-              ? " fast"
-              : result.delay <= 500
-                ? " medium"
-                : " slow"
-          : "";
-        return (
-          <div
-            className={`selector-node${
-              currentSelection === member.name ? " default" : ""
-            }${delaySupported ? "" : " no-delay"}`}
-            key={`${member.source}-${member.providerName}-${member.name}`}
-          >
-            <button
-              aria-pressed={currentSelection === member.name}
-              className="selector-node-select"
-              disabled={!runtimeReady || busySelection === groupName}
-              onClick={() => void onSelect(groupName, member.name)}
-              type="button"
-            >
-              <strong title={member.name}>{member.name}</strong>
-              <span>
-                {member.type || t("subscription.selector.unknownType")}
-                {member.providerName ? ` · ${member.providerName}` : ""}
-              </span>
-            </button>
-            {delaySupported ? (
-              <Tooltip
-                title={t(
-                  !runtimeReady
-                    ? "subscription.delay.requiresCore"
-                    : delayQueueActive
-                      ? "subscription.delay.queueBusy"
-                      : result?.source === "mihomo"
-                        ? "subscription.delay.retestAutomatic"
-                        : result
-                          ? "subscription.delay.retestCached"
-                          : "subscription.delay.test",
-                )}
-              >
-                <span className="selector-node-delay-wrap">
-                  <button
-                    aria-label={t(
-                      result
-                        ? "subscription.delay.retestNode"
-                        : "subscription.delay.testNode",
-                      { name: member.name },
-                    )}
-                    className={`selector-node-delay${delayClass}`}
-                    disabled={!runtimeReady || delayQueueActive}
-                    onClick={() => void onTestDelay(member.name)}
-                    type="button"
-                  >
-                    {delayBusy ? (
-                      <LoadingOutlined spin />
-                    ) : result?.status === "success" ? (
-                      `${result.delay} ms`
-                    ) : result?.status === "error" ? (
-                      t("subscription.delay.failed")
-                    ) : (
-                      <ThunderboltOutlined />
-                    )}
-                  </button>
-                </span>
-              </Tooltip>
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
   );
 }

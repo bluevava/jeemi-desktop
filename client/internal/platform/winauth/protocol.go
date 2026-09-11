@@ -16,7 +16,7 @@ import (
 )
 
 const HelperName = "jeemi-authorizer.exe"
-const Protocol = 6 // GUI connects directly to the selected core's controller.
+const Protocol = 7 // Retains HTTP rule-provider caches across core sessions.
 const maxRequestBytes = 1 << 20
 
 var helperSHA256 string // pinned after building the standalone helper

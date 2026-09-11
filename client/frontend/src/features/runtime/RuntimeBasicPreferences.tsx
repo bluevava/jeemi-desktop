@@ -13,6 +13,7 @@ import {
 } from "./RuntimePreferenceFields";
 import { RuntimeYamlResourceEditor } from "./RuntimeYamlResourceEditor";
 import { formatYamlStringSequence } from "./runtimeYaml";
+import { ExternalUIPreference } from "../external-ui/ExternalUIPreference";
 
 export function RuntimeBasicPreferences({
   draft,
@@ -165,6 +166,7 @@ export function RuntimeBasicPreferences({
               value={draft.findProcessMode}
             />
           </RuntimePreferenceItem>
+          <ExternalUIPreference enabled={draft.externalUIEnabled} onChange={(externalUIEnabled) => updateDraft({ externalUIEnabled })} />
         </div>
       </div>
     </RuntimePreferenceSection>

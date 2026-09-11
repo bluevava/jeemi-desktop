@@ -9,7 +9,7 @@ export function hasNodeNameSearch(query: string): boolean {
   return /[^|&!\s]/u.test(query);
 }
 
-function nodeNameMatcher(query: string): (name: string) => boolean {
+function nameMatcher(query: string): (name: string) => boolean {
   const conditions: Record<SearchCondition, string[]> = {
     any: [],
     all: [],
@@ -28,7 +28,7 @@ function nodeNameMatcher(query: string): (name: string) => boolean {
 
   // Operators label the following keyword rather than forming a Boolean AST.
   // Collect the union first, then intersect all required terms, then exclude.
-  // Moving a labelled condition cannot reintroduce a previously rejected node.
+  // Moving a labelled condition cannot reintroduce a previously rejected name.
   return (name) => {
     const normalisedName = name.toLowerCase();
     const includes = (keyword: string) => normalisedName.includes(keyword);
@@ -52,13 +52,22 @@ export function filterSelectorsByNodeName(
     return selectors;
   }
 
-  const matches = nodeNameMatcher(query);
+  const matches = nameMatcher(query);
   return selectors.flatMap((selector) => {
     const members = selector.members.filter(
       (member) => isNode(member) && matches(member.name),
     );
     return members.length > 0 ? [{ ...selector, members }] : [];
   });
+}
+
+export function filterSelectorsByName(
+  selectors: SubscriptionSelector[],
+  query: string,
+): SubscriptionSelector[] {
+  if (!hasNodeNameSearch(query)) return selectors;
+  const matches = nameMatcher(query);
+  return selectors.filter((selector) => matches(selector.name));
 }
 
 export function delayTargetsForSearch(

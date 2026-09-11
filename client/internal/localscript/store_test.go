@@ -1,7 +1,9 @@
 package localscript
 
 import (
+	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -51,5 +53,41 @@ func TestStoreCreatesUpdatesAndDeletesScript(t *testing.T) {
 	state, err = store.Delete(created.ID)
 	if err != nil || len(state.Scripts) != 0 {
 		t.Fatalf("Delete() = %+v, error = %v", state, err)
+	}
+}
+
+func TestRemoteScriptMetadataAndReadOnlyCache(t *testing.T) {
+	store, err := NewStore(StoreOptions{DataDirectory: filepath.Join(t.TempDir(), paths.DataDirectoryName)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	input := SaveInput{Name: "Remote", SourceURL: "https://example.test/script?token=private", Contents: "function main(c) {return c;}"}
+	script, err := store.Save(input)
+	if err != nil || script.SourceType != "url" || script.SourceURL != input.SourceURL {
+		t.Fatal("source metadata not saved", err)
+	}
+	manifest := filepath.Join(store.Directory(), script.ID, "manifest.json")
+	before, _ := os.ReadFile(manifest)
+	state, err := store.State()
+	if err != nil || state.Scripts[0].SourceType != "url" {
+		t.Fatal("URL kind missing from summary", err)
+	}
+	loaded, err := store.Get(script.ID)
+	after, _ := os.ReadFile(manifest)
+	if err != nil || !reflect.DeepEqual(script, loaded) || string(before) != string(after) {
+		t.Fatal("cache read changed persisted state", err)
+	}
+	input.ID, input.ExpectedRevision = script.ID, script.Revision
+	input.SourceURL = "file:///invalid"
+	if _, err := store.Save(input); err == nil {
+		t.Fatal("invalid source metadata accepted")
+	}
+	input.SourceURL = ""
+	text, err := store.Save(input)
+	if err != nil || text.SourceType != "text" || text.SourceURL != "" {
+		t.Fatal("URL script cannot become text", err)
+	}
+	if _, err := store.Save(input); err == nil {
+		t.Fatal("stale revision replaced newer script")
 	}
 }

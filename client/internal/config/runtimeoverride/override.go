@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"jeemi/internal/config/document"
+	"jeemi/internal/externalui"
 	"jeemi/internal/runtimeconfig"
 
 	"gopkg.in/yaml.v3"
@@ -16,6 +17,9 @@ var managedPaths = []string{
 	"/mode",
 	"/log-level",
 	"/find-process-mode",
+	"/external-ui",
+	"/external-ui-url",
+	"/external-ui-name",
 	"/ipv6",
 	"/allow-lan",
 	"/bind-address",
@@ -70,8 +74,21 @@ func ApplyForPlatform(configurationYAML []byte, preferences runtimeconfig.Prefer
 		return nil, fmt.Errorf("parse composed configuration: %w", err)
 	}
 	root := document.Root(configuration)
-	for _, path := range []string{"/port", "/socks-port", "/mixed-port"} {
+	for _, path := range []string{"/port", "/socks-port", "/mixed-port", "/external-ui", "/external-ui-url", "/external-ui-name"} {
 		if err := document.DeleteMappingPath(root, path); err != nil {
+			return nil, err
+		}
+	}
+	if preferences.ExternalUIEnabled {
+		if !externalui.ValidVersion(preferences.ExternalUIVersion) {
+			return nil, fmt.Errorf("download a zashboard version before enabling external UI")
+		}
+		if err := document.SetMappingPath(root, "/external-ui", stringNode(externalui.RuntimePath(preferences.ExternalUIVersion))); err != nil {
+			return nil, err
+		}
+		// A local, nonempty directory prevents mihomo's automatic download.
+		// Pin its explicit dashboard-update action to the same official version.
+		if err := document.SetMappingPath(root, "/external-ui-url", stringNode(externalui.ArchiveURL(preferences.ExternalUIVersion))); err != nil {
 			return nil, err
 		}
 	}

@@ -17,6 +17,7 @@ import (
 	configresources "jeemi/internal/config/resources"
 	configschema "jeemi/internal/config/schema"
 	"jeemi/internal/core"
+	"jeemi/internal/externalui"
 	"jeemi/internal/geodata"
 	"jeemi/internal/localscript"
 	"jeemi/internal/mihomo/delaycache"
@@ -70,10 +71,12 @@ type Service struct {
 	ctx                  context.Context
 	runtime              RuntimeStatus
 	versionManager       *core.VersionManager
+	zashboard            *externalui.Manager
 	geoDataManager       *geodata.Manager
 	settingsStore        *settings.Store
 	localConfigs         *profile.LocalConfigStore
 	localScripts         *localscript.Store
+	scriptFetcher        localscript.Fetcher
 	configResources      *configresources.Store
 	chainProxies         *chainproxy.Store
 	chainFetcher         subscription.Fetcher
@@ -172,10 +175,12 @@ func NewService(dataDirectory string) (*Service, error) {
 			Configuration:    RuntimeConfigurationStatus{State: RuntimeConfigurationIdle},
 		},
 		versionManager:  manager,
+		zashboard:       externalui.NewManager(externalui.Options{DataDirectory: dataDirectory}),
 		geoDataManager:  geoDataManager,
 		settingsStore:   settingsStore,
 		localConfigs:    localConfigs,
 		localScripts:    localScripts,
+		scriptFetcher:   &localscript.HTTPFetcher{},
 		configResources: configResources,
 		chainProxies:    chainProxies,
 		chainFetcher:    subscription.NewHTTPFetcher(),
@@ -657,6 +662,9 @@ func (s *Service) Startup(ctx context.Context) {
 
 func (s *Service) Shutdown(ctx context.Context) error {
 	s.CancelChainProxyRefresh()
+	if s.zashboard != nil {
+		s.zashboard.Cancel()
+	}
 	if s.jeemiUpdater != nil {
 		s.jeemiUpdater.Cancel()
 	}

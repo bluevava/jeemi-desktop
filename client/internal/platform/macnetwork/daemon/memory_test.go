@@ -43,10 +43,10 @@ func TestMemoryUsesOwnedProcessAndAuthenticatedWebClient(t *testing.T) {
 func TestMemoryRejectsQueryArgumentsAndDiscardsExitedProcess(t *testing.T) {
 	server, cores, _, _ := fixtureServer()
 	for _, input := range []string{
-		`{"protocol":2,"operation":"memory","pid":1}`,
-		`{"protocol":2,"operation":"memory","target":{}}`,
-		`{"protocol":2,"operation":"memory","configuration":"config.yaml"}`,
-		`{"protocol":2,"operation":"ping","webViewMemory":true}`,
+		`{"protocol":3,"operation":"memory","pid":1}`,
+		`{"protocol":3,"operation":"memory","target":{}}`,
+		`{"protocol":3,"operation":"memory","configuration":"config.yaml"}`,
+		`{"protocol":3,"operation":"ping","webViewMemory":true}`,
 	} {
 		var reply macnetwork.Response
 		_ = json.Unmarshal(server.Handle(1, 501, 77, []byte(input)), &reply)

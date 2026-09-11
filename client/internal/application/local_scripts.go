@@ -19,7 +19,13 @@ func (s *Service) LocalScript(id string) (localscript.Script, error) {
 }
 
 func (s *Service) TestLocalScript(input localscript.TestInput) (localscript.TestResult, error) {
-	candidate, err := s.localScripts.Preview(input.SaveInput)
+	ctx, cancel := s.operationContext(60 * time.Second)
+	defer cancel()
+	prepared, err := s.prepareLocalScriptInput(ctx, input.SaveInput, false)
+	if err != nil {
+		return localscript.TestResult{}, err
+	}
+	candidate, err := s.localScripts.Preview(prepared)
 	if err != nil {
 		return localscript.TestResult{}, err
 	}
@@ -27,8 +33,6 @@ func (s *Service) TestLocalScript(input localscript.TestInput) (localscript.Test
 	if err != nil {
 		return localscript.TestResult{}, err
 	}
-	ctx, cancel := s.operationContext(30 * time.Second)
-	defer cancel()
 	result, err := s.validateLocalScriptCandidate(ctx, target, candidate)
 	if err != nil {
 		return localscript.TestResult{}, err
@@ -42,10 +46,23 @@ func (s *Service) TestLocalScript(input localscript.TestInput) (localscript.Test
 }
 
 func (s *Service) SaveLocalScript(input localscript.SaveInput) (localscript.Script, error) {
+	return s.saveLocalScript(input, false)
+}
+
+func (s *Service) saveLocalScript(input localscript.SaveInput, forceDownload bool) (localscript.Script, error) {
+	ctx, cancel := s.operationContext(75 * time.Second)
+	defer cancel()
+	input, err := s.prepareLocalScriptInput(ctx, input, forceDownload)
+	if err != nil {
+		return localscript.Script{}, err
+	}
 	s.reconcileMu.Lock()
 	defer s.reconcileMu.Unlock()
 	s.associationMu.Lock()
 	defer s.associationMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return localscript.Script{}, err
+	}
 
 	candidate, err := s.localScripts.Preview(input)
 	if err != nil {
@@ -58,12 +75,13 @@ func (s *Service) SaveLocalScript(input localscript.SaveInput) (localscript.Scri
 			return localscript.Script{}, err
 		}
 	}
-	ctx, cancel := s.operationContext(45 * time.Second)
-	defer cancel()
 	for _, reference := range references {
 		if _, err := s.validateLocalScriptCandidate(ctx, reference, candidate); err != nil {
 			return localscript.Script{}, fmt.Errorf("local script would make subscription %q invalid: %w", reference.Name, err)
 		}
+	}
+	if err := ctx.Err(); err != nil {
+		return localscript.Script{}, err
 	}
 	saved, err := s.localScripts.Save(input)
 	if err != nil {

@@ -1,8 +1,9 @@
-export type HomeSettingsSection = "mihomo" | "geodata";
+export type HomeSettingsSection = "mihomo" | "geodata" | "zashboard";
 
 export const homeSettingsSectionIds: Record<HomeSettingsSection, string> = {
   mihomo: "home-settings-mihomo",
   geodata: "home-settings-geodata",
+  zashboard: "home-settings-zashboard",
 };
 
 export function homeSettingsSectionPath(
@@ -31,5 +32,5 @@ export function resolveHomeSettingsSection(
   if (hashSection) return hashSection;
 
   const focus = new URLSearchParams(search).get("focus");
-  return focus === "mihomo" || focus === "geodata" ? focus : null;
+  return focus === "mihomo" || focus === "geodata" || focus === "zashboard" ? focus : null;
 }

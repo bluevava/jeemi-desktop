@@ -102,6 +102,9 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		status.LastError = nil
 	})
 
+	if err := s.prepareExternalUI(ctx); err != nil {
+		return s.failRuntimeConfiguration(trigger, "external_ui", "external_ui_prepare_failed", err, nil)
+	}
 	if err := s.normalizeSubscriptionFallbacks(); err != nil {
 		return s.failRuntimeConfiguration(trigger, "compose", "fallback_update_failed", err, nil)
 	}
@@ -158,6 +161,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		return s.failRuntimeConfiguration(trigger, "geodata", "geodata_state_failed", err, nil)
 	}
 	fastMode := !geoPending && candidate.installation != nil && live.State == mihomoruntime.StateRunning &&
+		!s.runtimeManager.ExternalUIRequiresRestart(candidate.request.Preferences) &&
 		previousPreferences != nil && onlyOutboundModeChanged(*previousPreferences, candidate.resolved.Preferences) &&
 		sameRuntimeSource(live.Source, candidate.request.Source) && live.CoreVersion == candidate.installation.Version
 
@@ -224,6 +228,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 
 	activationRequested := mode == reconcileStart || mode == reconcileRestart ||
 		(mode == reconcileAutomatic && (live.State == mihomoruntime.StateRunning || live.DesiredRunning))
+	externalUIRestart := s.runtimeManager.ExternalUIRequiresRestart(candidate.request.Preferences)
 	if geoPending && geoActivation == nil && live.State == mihomoruntime.StateRunning &&
 		mode != reconcileStart && mode != reconcileRestart {
 		// GEO files are intentionally not replaced beneath a running core.
@@ -249,7 +254,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		return nil
 	}
 	if !fastMode {
-		if err := s.runtimeManager.CheckPrerequisites(ctx, candidate.request, mode == reconcileRestart || geoPending); err != nil {
+		if err := s.runtimeManager.CheckPrerequisites(ctx, candidate.request, mode == reconcileRestart || geoPending || externalUIRestart); err != nil {
 			rollbackGeo()
 			return s.failRuntimeConfiguration(trigger, "prepare", "platform_unavailable", err, nil)
 		}
@@ -295,7 +300,14 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 			if err == nil {
 				geoActivation, err = s.geoDataManager.PrepareActivation(candidate.geoDataPreferences)
 			}
-		} else if mode == reconcileRestart && live.State != mihomoruntime.StateStopped {
+		} else if (mode == reconcileRestart || externalUIRestart) && live.State != mihomoruntime.StateStopped {
+			if externalUIRestart {
+				request, requestErr := s.runtimeManager.ActiveStartRequest()
+				if requestErr != nil {
+					return s.failRuntimeConfiguration(trigger, "external_ui", "external_ui_rollback_point_failed", requestErr, nil)
+				}
+				previousRequest = &request
+			}
 			stopContext, cancel := context.WithTimeout(ctx, 15*time.Second)
 			_, err = s.runtimeManager.Stop(stopContext)
 			cancel()

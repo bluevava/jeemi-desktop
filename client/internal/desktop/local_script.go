@@ -23,3 +23,7 @@ func (a *App) SaveLocalScript(input localscript.SaveInput) (localscript.Script, 
 func (a *App) DeleteLocalScript(id string) (localscript.State, error) {
 	return a.service.DeleteLocalScript(id)
 }
+
+func (a *App) RefreshLocalScript(id string) (localscript.State, error) {
+	return a.service.RefreshLocalScript(id)
+}

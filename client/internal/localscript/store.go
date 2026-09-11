@@ -132,6 +132,14 @@ func (s *Store) Delete(id string) (State, error) {
 }
 
 func (s *Store) previewUnlocked(input SaveInput) (Script, error) {
+	sourceURL := ""
+	if input.SourceURL != "" {
+		var err error
+		sourceURL, err = NormalizeSourceURL(input.SourceURL)
+		if err != nil {
+			return Script{}, err
+		}
+	}
 	name := strings.TrimSpace(input.Name)
 	description := strings.TrimSpace(input.Description)
 	contents := normalizeSource(input.Contents)
@@ -158,6 +166,9 @@ func (s *Store) previewUnlocked(input SaveInput) (Script, error) {
 		if err != nil {
 			return Script{}, err
 		}
+		if input.ExpectedRevision > 0 && existing.Revision != input.ExpectedRevision {
+			return Script{}, fmt.Errorf("local script changed; reopen it before saving")
+		}
 		createdAt, err = time.Parse(time.RFC3339Nano, existing.CreatedAt)
 		if err != nil {
 			return Script{}, fmt.Errorf("stored local script creation time is invalid")
@@ -168,7 +179,8 @@ func (s *Store) previewUnlocked(input SaveInput) (Script, error) {
 		ID: input.ID, Name: name, Description: description, Revision: revision,
 		LineCount: sourceLineCount(contents), SizeBytes: int64(len([]byte(contents))),
 		CreatedAt: createdAt.UTC().Format(time.RFC3339Nano), UpdatedAt: now.Format(time.RFC3339Nano),
-	}, Contents: contents}, nil
+		SourceType: sourceType(sourceURL),
+	}, Contents: contents, SourceURL: sourceURL}, nil
 }
 
 func (s *Store) stateUnlocked() (State, error) {
@@ -222,7 +234,7 @@ func (s *Store) loadUnlocked(id string) (Script, error) {
 	if err := validateStored(manifest, id, contents); err != nil {
 		return Script{}, err
 	}
-	return Script{Summary: summaryFromManifest(manifest), Contents: string(contents)}, nil
+	return Script{Summary: summaryFromManifest(manifest), Contents: string(contents), SourceURL: manifest.SourceURL}, nil
 }
 
 func (s *Store) writeUnlocked(manifest manifestDocument, contents []byte) error {
@@ -271,6 +283,11 @@ func (s *Store) writeUnlocked(manifest manifestDocument, contents []byte) error 
 }
 
 func validateStored(manifest manifestDocument, id string, contents []byte) error {
+	if manifest.SourceURL != "" {
+		if _, err := NormalizeSourceURL(manifest.SourceURL); err != nil {
+			return err
+		}
+	}
 	if manifest.ManifestVersion != manifestVersion || manifest.ID != id || manifest.Revision < 1 {
 		return fmt.Errorf("local script manifest is inconsistent")
 	}
@@ -317,6 +334,7 @@ func manifestFromScript(script Script) manifestDocument {
 		Description: script.Description, Revision: script.Revision,
 		LineCount: script.LineCount, SizeBytes: script.SizeBytes,
 		CreatedAt: script.CreatedAt, UpdatedAt: script.UpdatedAt,
+		SourceURL: script.SourceURL,
 	}
 }
 
@@ -325,7 +343,15 @@ func summaryFromManifest(manifest manifestDocument) Summary {
 		ID: manifest.ID, Name: manifest.Name, Description: manifest.Description,
 		Revision: manifest.Revision, LineCount: manifest.LineCount, SizeBytes: manifest.SizeBytes,
 		CreatedAt: manifest.CreatedAt, UpdatedAt: manifest.UpdatedAt,
+		SourceType: sourceType(manifest.SourceURL),
 	}
+}
+
+func sourceType(sourceURL string) string {
+	if sourceURL != "" {
+		return "url"
+	}
+	return "text"
 }
 
 func ensureManagedPath(path, root string) error {

@@ -29,7 +29,7 @@ func (s *Service) SaveRuntimePreferences(input runtimeconfig.Preferences) (runti
 	if err != nil {
 		return runtimeconfig.Preferences{}, err
 	}
-	document, err := s.settingsStore.SetRuntimePreferences(input)
+	_, err = s.settingsStore.SetRuntimePreferences(input)
 	if err != nil {
 		return runtimeconfig.Preferences{}, err
 	}
@@ -37,5 +37,5 @@ func (s *Service) SaveRuntimePreferences(input runtimeconfig.Preferences) (runti
 	// reported through RuntimeStatus.Configuration while the previous healthy
 	// generation remains active; they do not roll back the user's saved intent.
 	_ = s.reconcileSelectedWithTimeoutLocked(reconcileTriggerRuntimePreferences, &previous, reconcileAutomatic)
-	return document.Runtime, nil
+	return s.RuntimePreferences()
 }

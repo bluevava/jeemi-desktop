@@ -12,9 +12,11 @@ import { enRuleSetEntry } from "./rule-set-entry";
 import { enSubscriptionNormalization } from "./subscription-normalization";
 import { enDNSQuery, enDNSQueryHelp } from "./dns-query";
 import { enAppUpdate } from "./app-update";
+import { enExternalUI, enExternalUIHelp } from "./external-ui";
 import { enChainProxy, enChainProxyHelp, enChainProxyFilterHelp, enChainProxyImportHelp } from "./chain-proxy";
 
 export const enUS = {
+  externalUI: enExternalUI,
   chainProxy: enChainProxy,
   appUpdate: enAppUpdate,
   dnsQuery: enDNSQuery,
@@ -448,6 +450,7 @@ export const enUS = {
     normalization: enSubscriptionNormalization,
     fallback: {
       title: "Fallback traffic",
+      configure: "Configure fallback traffic",
       preserve: "No override ( {{target}})",
       direct: "Direct",
       undefined: "Undefined",
@@ -514,11 +517,14 @@ export const enUS = {
       showHiddenSelectors: "Show selectors marked hidden",
       hideHiddenSelectors: "Hide selectors marked hidden",
     },
+    dismissWarning: "Dismiss this warning for this app session",
     selector: {
       title: "Proxy selectors",
       tools: "Proxy-selector shortcut toolbar",
       search: "Search node names",
       searchPlaceholder: "Search nodes: hk | jp & gm & !ev",
+      nameSearch: "Search proxy selector names",
+      nameSearchPlaceholder: "Search selectors, use | & !",
       outboundMode: "Switch outbound mode",
       outboundModes: {
         rule: "Rule mode",
@@ -542,10 +548,32 @@ export const enUS = {
       hiddenOnly:
         "No selector is currently visible. Use the subscription bar to show hidden selectors.",
       noSearchResults: "No nodes match",
+      noSelectorSearchResults: "No proxy selectors match the current search conditions",
       unknownType: "Unknown type",
-      nodeCount: "{{count}}",
-      defaultSelection: "Config default",
-      currentSelection: "Current selection",
+      memberCount: "{{count}} items",
+      memberBreakdown: "{{count}} items: {{nodes}} nodes, {{groups}} proxy groups, {{actions}} built-in actions",
+      groupTypes: {
+        select: "Manual selection", urlTest: "Automatic selection", fallback: "Automatic fallback",
+        loadBalance: "Load balancing", relay: "Relay", other: "Proxy group",
+      },
+      nested: {
+        path: "Proxy group navigation",
+        open: "View members of {{name}}",
+        unavailable: "This proxy group is unavailable",
+        balanced: "Exit chosen per connection",
+        help: {
+          title: "Nested proxy groups",
+          purpose: "A proxy group can select a node or another group to determine the final exit. Cards and headers show the full Selector · Nested selector · Final node path; hover to read a long path.",
+          scenarios: "For example, choose Japan for TikTok, then open Japan to inspect automatic routing or individual nodes. Click a card to select it, its arrow to view members, and the breadcrumbs to return.",
+          cautions: "Groups can be shared by several routing groups, so changing one affects all traffic using it. Browsing does not change selections. Automatic selection, fallback, and load balancing are controlled by the core; their members can only be inspected and tested. Offline values are configuration defaults.",
+        },
+      },
+      egress: {
+        live: "Runtime exit: {{path}}",
+        offline: "Configuration default path (runtime state unavailable): {{path}}",
+        relay: "Relay in configured order",
+        cycle: "Circular reference",
+      },
       providersPending:
         "Nodes from {{names}} are supplied by external proxy providers and become complete only after mihomo loads them.",
       dynamicFiltersPending:
@@ -674,6 +702,8 @@ export const enUS = {
       empty:
         "No local script exists yet. Create and test one from Config first.",
       save: "Validate and save",
+      saving: "Processing script association…",
+      waiting: "Validating the configuration and processing the association. Loading rule sets for the first time may take a little while.",
       conflictTitle: "Only one local handler can be associated",
       unlinkConfigFirst:
         "This subscription already uses a local configuration. Unlink it from “Associate local config” first.",
@@ -784,6 +814,9 @@ export const enUS = {
       edit: "Edit",
       delete: "Delete",
       menu: "Script actions for {{name}}",
+      redownload: "Download again",
+      redownloadNamed: "Download script {{name}} again",
+      redownloaded: "The local script has been updated.",
       deleteTitle: "Delete local script?",
       deleteDescription:
         "This deletes “{{name}}”. Deletion is blocked while a subscription still uses it.",
@@ -799,7 +832,11 @@ export const enUS = {
       description: "Description",
       descriptionPlaceholder:
         "Describe what the script changes and where it applies.",
-      source: "JavaScript source",
+      source: "JavaScript source or script URL",
+      sourcePlaceholder: "Paste a main(config) script or the full HTTP(S) URL of a JavaScript file.",
+      urlSource: "URL script",
+      urlHint: "The first save or test, or a changed URL, downloads the source. An unchanged saved URL uses the local cache; use Download again on its card to update it.",
+      cachedSource: "View downloaded source",
       testTarget: "Test subscription: {{name}}",
       noTestSubscription:
         "No subscription is available for a test run. The script can still be saved, but its final configuration must pass validation before association.",
@@ -1531,6 +1568,7 @@ export const enUS = {
       cautionsAndExample: "Notes and example",
     },
     topics: {
+      externalUI: enExternalUIHelp,
       chainProxy: enChainProxyHelp,
       chainProxyFilter: enChainProxyFilterHelp,
       chainProxyImport: enChainProxyImportHelp,
@@ -1779,8 +1817,8 @@ export const enUS = {
       localScript: {
         title: "Local script transform",
         purpose: "Transform a subscription configuration object with synchronous main(config). The returned object continues into final configuration generation, supporting conditional changes to nodes, policy groups, and rules.",
-        scenarios: "Run a test against the current subscription and inspect the final preview before association. Editing a referenced script validates every associated subscription.",
-        cautions: "The Go-isolated runtime exposes no filesystem, network, process, environment, or Wails APIs. Its clock and random source are fixed, execution is time-bounded, and the result must be a valid top-level configuration object. Scripts are still executable logic; use only content you trust.",
+        scenarios: "Paste source code or a plain HTTP(S) JavaScript file URL. The first save or test downloads it; saved URL scripts use their local source by default. Download again in the card menu and the refresh icon beside it both update the source manually. Test against the current subscription and inspect the final preview before association.",
+        cautions: "The URL must return JavaScript defining synchronous main(config), not a webpage or an asynchronous module. Downloads are limited to 256 KiB and 30 seconds. Updates validate every associated subscription before replacing the local source; failures preserve the previous URL and code. Listing, editing, and starting the proxy do not refresh scripts. A changed URL downloads again; pasting code and saving converts it to a text script. Execution is time-bounded and isolated from files, network, processes, environment, and Wails APIs, with fixed time and randomness. Use trusted sources; URLs may contain credentials.",
       },
       subscriptionShelf: {
         title: "Subscription shelf",
@@ -1795,17 +1833,24 @@ export const enUS = {
         cautions: "The fixed order is | OR → & AND → ! exclusion. The first unprefixed term and terms after | form one OR set; every & term is required; ! terms are always excluded last. Keep each prefix when moving a condition. Leading/trailing whitespace and empty conditions are ignored; internal spaces stay literal. With no OR terms, filtering starts from all nodes. Only real node names are searched, excluding selector, protocol, and provider names.",
         example: "Enter hk | jp & gm & !ev: first collect nodes containing hk or jp, then require gm, and finally exclude ev. Writing hk & gm & !ev | jp gives the same result.",
       },
+      subscriptionSelectorSearch: {
+        title: "Selector name search",
+        purpose: "Filter proxy selector panels or tabs by name using | for OR, & for AND, and ! for exclusion, ignoring case.",
+        scenarios: "Quickly locate Google, YouTube, or other routing groups when a script creates many selectors. Node search in the subscription bar stays independent.",
+        cautions: "The order is | OR → & AND → ! exclusion. The first unprefixed term and terms after | form the OR set; all & terms are required, and ! terms are excluded last. Keep prefixes when moving conditions. Leading/trailing whitespace and empty conditions are ignored; with no OR terms, start from all groups. Only group names are matched; members, actual exits, and batch-test scope remain unchanged. Node search and the hidden-group switch still apply.",
+        example: "Google | YouTube & Auto & !Backup: first collect groups containing Google or YouTube, require Auto, then exclude Backup. Google & Auto & !Backup | YouTube produces the same result.",
+      },
       fallbackTraffic: {
         title: "Fallback traffic",
         purpose: "Set the fallback for each subscription: keep the target after local processing, use DIRECT, or choose a selector. This preserves the source subscription and targets of earlier matching rules.",
-        scenarios: "Use it when subscriptions need different fallback routes or unmatched traffic should go directly. The preference is saved per subscription and affects routing in rule mode. After a manual change takes effect, existing connections follow Reset connections on switch in subscription settings.",
+        scenarios: "When subscriptions need different fallback routes or unmatched traffic should go directly, click the fish icon in the selector toolbar, choose an option in the dialog, and save. The preference is saved per subscription and affects routing in rule mode. After a manual change takes effect, existing connections follow Reset connections on switch in subscription settings.",
         cautions: "The original target is the first MATCH / FINAL before injection, not the selected node. After refresh, switching or editing, selector names must match exactly; a missing target resets to no override. Fetch or composition failures keep the preference. An override edits the first top-level terminal in place, or appends MATCH if absent. No override does not repair an invalid source target.",
       },
       selectorPreview: {
         title: "Proxy selector preview",
         purpose: "Preview selectors and resolvable nodes after local configuration or script processing, even before starting the core. The adjacent rule, global, and direct mode controls share Home settings.",
-        scenarios: "Use it after importing, refreshing, switching subscriptions, or changing an association. Search and temporary hidden-group controls live in the collapsed shelf; outbound mode lives beside the selector title.",
-        cautions: "Global hides ordinary selectors and Direct shows none. Search matches node names only, excluding selector, protocol, and provider names; external-provider nodes, delay, and true selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
+        scenarios: "Inspect results after importing, refreshing, switching subscriptions, or changing an association. Search group names in the selector toolbar, or node names and hidden groups in the collapsed shelf. Scroll the tab bar to browse selectors; the fish icon configures fallback traffic. A card's arrow opens its members, breadcrumbs return, and the card itself selects the exit.",
+        cautions: "Global hides ordinary selectors and Direct shows none. The two searches match node or group names independently, excluding protocol and provider names. Exit summaries follow selections through nested groups; offline paths are configuration defaults and load balancing chooses per connection. External-provider nodes, delay, and real selections require running mihomo. Remote icons are HTTP(S)-only and omit Referer.",
       },
       ruleProviderRefresh: {
         title: "Rule-provider update",

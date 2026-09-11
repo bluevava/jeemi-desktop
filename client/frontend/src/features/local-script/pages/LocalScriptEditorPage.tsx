@@ -18,9 +18,11 @@ import {
   testLocalScript,
 } from "../../../services/appBridge";
 import type {
+  LocalScript,
   LocalScriptTestResult,
   SaveLocalScriptInput,
 } from "../../../types/localScript";
+import { isScriptURL, scriptEditorInput } from "../scriptSource";
 
 const defaultScript = `const main = (config) => {
   return config;
@@ -40,6 +42,7 @@ export function LocalScriptEditorPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [draft, setDraft] = useState<SaveLocalScriptInput>(emptyDraft);
+  const [savedScript, setSavedScript] = useState<LocalScript | null>(null);
   const [initialSignature, setInitialSignature] = useState("");
   const [subscriptionID, setSubscriptionID] = useState("");
   const [subscriptionName, setSubscriptionName] = useState("");
@@ -50,6 +53,7 @@ export function LocalScriptEditorPage() {
     null,
   );
   const signature = useMemo(() => JSON.stringify(draft), [draft]);
+  const urlSource = isScriptURL(draft.contents);
   const dirty = initialSignature !== "" && signature !== initialSignature;
   const navigationGuard = useUnsavedChangesGuard(
     Boolean(busy) || dirty,
@@ -67,14 +71,8 @@ export function LocalScriptEditorPage() {
     ])
       .then(([script, subscriptions]) => {
         if (!active) return;
-        const next = script
-          ? {
-              id: script.id,
-              name: script.name,
-              description: script.description,
-              contents: script.contents,
-            }
-          : emptyDraft;
+        const next = script ? scriptEditorInput(script) : emptyDraft;
+        setSavedScript(script ?? null);
         setDraft(next);
         setInitialSignature(JSON.stringify(next));
         setSubscriptionID(subscriptions.selectedSubscriptionId);
@@ -125,12 +123,7 @@ export function LocalScriptEditorPage() {
     setError("");
     try {
       const saved = await saveLocalScript(draft);
-      setDraft({
-        id: saved.id,
-        name: saved.name,
-        description: saved.description,
-        contents: saved.contents,
-      });
+      setDraft(scriptEditorInput(saved));
       navigationGuard.clear();
       navigate("/config?section=scripts");
     } catch (cause) {
@@ -208,6 +201,7 @@ export function LocalScriptEditorPage() {
             <span className="config-resource-title-line">
               <strong>{t("localScript.editor.source")}</strong>
               <FeatureHelp compact topic="localScript" />
+              {urlSource ? <Tag>{t("localScript.editor.urlSource")}</Tag> : null}
             </span>
           </div>
           {subscriptionID ? (
@@ -220,14 +214,22 @@ export function LocalScriptEditorPage() {
           aria-label={t("localScript.editor.source")}
           autoCapitalize="off"
           autoCorrect="off"
-          className="local-script-source"
+          className={`local-script-source${urlSource ? " is-url" : ""}`}
           onChange={(event) =>
             setDraft({ ...draft, contents: event.target.value })
           }
-          rows={22}
+          placeholder={t("localScript.editor.sourcePlaceholder")}
+          rows={urlSource ? 4 : 22}
           spellCheck={false}
           value={draft.contents}
         />
+        {urlSource ? <p className="local-script-source-hint">{t("localScript.editor.urlHint")}</p> : null}
+        {savedScript?.sourceUrl && draft.contents.trim() === savedScript.sourceUrl ? (
+          <details className="local-script-cached-source">
+            <summary>{t("localScript.editor.cachedSource")}</summary>
+            <pre>{savedScript.contents}</pre>
+          </details>
+        ) : null}
         {!subscriptionID ? (
           <Alert
             description={t("localScript.editor.noTestSubscription")}
