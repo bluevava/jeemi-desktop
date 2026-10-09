@@ -30,13 +30,26 @@ type pendingSubscriptionRefresh struct {
 	candidate subscription.RefreshCandidate
 }
 
+func (s *Service) subscriptionRefreshFallback() subscription.Fetcher {
+	client := s.runtimeManager.NewDirectDownloadClient()
+	if client == nil {
+		return nil
+	}
+	fetcher := subscription.NewHTTPFetcher()
+	// Retain the subscription timeout, redirect checks, size limits and header
+	// parsing; replace only the network route for this one retry.
+	fetcher.Client.Transport = client.Transport
+	return fetcher
+}
+
 // CheckSubscriptionRefresh validates the fetched bytes before any revision or
 // metadata is written. At most one bounded, expiring candidate is retained.
 func (s *Service) CheckSubscriptionRefresh(id string) (SubscriptionRefreshResult, error) {
 	s.reconcileMu.Lock()
 	defer s.reconcileMu.Unlock()
 	s.pendingRefresh = nil
-	ctx, cancel := s.operationContext(60 * time.Second)
+	// Each fetch has a 30-second limit. Leave time for validation after a retry.
+	ctx, cancel := s.operationContext(90 * time.Second)
 	defer cancel()
 	candidate, err := s.subscriptions.PrepareRefresh(ctx, id)
 	if err != nil {

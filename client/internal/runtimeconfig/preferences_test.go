@@ -16,7 +16,7 @@ func TestDefaultPreferencesAreValid(t *testing.T) {
 		preferences.ListenerType != ListenerTypeMixed ||
 		preferences.ListenPort != DefaultListenPort ||
 		preferences.AllowLAN ||
-		preferences.TUNStack != TUNStackMixed ||
+		preferences.TUNStack != TUNStackSystem ||
 		preferences.LogLevel != LogLevelSilent ||
 		preferences.FindProcessMode != FindProcessModeStrict ||
 		!preferences.IPv6 ||

@@ -50,6 +50,7 @@ func (s *Service) decorateSubscriptionState(state subscription.State) (subscript
 		return subscription.State{}, err
 	}
 	selectedID := document.Subscriptions.SelectedID
+	state.Subscriptions = subscription.ApplyOrder(state.Subscriptions, document.Subscriptions.Order)
 	if !containsSubscription(state.Subscriptions, selectedID) {
 		selectedID = ""
 		if len(state.Subscriptions) > 0 {

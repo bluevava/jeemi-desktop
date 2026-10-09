@@ -377,6 +377,7 @@ func (s *Service) buildRuntimeCandidate() (runtimeCandidate, error) {
 		return runtimeCandidate{}, err
 	}
 	selectedID := document.Subscriptions.SelectedID
+	state.Subscriptions = subscription.ApplyOrder(state.Subscriptions, document.Subscriptions.Order)
 	if !containsSubscription(state.Subscriptions, selectedID) {
 		selectedID = ""
 		if len(state.Subscriptions) > 0 {

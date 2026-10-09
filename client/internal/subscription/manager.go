@@ -13,22 +13,26 @@ import (
 )
 
 type ManagerOptions struct {
-	DataDirectory  string
-	Store          *Store
-	Fetcher        Fetcher
-	IconDetector   IconDetector
-	QRDecoder      QRDecoder
-	Screen         platformscreen.Capturer
-	ValidateImport func(context.Context, []byte) error
+	DataDirectory string
+	Store         *Store
+	Fetcher       Fetcher
+	// RefreshFallback is consulted only after a failed refresh fetch. A nil
+	// fetcher means that the alternate route is currently unavailable.
+	RefreshFallback func() Fetcher
+	IconDetector    IconDetector
+	QRDecoder       QRDecoder
+	Screen          platformscreen.Capturer
+	ValidateImport  func(context.Context, []byte) error
 }
 
 type Manager struct {
-	store          *Store
-	fetcher        Fetcher
-	icons          IconDetector
-	qrDecoder      QRDecoder
-	screen         platformscreen.Capturer
-	validateImport func(context.Context, []byte) error
+	store           *Store
+	fetcher         Fetcher
+	refreshFallback func() Fetcher
+	icons           IconDetector
+	qrDecoder       QRDecoder
+	screen          platformscreen.Capturer
+	validateImport  func(context.Context, []byte) error
 }
 
 func NewManager(options ManagerOptions) (*Manager, error) {
@@ -61,7 +65,7 @@ func NewManager(options ManagerOptions) (*Manager, error) {
 	if screenCapturer == nil {
 		screenCapturer = platformscreen.DesktopCapturer{}
 	}
-	return &Manager{store: store, fetcher: fetcher, icons: icons, qrDecoder: decoder, screen: screenCapturer, validateImport: options.ValidateImport}, nil
+	return &Manager{store: store, fetcher: fetcher, refreshFallback: options.RefreshFallback, icons: icons, qrDecoder: decoder, screen: screenCapturer, validateImport: options.ValidateImport}, nil
 }
 
 func (m *Manager) State() (State, error) {
@@ -218,7 +222,7 @@ func (m *Manager) PrepareRefresh(ctx context.Context, id string) (RefreshCandida
 	if detail.SourceKind != SourceURL {
 		return RefreshCandidate{}, fmt.Errorf("file subscriptions cannot be refreshed from a remote source")
 	}
-	fetched, err := m.fetcher.Fetch(ctx, detail.SourceURL)
+	fetched, err := m.fetchRefresh(ctx, detail.SourceURL)
 	if err != nil {
 		return RefreshCandidate{}, err
 	}

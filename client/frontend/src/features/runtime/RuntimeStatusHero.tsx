@@ -326,7 +326,7 @@ export function RuntimeStatusHero({ preferences }: RuntimeStatusHeroProps) {
               onChange={(value) =>
                 preferences.updateDraft({ tunStack: value as TunStack })
               }
-              options={(["system", "gvisor", "mixed"] as const).map((value) => ({
+              options={(["system", "gvisor", "mixed", "mips"] as const).map((value) => ({
                 label: t(`home.runtimePreferences.tunStacks.${value}`),
                 value,
               }))}

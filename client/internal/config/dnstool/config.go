@@ -1,5 +1,6 @@
-// Package dnstool owns ephemeral, authenticated mihomo inbounds used only by
-// DNS diagnostics. They never enter subscriptions or resolved snapshots.
+// Package dnstool owns ephemeral, authenticated mihomo inbounds used by DNS
+// diagnostics and direct subscription retries. They never enter subscriptions
+// or resolved snapshots.
 package dnstool
 
 import (

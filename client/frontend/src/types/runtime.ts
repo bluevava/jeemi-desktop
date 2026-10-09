@@ -157,7 +157,7 @@ export interface BootstrapState {
 export type OutboundMode = "rule" | "global" | "direct";
 export type ProxyMode = "system_proxy" | "tun";
 export type ListenerType = "http" | "socks" | "mixed";
-export type TunStack = "system" | "gvisor" | "mixed";
+export type TunStack = "system" | "gvisor" | "mixed" | "mips";
 export type LogLevel = "silent" | "error" | "warning" | "info" | "debug";
 export type FindProcessMode = "always" | "strict" | "off";
 export type DnsEnhancedMode = "fake-ip" | "redir-host";

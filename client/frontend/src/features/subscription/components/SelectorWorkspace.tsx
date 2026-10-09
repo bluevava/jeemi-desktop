@@ -180,6 +180,7 @@ export function SelectorWorkspace({
           onChange={(event) => setSelectorNameQuery(event.target.value)}
           placeholder={t("subscription.selector.nameSearchPlaceholder")}
           prefix={<SearchOutlined />}
+          size="small"
           value={selectorNameQuery}
         />
       </div>

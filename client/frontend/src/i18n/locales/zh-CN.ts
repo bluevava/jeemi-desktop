@@ -307,6 +307,7 @@ export const zhCN = {
         system: "system",
         gvisor: "gVisor",
         mixed: "mixed",
+        mips: "mips",
       },
       errors: {
         load: "无法读取代理运行参数，请检查 jeemi_data/settings.json 权限与内容。",
@@ -471,9 +472,20 @@ export const zhCN = {
       trafficUnavailable: "未提供流量信息",
       expiryUnavailable: "未提供到期时间",
       ruleProviders: "规则提供者 {{count}}",
-      associated: "已关联 {{name}} [{{type}}]",
       handlerConfig: "配置",
       handlerScript: "脚本",
+      handlerChain: "链式",
+      bind: "绑定",
+      unbind: "解绑",
+      bindType: "绑定{{type}}",
+      unbindType: "解绑{{type}}",
+      changeBinding: "修改{{type}}绑定：{{name}}",
+      resourceUnavailable: "资源不可用",
+      copyURL: "复制订阅 URL",
+      copyFilePath: "复制当前配置文件路径",
+      sourceCopied: "已复制来源地址",
+      dragToReorder: "拖拽调整顺序；也可聚焦后用方向键移动",
+      reorderLabel: "调整 {{name}} 的订阅顺序",
     },
     shelf: {
       title: "订阅配置",
@@ -615,8 +627,6 @@ export const zhCN = {
       rawText: "查看原文配置",
       associate: "关联本地配置",
       runtimeConfiguration: "查看运行配置",
-      associateConfig: "关联本地配置",
-      associateScript: "关联本地脚本",
       delete: "删除",
     },
     form: {
@@ -658,7 +668,7 @@ export const zhCN = {
       save: "保存关联",
       conflictTitle: "不能同时关联两种本地处理方式",
       unlinkScriptFirst:
-        "这份订阅已关联本地脚本，请先在“关联本地脚本”中取消关联。",
+        "这份订阅已关联本地脚本，请先点击卡片脚本项的“解绑”。",
     },
     scriptAssociation: {
       title: "关联本地脚本",
@@ -669,7 +679,7 @@ export const zhCN = {
       waiting: "正在校验配置并处理关联。首次加载规则集可能需要一些时间，请稍候。",
       conflictTitle: "不能同时关联两种本地处理方式",
       unlinkConfigFirst:
-        "这份订阅已关联本地配置，请先在“关联本地配置”中取消关联。",
+        "这份订阅已关联本地配置，请先点击卡片配置项的“解绑”。",
       validationFailed: "关联脚本后的最终运行配置无效：{{error}}",
     },
     delete: {
@@ -710,6 +720,9 @@ export const zhCN = {
       edit: "保存订阅失败；名称、来源 URL 和当前修订保持不变。",
       rawText: "无法读取当前订阅原文，请检查受管修订文件完整性。",
       association: "保存本地配置关联失败，请确认订阅和本地配置仍然存在。",
+      copySource: "复制来源地址失败，请确认订阅文件可用且剪贴板可访问。",
+      unbind: "解绑失败，请刷新确认当前关联后重试。",
+      reorder: "保存订阅顺序失败，请重新载入订阅列表后重试。",
       ruleProviderRefresh:
         "规则提供者更新失败，请确认当前运行 generation 使用这份订阅且 mihomo 控制 API 健康。",
       ruleProviderToggle:
@@ -1220,7 +1233,7 @@ export const zhCN = {
       },
       rules: {
         title: "规则配置与订阅关联",
-        purpose: "启用本地规则后，有序引用策略组并选择加入头部、加入尾部或完全覆写；每个引用均可单独停用。保存后，在订阅卡片菜单的“关联本地配置”中选择此配置。",
+        purpose: "启用本地规则后，有序引用策略组并选择加入头部、加入尾部或完全覆写；每个引用均可单独停用。保存后，点击订阅卡片配置项的“绑定”并选择此配置。",
         scenarios: "需要把共享规则组或选择器规则追加到订阅头部、终结规则前，或替换订阅普通规则时使用。",
         cautions: "完全重构统一替换订阅规则、选择器、规则提供者及原有子规则，要求已引用且启用的本地选择器和明确的 MATCH。本地 MATCH 先生成，订阅页漏网之鱼随后可再覆盖。关闭总开关仅注入自定义字段，保留引用和组合方式。保存前检查全部关联订阅，有可用核心时执行核心校验，失败保留旧数据和草稿。",
       },
@@ -1748,8 +1761,8 @@ export const zhCN = {
       subscriptionShelf: {
         title: "订阅配置面板",
         purpose: "展开时管理全部订阅卡片，收起时显示当前订阅的流量、到期、更新时间、节点搜索与快捷操作；展开或收起不会移动下方选择器。",
-        scenarios: "切换或编辑订阅时展开；浏览节点时收起，直接搜索节点名称或使用刷新、规则提供者、测速和 hidden 选择器按钮。测速只处理当前搜索结果，搜索为空时测试全部节点。",
-        cautions: "流量和名称可能缺失或过期；测速只在当前投影对应的 mihomo 控制会话健康时启用，显示 hidden 只改变当前界面过滤，不改变订阅配置或运行核心。",
+        scenarios: "展开后可绑定、解绑脚本、配置和链式分组，点击已绑定名称重新选择；标题右侧可复制地址或刷新。拖动卡片左下角手柄排序，或聚焦手柄后用方向键移动。默认按添加顺序，新订阅在末尾；刷新不改变位置，手动顺序重启后保留。收起后可搜索和测速节点。",
+        cautions: "脚本与配置互斥，链式可关联多个分组，解绑链式会解除全部分组。URL 和二维码订阅复制完整 URL，文件订阅复制客户端保存的当前原文路径；地址可能含凭据，请谨慎分享。流量可能缺失或过期，测速须有健康核心。",
       },
       subscriptionNodeSearch: {
         title: "节点名称搜索",

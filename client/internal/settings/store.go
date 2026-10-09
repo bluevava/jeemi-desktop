@@ -43,12 +43,13 @@ type MihomoSettings struct {
 }
 
 type SubscriptionSettings struct {
-	SelectedID           string `json:"selectedId"`
-	SelectorDensity      string `json:"selectorDensity"`
-	DelayTestConcurrency int    `json:"delayTestConcurrency"`
-	ConnectionResetMode  string `json:"connectionResetMode"`
-	SelectorSortMode     string `json:"selectorSortMode"`
-	SelectorViewMode     string `json:"selectorViewMode"`
+	SelectedID           string   `json:"selectedId"`
+	Order                []string `json:"order,omitempty"`
+	SelectorDensity      string   `json:"selectorDensity"`
+	DelayTestConcurrency int      `json:"delayTestConcurrency"`
+	ConnectionResetMode  string   `json:"connectionResetMode"`
+	SelectorSortMode     string   `json:"selectorSortMode"`
+	SelectorViewMode     string   `json:"selectorViewMode"`
 }
 
 type Document struct {
@@ -215,6 +216,9 @@ func (s *Store) loadUnlocked() (Document, error) {
 	var document Document
 	if err := json.Unmarshal(contents, &document); err != nil {
 		return Document{}, configfile.Invalid(s.path, contents, fmt.Errorf("parse settings: %w", err))
+	}
+	if err := validateSubscriptionOrder(document.Subscriptions.Order); err != nil {
+		return Document{}, configfile.Invalid(s.path, contents, err)
 	}
 	normalizeDocument(&document)
 	return document, nil

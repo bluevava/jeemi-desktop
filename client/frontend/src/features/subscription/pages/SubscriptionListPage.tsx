@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CameraOutlined,
-  CodeOutlined,
   DeleteOutlined,
   EditOutlined,
   FileAddOutlined,
@@ -9,11 +8,13 @@ import {
   FileTextOutlined,
   LinkOutlined,
   QrcodeOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
 import { Alert, App, Button, Input, Modal, Select, Spin, Tag } from "antd";
 import { ChainProxyAssociation } from "../../chain-proxy/ChainProxyAssociation";
 import { ChainProxyCompositionNotice } from "../../chain-proxy/ChainProxyCompositionNotice";
+import { getChainProxyState } from "../../../services/chainProxyBridge";
+import { useSubscriptionCardActions } from "../useSubscriptionCardActions";
+import { applySubscriptionOrder } from "../cardOrder";
 import { normalizationErrorKey } from "../normalization";
 import type { MenuProps } from "antd";
 import { createPortal } from "react-dom";
@@ -142,6 +143,7 @@ export function SubscriptionListPage({
   const [localScripts, setLocalScripts] = useState<LocalScriptState | null>(
     null,
   );
+  const [chainGroupNames, setChainGroupNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [errorKey, setErrorKey] = useState<string | null>(null);
@@ -185,6 +187,12 @@ export function SubscriptionListPage({
   const ruleProviderRuntimeRequest = useRef(0);
 
   const activeSelections = proxyRuntime?.selections ?? emptySelections;
+  const cardActions = useSubscriptionCardActions({
+    busyAction, setBusyAction, onSaved: setState, onError: setErrorKey,
+    onReordered: (ids) => setState((current) => current ? {
+      ...current, subscriptions: applySubscriptionOrder(current.subscriptions, ids),
+    } : current),
+  });
 
   useEffect(() => {
     let active = true;
@@ -192,8 +200,9 @@ export function SubscriptionListPage({
       getSubscriptionState(),
       getLocalConfigState(),
       getLocalScriptState(),
+      getChainProxyState(),
     ])
-      .then(([subscriptionState, localConfigState, localScriptState]) => {
+      .then(([subscriptionState, localConfigState, localScriptState, chainState]) => {
         if (active) {
           if (subscriptionState.status === "fulfilled")
             setState(subscriptionState.value);
@@ -203,8 +212,10 @@ export function SubscriptionListPage({
           if (localScriptState.status === "fulfilled")
             setLocalScripts(localScriptState.value);
           else setLocalScripts({ directory: "", scripts: [] });
+          if (chainState.status === "fulfilled")
+            setChainGroupNames(Object.fromEntries(chainState.value.groups.map((group) => [group.id, group.name])));
           if (
-            [subscriptionState, localConfigState, localScriptState].some(
+            [subscriptionState, localConfigState, localScriptState, chainState].some(
               (item) => item.status === "rejected",
             )
           )
@@ -999,17 +1010,6 @@ export function SubscriptionListPage({
         icon: <FileSearchOutlined />,
         label: t("subscription.menu.runtimeConfiguration"),
       },
-      {
-        key: "associate",
-        icon: <SwapOutlined />,
-        label: t("subscription.menu.associateConfig"),
-      },
-      {
-        key: "associate-script",
-        icon: <CodeOutlined />,
-        label: t("subscription.menu.associateScript"),
-      },
-      { key: "associate-chain", icon: <LinkOutlined />, label: t("chainProxy.associate") },
       { type: "divider" },
       {
         key: "delete",
@@ -1023,9 +1023,6 @@ export function SubscriptionListPage({
       if (key === "edit") void openEditor(subscription);
       else if (key === "text") void openRawText(subscription);
       else if (key === "runtime") setRuntimeViewerSignal((value) => value + 1);
-      else if (key === "associate") openAssociation(subscription);
-      else if (key === "associate-script") openScriptAssociation(subscription);
-      else if (key === "associate-chain") setChainAssociationTarget(subscription);
       else if (key === "delete") confirmDelete(subscription);
     },
   });
@@ -1087,7 +1084,16 @@ export function SubscriptionListPage({
       locale={i18n.language}
       localConfigNames={localConfigNames}
       localScriptNames={localScriptNames}
+      chainGroupNames={chainGroupNames}
       menuFor={cardMenu}
+      onCopy={(subscription) => void cardActions.copySource(subscription)}
+      onBind={(subscription, kind) => {
+        if (kind === "script") openScriptAssociation(subscription);
+        else if (kind === "config") openAssociation(subscription);
+        else setChainAssociationTarget(subscription);
+      }}
+      onUnbind={(subscription, kind) => void cardActions.unbind(subscription, kind)}
+      onReorder={(ids) => void cardActions.reorder(ids)}
       onExpandedChange={(expanded) =>
         setShelfExpanded(state.subscriptions.length === 0 ? true : expanded)
       }

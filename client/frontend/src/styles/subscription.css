@@ -259,7 +259,7 @@
 
 .subscription-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 310px));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 380px));
   align-items: stretch;
   justify-content: start;
   gap: 14px;
@@ -268,7 +268,7 @@
 .subscription-card.ant-card,
 .subscription-add-card {
   min-width: 0;
-  height: 168px;
+  min-height: 246px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background: var(--color-surface);
@@ -281,6 +281,39 @@
 
 .subscription-card.ant-card {
   cursor: pointer;
+}
+
+.subscription-card-slot {
+  min-width: 0;
+  border-radius: 14px;
+}
+
+.subscription-card-slot > .subscription-card {
+  height: 100%;
+}
+
+.subscription-card-slot.dragging {
+  opacity: 0.5;
+}
+
+.subscription-card-slot.drop-target {
+  outline: 2px dashed var(--color-accent);
+  outline-offset: 3px;
+}
+
+.subscription-card-drag-handle.ant-btn {
+  margin-right: auto;
+  color: var(--color-text-secondary);
+  cursor: grab;
+  touch-action: none;
+}
+
+.subscription-card-drag-handle.ant-btn:active {
+  cursor: grabbing;
+}
+
+.subscription-card-drag-handle.ant-btn:disabled {
+  cursor: default;
 }
 
 .subscription-card.ant-card:hover,
@@ -296,7 +329,7 @@
 
 .subscription-card .ant-card-body {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   gap: 8px;
   height: 100%;
   padding: 14px;
@@ -309,24 +342,14 @@
   gap: 1px;
 }
 
-.subscription-card-association {
-  overflow: hidden;
-  color: var(--color-accent);
-  font-size: var(--font-size-caption);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .subscription-card-heading,
-.subscription-card-footer,
-.subscription-card-traffic {
+.subscription-card-footer {
   display: flex;
   align-items: center;
   min-width: 0;
 }
 
-.subscription-card-heading,
-.subscription-card-footer {
+.subscription-card-heading {
   justify-content: space-between;
   gap: 8px;
 }
@@ -359,25 +382,97 @@
   line-height: 1;
 }
 
-.subscription-card-traffic {
-  align-content: start;
-  flex-wrap: wrap;
-  gap: 3px;
+.subscription-card-metadata {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
+  font-variant-numeric: tabular-nums;
 }
 
-.subscription-card-traffic strong {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-caption);
-}
-
-.subscription-card-footer time {
+.subscription-card-metadata > * {
+  min-width: 0;
   overflow: hidden;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.subscription-card-associations {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.subscription-association-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 1px 5px 1px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.subscription-association-row.bound {
+  background: var(--color-accent-soft);
+  border-color: transparent;
+  color: var(--color-accent);
+}
+
+.subscription-association-label {
+  flex: 0 0 auto;
+  font-weight: 600;
+}
+
+.subscription-association-space,
+.subscription-association-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.subscription-association-name {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.subscription-association-name:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.subscription-association-action.ant-btn {
+  flex: 0 0 auto;
+  height: 24px;
+  padding-inline: 5px;
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+}
+
+.subscription-association-action.ant-btn:disabled,
+.subscription-association-name:disabled {
+  color: var(--color-text-disabled);
+  cursor: default;
+}
+
+.subscription-card-footer {
+  justify-content: flex-end;
 }
 
 .subscription-card-footer .ant-tag {
@@ -460,14 +555,21 @@
 .selector-name-search {
   display: flex;
   align-items: center;
-  flex: 1 1 240px;
+  flex: 1 1 120px;
   gap: 6px;
   min-width: 0;
-  max-width: 440px;
+  max-width: 220px;
 }
 
 .selector-name-search .ant-input-affix-wrapper {
   min-width: 0;
+  height: 28px;
+  padding-block: 2px;
+  font-size: var(--font-size-caption);
+}
+
+.selector-name-search .ant-input {
+  font-size: var(--font-size-caption);
 }
 
 .subscription-fallback-trigger.ant-btn {

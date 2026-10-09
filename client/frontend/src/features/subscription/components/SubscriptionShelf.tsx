@@ -3,6 +3,7 @@ import {
   DownOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
+  HolderOutlined,
   LoadingOutlined,
   PlusOutlined,
   ReloadOutlined,
@@ -30,8 +31,10 @@ import {
   subscriptionUsedBytes,
 } from "../model";
 import { SubscriptionCard } from "./SubscriptionCard";
+import type { SubscriptionAssociationKind } from "./SubscriptionAssociations";
 import { SubscriptionIcon } from "./SubscriptionIcon";
 import { hasNodeNameSearch } from "../selectorSearch";
+import { useSubscriptionCardDrag } from "../useSubscriptionCardDrag";
 
 interface SubscriptionShelfProps {
   addMenu: MenuProps;
@@ -40,7 +43,12 @@ interface SubscriptionShelfProps {
   locale: string;
   localConfigNames: Record<string, string>;
   localScriptNames: Record<string, string>;
+  chainGroupNames: Record<string, string>;
   menuFor: (subscription: SubscriptionSummary) => MenuProps;
+  onCopy: (subscription: SubscriptionSummary) => void;
+  onBind: (subscription: SubscriptionSummary, kind: SubscriptionAssociationKind) => void;
+  onUnbind: (subscription: SubscriptionSummary, kind: SubscriptionAssociationKind) => void;
+  onReorder: (ids: string[]) => void;
   onExpandedChange: (expanded: boolean) => void;
   onOpenRuleProviders: () => void;
   onRefreshSelected: (subscription: SubscriptionSummary) => void;
@@ -63,7 +71,12 @@ export function SubscriptionShelf({
   locale,
   localConfigNames,
   localScriptNames,
+  chainGroupNames,
   menuFor,
+  onCopy,
+  onBind,
+  onUnbind,
+  onReorder,
   onExpandedChange,
   onOpenRuleProviders,
   onRefreshSelected,
@@ -79,6 +92,7 @@ export function SubscriptionShelf({
   state,
 }: SubscriptionShelfProps) {
   const { t } = useTranslation();
+  const cardDrag = useSubscriptionCardDrag(state.subscriptions.map((item) => item.id), busyAction !== null, onReorder);
   const speedTestLabel = t(
     hasNodeNameSearch(selectorQuery)
       ? "subscription.shelf.speedTestMatched"
@@ -308,19 +322,42 @@ export function SubscriptionShelf({
       ) : null}
       <div className="subscription-card-grid">
         {state.subscriptions.map((subscription) => (
-          <SubscriptionCard
-            busy={busyAction === subscription.id}
-            disabled={busyAction !== null}
+          <div
+            className={`subscription-card-slot${cardDrag.draggedID === subscription.id ? " dragging" : ""}${cardDrag.targetID === subscription.id ? " drop-target" : ""}`}
             key={subscription.id}
-            locale={locale}
-            localConfigName={localConfigNames[subscription.localConfigId]}
-            localScriptName={localScriptNames[subscription.localScriptId]}
-            menu={menuFor(subscription)}
-            onRefresh={() => onRefreshSelected(subscription)}
-            onSelect={() => onSelect(subscription)}
-            selected={subscription.id === state.selectedSubscriptionId}
-            subscription={subscription}
-          />
+            {...cardDrag.dropProps(subscription.id)}
+          >
+            <SubscriptionCard
+              busy={busyAction === subscription.id}
+              copying={busyAction === `copy:${subscription.id}`}
+              pendingAssociation={(["script", "config", "chain"] as const).find((kind) => busyAction === `unbind:${subscription.id}:${kind}`) ?? null}
+              chainGroupNames={chainGroupNames}
+              disabled={busyAction !== null}
+              locale={locale}
+              localConfigName={localConfigNames[subscription.localConfigId]}
+              localScriptName={localScriptNames[subscription.localScriptId]}
+              menu={menuFor(subscription)}
+              onCopy={() => onCopy(subscription)}
+              onBind={(kind) => onBind(subscription, kind)}
+              onUnbind={(kind) => onUnbind(subscription, kind)}
+              onRefresh={() => onRefreshSelected(subscription)}
+              onSelect={() => onSelect(subscription)}
+              selected={subscription.id === state.selectedSubscriptionId}
+              subscription={subscription}
+              sortHandle={
+                <Tooltip title={t("subscription.card.dragToReorder")}>
+                  <Button
+                    {...cardDrag.handleProps(subscription.id)}
+                    aria-label={t("subscription.card.reorderLabel", { name: subscription.name })}
+                    className="subscription-card-drag-handle"
+                    icon={<HolderOutlined />}
+                    size="small"
+                    type="text"
+                  />
+                </Tooltip>
+              }
+            />
+          </div>
         ))}
         <Dropdown disabled={busyAction !== null} menu={addMenu} trigger={["click"]}>
           <button

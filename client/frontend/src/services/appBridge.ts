@@ -237,6 +237,8 @@ declare global {
           ) => Promise<SubscriptionState>;
           DeleteSubscription: (id: string) => Promise<SubscriptionState>;
           GetSubscriptionText: (id: string) => Promise<SubscriptionTextView>;
+          CopySubscriptionSource: (id: string) => Promise<void>;
+          ReorderSubscriptions: (ids: string[]) => Promise<void>;
           SetSubscriptionLocalConfig: (
             id: string,
             localConfigId: string,
@@ -381,7 +383,7 @@ const browserRuntimePreferencesFallback: RuntimePreferences = {
   listenerType: "mixed",
   listenPort: 7890,
   allowLan: false,
-  tunStack: "mixed",
+  tunStack: "system",
   logLevel: "silent",
   findProcessMode: "strict",
   externalUIEnabled: false,
@@ -899,6 +901,14 @@ export async function getSubscriptionText(
   id: string,
 ): Promise<SubscriptionTextView> {
   return requireAppBinding().GetSubscriptionText(id);
+}
+
+export async function copySubscriptionSource(id: string): Promise<void> {
+  return requireAppBinding().CopySubscriptionSource(id);
+}
+
+export async function reorderSubscriptions(ids: string[]): Promise<void> {
+  return requireAppBinding().ReorderSubscriptions(ids);
 }
 
 export async function setSubscriptionLocalConfig(

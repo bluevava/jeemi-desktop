@@ -454,10 +454,14 @@ func (s *Store) listUnlocked() ([]Summary, error) {
 		items = append(items, summaryFromMetadata(metadata))
 	}
 	sort.Slice(items, func(left, right int) bool {
-		if items[left].UpdatedAt == items[right].UpdatedAt {
-			return items[left].Name < items[right].Name
+		// Metadata timestamps have already been validated. Parse RFC3339Nano so
+		// fractional seconds and timezone offsets sort by time, not by text.
+		leftTime, _ := time.Parse(time.RFC3339Nano, items[left].CreatedAt)
+		rightTime, _ := time.Parse(time.RFC3339Nano, items[right].CreatedAt)
+		if leftTime.Equal(rightTime) {
+			return items[left].ID < items[right].ID
 		}
-		return items[left].UpdatedAt > items[right].UpdatedAt
+		return leftTime.Before(rightTime)
 	})
 	return items, nil
 }

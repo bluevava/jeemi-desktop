@@ -144,6 +144,9 @@ func NewService(dataDirectory string) (*Service, error) {
 	}
 	subscriptions, err := subscription.NewManager(subscription.ManagerOptions{
 		DataDirectory: dataDirectory,
+		RefreshFallback: func() subscription.Fetcher {
+			return service.subscriptionRefreshFallback()
+		},
 		ValidateImport: func(ctx context.Context, contents []byte) error {
 			return service.validateImportedSubscription(ctx, contents)
 		},

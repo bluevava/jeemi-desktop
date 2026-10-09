@@ -15,6 +15,10 @@ func (a *App) GetSubscriptionState() (subscription.State, error) {
 	return a.service.SubscriptionState()
 }
 
+func (a *App) ReorderSubscriptions(ids []string) error {
+	return a.service.ReorderSubscriptions(ids)
+}
+
 func (a *App) GetSubscription(id string) (subscription.Detail, error) {
 	return a.service.Subscription(id)
 }

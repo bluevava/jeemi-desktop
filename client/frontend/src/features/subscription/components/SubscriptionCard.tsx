@@ -1,9 +1,11 @@
 import {
+  CopyOutlined,
   MoreOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Dropdown, Progress, Tag, Tooltip } from "antd";
 import type { MenuProps } from "antd";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { SubscriptionSummary } from "../../../types/subscription";
@@ -15,31 +17,46 @@ import {
   subscriptionUsedBytes,
 } from "../model";
 import { SubscriptionIcon } from "./SubscriptionIcon";
+import { SubscriptionAssociations, type SubscriptionAssociationKind } from "./SubscriptionAssociations";
 
 interface SubscriptionCardProps {
   busy: boolean;
+  copying: boolean;
+  pendingAssociation: SubscriptionAssociationKind | null;
+  chainGroupNames: Record<string, string>;
   disabled: boolean;
   locale: string;
   localConfigName?: string;
   localScriptName?: string;
   menu: MenuProps;
+  onCopy: () => void;
+  onBind: (kind: SubscriptionAssociationKind) => void;
+  onUnbind: (kind: SubscriptionAssociationKind) => void;
   onRefresh: () => void;
   onSelect: () => void;
   selected: boolean;
   subscription: SubscriptionSummary;
+  sortHandle?: ReactNode;
 }
 
 export function SubscriptionCard({
   busy,
+  copying,
+  pendingAssociation,
+  chainGroupNames,
   disabled,
   locale,
   localConfigName,
   localScriptName,
   menu,
+  onCopy,
+  onBind,
+  onUnbind,
   onRefresh,
   onSelect,
   selected,
   subscription,
+  sortHandle,
 }: SubscriptionCardProps) {
   const { t } = useTranslation();
   const used = subscriptionUsedBytes(subscription);
@@ -52,13 +69,15 @@ export function SubscriptionCard({
   return (
     <Card
       aria-current={selected ? "true" : undefined}
+      aria-busy={busy || copying || pendingAssociation !== null}
+      aria-disabled={disabled}
       className={`subscription-card${selected ? " selected" : ""}`}
-      loading={busy}
-      onClick={onSelect}
+      onClick={disabled ? undefined : onSelect}
       role="button"
-      tabIndex={0}
+      tabIndex={disabled ? -1 : 0}
       variant="borderless"
       onKeyDown={(event) => {
+        if (event.target !== event.currentTarget || disabled) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           onSelect();
@@ -75,6 +94,20 @@ export function SubscriptionCard({
           <strong>{subscription.name}</strong>
         </span>
         <span className="subscription-card-actions">
+          <Tooltip title={t(subscription.sourceKind === "url" ? "subscription.card.copyURL" : "subscription.card.copyFilePath")}>
+            <Button
+              aria-label={t(subscription.sourceKind === "url" ? "subscription.card.copyURL" : "subscription.card.copyFilePath")}
+              disabled={disabled}
+              icon={<CopyOutlined />}
+              loading={copying}
+              onClick={(event) => {
+                event.stopPropagation();
+                onCopy();
+              }}
+              size="small"
+              type="text"
+            />
+          </Tooltip>
           <Tooltip
             title={
               subscription.sourceKind === "url"
@@ -118,43 +151,42 @@ export function SubscriptionCard({
         status={total > 0 && used > total ? "exception" : "normal"}
       />
 
-      <div className="subscription-card-traffic">
+      <div className="subscription-card-metadata">
         {subscription.remoteProfile.hasTraffic ? (
-          <strong>
+          <strong title={`${formatSubscriptionBytes(used, locale)} / ${total > 0 ? formatSubscriptionBytes(total, locale) : "—"}`}>
             {formatSubscriptionBytes(used, locale)} / {total > 0 ? formatSubscriptionBytes(total, locale) : "—"}
           </strong>
         ) : (
           <span>{t("subscription.card.trafficUnavailable")}</span>
         )}
-        {expiry ? <span>· {expiry}</span> : null}
-      </div>
-
-      <div className="subscription-card-footer">
-        <time dateTime={subscription.lastFetchedAt}>
+        <span title={expiry ?? t("subscription.card.expiryUnavailable")}>{expiry ?? "—"}</span>
+        <time dateTime={subscription.lastFetchedAt} title={t("subscription.card.updated")}>
           {formatSubscriptionUpdateAge(
             subscription.lastFetchedAt,
             locale,
           )}
         </time>
+      </div>
+
+      <SubscriptionAssociations
+        chainGroupNames={chainGroupNames}
+        disabled={disabled}
+        localConfigName={localConfigName}
+        localScriptName={localScriptName}
+        onBind={onBind}
+        onUnbind={onUnbind}
+        pending={pendingAssociation}
+        subscription={subscription}
+      />
+
+      <div className="subscription-card-footer">
+        {sortHandle}
         <Tag bordered={false}>
           {t("subscription.card.ruleProviders", {
             count: subscription.composition.ruleProviderCount,
           })}
         </Tag>
       </div>
-      {!!subscription.chainProxyGroupIds?.length && <div className="subscription-card-association">{t("chainProxy.associationTag", { count: subscription.chainProxyGroupIds.length })}</div>}
-      {localConfigName || localScriptName ? (
-        <div className="subscription-card-association">
-          {t("subscription.card.associated", {
-            name: localConfigName || localScriptName,
-            type: t(
-              localConfigName
-                ? "subscription.card.handlerConfig"
-                : "subscription.card.handlerScript",
-            ),
-          })}
-        </div>
-      ) : null}
     </Card>
   );
 }

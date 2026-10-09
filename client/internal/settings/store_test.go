@@ -141,7 +141,7 @@ func TestStorePersistsRuntimePreferencesAtomically(t *testing.T) {
 	preferences.ListenerType = runtimeconfig.ListenerTypeSOCKS
 	preferences.ListenPort = 1080
 	preferences.AllowLAN = true
-	preferences.TUNStack = runtimeconfig.TUNStackGVisor
+	preferences.TUNStack = runtimeconfig.TUNStackMIPS
 	preferences.TUNRouteExcludeAddress = []string{"192.168.50.0/24", "fd00:50::/64"}
 	preferences.TUNRouteExcludeAddressEnabled = true
 	preferences.TUNRouteExcludeAddressMerge = runtimeconfig.MergeModeOverride
@@ -206,6 +206,39 @@ func TestStoreDefaultsMissingRuntimePreferences(t *testing.T) {
 	}
 	if !reflect.DeepEqual(document.GeoData, geodata.DefaultPreferences()) {
 		t.Fatalf("missing GEO data preferences were not defaulted: %+v", document.GeoData)
+	}
+}
+
+func TestStoreDefaultsTUNStackWithoutReplacingSavedChoice(t *testing.T) {
+	for _, test := range []struct{ name, runtimeJSON, want string }{
+		{"default", `{}`, "system"},
+		{"system", `{"tunStack":"system"}`, "system"},
+		{"gvisor", `{"tunStack":"gvisor"}`, "gvisor"},
+		{"mixed", `{"tunStack":"mixed"}`, "mixed"},
+		{"mips", `{"tunStack":"mips"}`, "mips"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "settings.json")
+			contents := `{"runtime":` + test.runtimeJSON + `}`
+			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			store, err := NewStore(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			document, err := store.Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if document.Runtime.TUNStack != test.want {
+				t.Fatalf("TUN stack = %q, want %q", document.Runtime.TUNStack, test.want)
+			}
+			after, err := os.ReadFile(path)
+			if err != nil || string(after) != contents {
+				t.Fatal("reading TUN stack preferences rewrote settings", err)
+			}
+		})
 	}
 }
 

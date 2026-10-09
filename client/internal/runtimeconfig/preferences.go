@@ -27,6 +27,7 @@ const (
 	TUNStackSystem = "system"
 	TUNStackGVisor = "gvisor"
 	TUNStackMixed  = "mixed"
+	TUNStackMIPS   = "mips"
 
 	LogLevelSilent  = "silent"
 	LogLevelError   = "error"
@@ -178,7 +179,7 @@ func DefaultPreferences() Preferences {
 		ListenerType: ListenerTypeMixed,
 		ListenPort:   DefaultListenPort,
 		AllowLAN:     false,
-		TUNStack:     TUNStackMixed,
+		TUNStack:     TUNStackSystem,
 
 		LogLevel:                      LogLevelSilent,
 		FindProcessMode:               FindProcessModeStrict,
@@ -420,7 +421,7 @@ func validListenerType(value string) bool {
 }
 
 func validTUNStack(value string) bool {
-	return value == TUNStackSystem || value == TUNStackGVisor || value == TUNStackMixed
+	return value == TUNStackSystem || value == TUNStackGVisor || value == TUNStackMixed || value == TUNStackMIPS
 }
 
 func validLogLevel(value string) bool {

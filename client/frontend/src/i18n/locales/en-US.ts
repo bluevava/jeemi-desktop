@@ -319,6 +319,7 @@ export const enUS = {
         system: "system",
         gvisor: "gVisor",
         mixed: "mixed",
+        mips: "mips",
       },
       errors: {
         load: "Could not read proxy runtime parameters. Check jeemi_data/settings.json permissions and contents.",
@@ -492,9 +493,20 @@ export const enUS = {
       trafficUnavailable: "Traffic metadata unavailable",
       expiryUnavailable: "Expiry unavailable",
       ruleProviders: "{{count}} rule providers",
-      associated: "Associated with {{name}} [{{type}}]",
       handlerConfig: "Config",
       handlerScript: "Script",
+      handlerChain: "Chain",
+      bind: "Bind",
+      unbind: "Unbind",
+      bindType: "Bind {{type}}",
+      unbindType: "Unbind {{type}}",
+      changeBinding: "Change {{type}} binding: {{name}}",
+      resourceUnavailable: "Resource unavailable",
+      copyURL: "Copy subscription URL",
+      copyFilePath: "Copy current configuration file path",
+      sourceCopied: "Source address copied",
+      dragToReorder: "Drag to reorder, or focus and use the arrow keys",
+      reorderLabel: "Reorder subscription {{name}}",
     },
     shelf: {
       title: "Subscription configurations",
@@ -650,8 +662,6 @@ export const enUS = {
       rawText: "View source config",
       associate: "Associate local config",
       runtimeConfiguration: "View runtime config",
-      associateConfig: "Associate local config",
-      associateScript: "Associate local script",
       delete: "Delete",
     },
     form: {
@@ -695,7 +705,7 @@ export const enUS = {
       save: "Save association",
       conflictTitle: "Only one local handler can be associated",
       unlinkScriptFirst:
-        "This subscription already uses a local script. Unlink it from “Associate local script” first.",
+        "This subscription already uses a local script. Click Unbind in the card's Script row first.",
     },
     scriptAssociation: {
       title: "Associate local script",
@@ -707,7 +717,7 @@ export const enUS = {
       waiting: "Validating the configuration and processing the association. Loading rule sets for the first time may take a little while.",
       conflictTitle: "Only one local handler can be associated",
       unlinkConfigFirst:
-        "This subscription already uses a local configuration. Unlink it from “Associate local config” first.",
+        "This subscription already uses a local configuration. Click Unbind in the card's Config row first.",
       validationFailed:
         "The final runtime configuration produced by this script association is invalid: {{error}}",
     },
@@ -758,6 +768,9 @@ export const enUS = {
         "Could not read the current subscription source. Check the managed revision file integrity.",
       association:
         "Could not save the local configuration association. Confirm that both objects still exist.",
+      copySource: "Could not copy the source address. Check the subscription file and clipboard availability.",
+      unbind: "Could not unbind. Refresh to check the current association and try again.",
+      reorder: "Could not save the subscription order. Reload the subscription list and try again.",
       ruleProviderRefresh:
         "Could not update the rule provider. Confirm that the active generation uses this subscription and that the mihomo control API is healthy.",
       ruleProviderToggle:
@@ -1283,7 +1296,7 @@ export const enUS = {
       },
       rules: {
         title: "Rules and subscription association",
-        purpose: "Enable local rules, add policy groups in order, and prepend, append, or replace rules. Each reference can be disabled separately. After saving, select this configuration from the subscription card’s Associate local configuration menu.",
+        purpose: "Enable local rules, add policy groups in order, and prepend, append, or replace rules. Each reference can be disabled separately. After saving, choose Bind in the subscription card’s Config row to select this configuration.",
         scenarios: "Use reusable rule groups for proxy, direct, or reject policies and selector groups for filtered subscription nodes.",
         cautions: "Complete reconstruction replaces source rules, selectors, rule providers and sub-rules together. It requires an included, enabled local selector and an explicit MATCH. Subscription Fallback traffic may override the local MATCH afterwards. Turning off local rules applies only custom fields and preserves references and composition modes. Every affected subscription is checked before saving, including core validation when available; failure preserves saved data and the draft.",
       },
@@ -1824,8 +1837,8 @@ export const enUS = {
       subscriptionShelf: {
         title: "Subscription shelf",
         purpose: "Expand to manage subscription cards; collapse to see the current subscription’s usage, expiry, update time, node search, and shortcuts. Expanding or collapsing keeps selectors in place.",
-        scenarios: "Expand it to switch or edit subscriptions; collapse it to search node names or use refresh, rule-provider, speed-test, and hidden-selector actions. Batch testing follows the current search results; an empty search tests all nodes.",
-        cautions: "Traffic and names may be absent or stale. Testing is enabled only for a healthy mihomo session matching the current projection, and showing hidden groups changes only this view, not the subscription or running core.",
+        scenarios: "Expand to bind or unbind scripts, configs, and chain groups; click a bound name to change it. Header actions copy the address or refresh. Drag the bottom-left handle to reorder, or focus it and use arrow keys. Cards start in added order, with new ones last. Refresh keeps their positions, and manual order survives restarts. Collapse to search and test nodes.",
+        cautions: "Scripts and configs are mutually exclusive. Chains can bind multiple groups; Unbind removes all of them. URL and QR subscriptions copy the full URL; file subscriptions copy the client's current stored source path. Addresses may contain credentials, so share carefully. Traffic may be unavailable or stale; testing requires a healthy core.",
       },
       subscriptionNodeSearch: {
         title: "Node name search",

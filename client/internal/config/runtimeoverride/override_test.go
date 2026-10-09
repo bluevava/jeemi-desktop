@@ -30,7 +30,7 @@ future-option: kept
 	preferences.ListenerType = runtimeconfig.ListenerTypeSOCKS
 	preferences.ListenPort = 1080
 	preferences.AllowLAN = true
-	preferences.TUNStack = runtimeconfig.TUNStackGVisor
+	preferences.TUNStack = runtimeconfig.TUNStackMIPS
 	preferences.TUNRouteExcludeAddress = []string{"192.168.0.0/16", "fc00::/7"}
 	preferences.TUNRouteExcludeAddressEnabled = true
 	preferences.TUNRouteExcludeAddressMerge = runtimeconfig.MergeModeOverride
@@ -50,7 +50,7 @@ future-option: kept
 	assertValue(t, configuration, "/bind-address", "*")
 	assertValue(t, configuration, "/socks-port", "1080")
 	assertValue(t, configuration, "/tun/enable", "true")
-	assertValue(t, configuration, "/tun/stack", "gvisor")
+	assertValue(t, configuration, "/tun/stack", "mips")
 	assertValue(t, configuration, "/tun/device", runtimeconfig.TUNDeviceName)
 	assertValue(t, configuration, "/tun/auto-route", "true")
 	assertValue(t, configuration, "/tun/auto-detect-interface", "true")

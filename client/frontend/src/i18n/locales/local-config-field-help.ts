@@ -378,7 +378,7 @@ export const zhLocalConfigFieldHelp = {
   ),
   "tun-stack": help(
     "tun.stack",
-    "选择 TUN 的 system、gvisor 或 mixed 网络栈，以适配性能与协议兼容需求。",
+    "选择 TUN 的 system、gvisor、mixed 或 mips 网络栈，Jeemi 默认使用 system；mips 是 mihomo 自研的 IP 协议栈。",
     "根据平台能力和应用兼容性在主页切换。",
     "Jeemi 统一管理此字段；不同平台支持程度不同，修改后需要重新验证 TUN。",
   ),
@@ -897,7 +897,7 @@ export const enLocalConfigFieldHelp = {
   ),
   "tun-stack": help(
     "tun.stack",
-    "Choose the system, gvisor, or mixed TUN stack for performance and protocol compatibility needs.",
+    "Choose the system, gvisor, mixed, or mips TUN stack. Jeemi defaults to system; mips is mihomo’s own IP stack.",
     "Select it from Home according to platform and application behavior.",
     "Jeemi owns the field; platform support differs and TUN must be revalidated after changes.",
   ),

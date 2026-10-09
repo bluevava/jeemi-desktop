@@ -13,7 +13,7 @@ export const zhChainProxy = {
   dialerReplaced: "输入中的 dialer-proxy 已由分组中继规则接管。", normalizationDetails: "解析说明",
   associate: "关联链式代理", associationTitle: "关联链式代理 · {{name}}", associationGroups: "选择分组",
   associationPlaceholder: "选择要使用的分组，可多选", missingGroup: "分组已不存在", noGroups: "请先到“配置 → 链式代理”新增分组。",
-  associationTag: "[链式] {{count}} 组", linkedNodes: "使用所选分组的全部落地节点；订阅来源刷新后自动同步增删。",
+  linkedNodes: "使用所选分组的全部落地节点；订阅来源刷新后自动同步增删。",
   composition: "链式代理：已生成 {{count}} 个节点", diagnostics: "生成详情", dirty: "当前链式代理编辑尚未保存，是否离开？",
   viewNode: "查看节点", sourceEmpty: "此来源当前没有符合筛选条件的节点", loadRetry: "重新读取",
   errors: {
@@ -55,7 +55,7 @@ export const enChainProxy = {
   dialerReplaced: "The supplied dialer-proxy is now managed by the group’s intermediary rules.", normalizationDetails: "Parsing details",
   associate: "Associate proxy chains", associationTitle: "Proxy chains · {{name}}", associationGroups: "Select groups",
   associationPlaceholder: "Select one or more groups", missingGroup: "Group no longer exists", noGroups: "Create a group under Config → Proxy chains first.",
-  associationTag: "[Chains] {{count}} groups", linkedNodes: "Uses all landing nodes in the selected groups. Source refreshes automatically synchronize additions and removals.",
+  linkedNodes: "Uses all landing nodes in the selected groups. Source refreshes automatically synchronize additions and removals.",
   composition: "Proxy chains: {{count}} generated nodes", diagnostics: "Generation details", dirty: "Proxy chain edits have not been saved. Leave this page?",
   viewNode: "View node", sourceEmpty: "No nodes currently match this source’s filter", loadRetry: "Reload",
   errors: {
