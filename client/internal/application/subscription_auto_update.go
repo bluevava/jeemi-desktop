@@ -81,6 +81,7 @@ func (s *Service) subscriptionUpdateDue(item subscription.Summary, now time.Time
 }
 
 // This loop stays independent of renderer visibility and core running state.
+// Only the selected URL subscription participates in unattended updates.
 // Never wait for a foreground configuration operation: recheck on the next tick.
 func (s *Service) updateDueSubscriptions(ctx context.Context, now time.Time) {
 	if ctx.Err() != nil {
@@ -101,8 +102,12 @@ func (s *Service) updateDueSubscriptions(ctx context.Context, now time.Time) {
 		}
 	}
 	s.mu.Unlock()
+	document, err := s.settingsStore.Load()
+	if err != nil {
+		return
+	}
 	for _, item := range state.Subscriptions {
-		if ctx.Err() != nil || !s.subscriptionUpdateDue(item, now) {
+		if ctx.Err() != nil || item.ID != document.Subscriptions.SelectedID || !s.subscriptionUpdateDue(item, now) {
 			continue
 		}
 		if !s.reconcileMu.TryLock() {
@@ -122,6 +127,12 @@ func (s *Service) updateDueSubscriptions(ctx context.Context, now time.Time) {
 }
 
 func (s *Service) updateDueSubscriptionLocked(parent context.Context, id string, now time.Time) bool {
+	// Selection can change after the initial scan. Holding reconcileMu keeps the
+	// selected subscription stable throughout fetching, validation and commit.
+	document, err := s.settingsStore.Load()
+	if err != nil || id == "" || document.Subscriptions.SelectedID != id {
+		return false
+	}
 	item, err := s.subscriptions.Get(id)
 	if err != nil || parent.Err() != nil || !s.subscriptionUpdateDue(item.Summary, now) {
 		return false

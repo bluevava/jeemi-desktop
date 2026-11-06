@@ -1771,8 +1771,8 @@ export const enUS = {
       subscriptionFetch: {
         title: "Automatic subscription updates",
         purpose: "Set each URL subscription to update every 10 minutes, 30 minutes, 1 hour, 3 hours or 12 hours. The default is 1 hour.",
-        scenarios: "Intervals start from the last successful fetch. Updates continue while hidden in the tray. After startup or resume, overdue subscriptions refresh once without replaying every missed interval.",
-        cautions: "Runs only while the initialized client is open; file subscriptions are excluded. QR subscriptions default to 1 hour and can be edited. Server recommendations do not override this choice. Failures preserve the previous revision and local association, then retry at the next interval. A successful manual fetch resets the timer. Exiting cancels background work.",
+        scenarios: "Only the currently selected URL subscription updates automatically, timed from its last successful fetch. Updates continue in the tray. After startup, resume, or switching subscriptions, the selected subscription refreshes once on the next check if overdue, without replaying missed intervals.",
+        cautions: "Runs only while the initialized client is open. Unselected and file subscriptions are excluded from automatic updates; manual refresh remains available. QR subscriptions default to 1 hour and can be edited. Server recommendations do not override this choice. Failures preserve the revision and local association, retrying at the next interval while selected. Manual fetches reset the timer. Exiting cancels background work.",
       },
       subscriptionDelayTest: {
         title: "Node-test concurrency",

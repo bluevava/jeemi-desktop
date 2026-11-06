@@ -77,6 +77,16 @@ func TestAutomaticSubscriptionUpdateIntervalsAndCatchup(t *testing.T) {
 	if state.SelectedSubscriptionID != first {
 		t.Fatal("import changed selection")
 	}
+	var second string
+	for _, item := range state.Subscriptions {
+		if item.ID != first {
+			second = item.ID
+		}
+	}
+	before, err := s.Subscription(second)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var notifications atomic.Int32
 	s.SetSubscriptionUpdateNotifier(func() { notifications.Add(1) })
 	*now = now.Add(29 * time.Minute)
@@ -86,19 +96,23 @@ func TestAutomaticSubscriptionUpdateIntervalsAndCatchup(t *testing.T) {
 	}
 	*now = now.Add(time.Minute)
 	s.updateDueSubscriptions(context.Background(), *now)
-	if f.calls.Load() != 3 {
-		t.Fatal("30 minute subscription did not refresh independently")
+	if f.calls.Load() != 2 {
+		t.Fatal("unselected 30 minute subscription was refreshed")
 	}
 	*now = now.Add(30 * time.Minute)
 	s.updateDueSubscriptions(context.Background(), *now)
-	if f.calls.Load() != 5 {
-		t.Fatal("hourly subscriptions did not refresh")
+	if f.calls.Load() != 3 {
+		t.Fatal("selected hourly subscription did not refresh alone")
 	}
 	*now = now.Add(24 * time.Hour)
 	s.updateDueSubscriptions(context.Background(), *now)
 	s.updateDueSubscriptions(context.Background(), now.Add(15*time.Second))
-	if f.calls.Load() != 7 || notifications.Load() != 5 {
+	if f.calls.Load() != 4 || notifications.Load() != 2 {
 		t.Fatal("missed intervals replayed or file subscription refreshed")
+	}
+	unselected, err := s.Subscription(second)
+	if err != nil || !reflect.DeepEqual(unselected, before) {
+		t.Fatal("unselected subscription metadata changed", err)
 	}
 	after, err := s.SubscriptionState()
 	if err != nil || after.SelectedSubscriptionID != first {
@@ -106,6 +120,78 @@ func TestAutomaticSubscriptionUpdateIntervalsAndCatchup(t *testing.T) {
 	}
 	if s.runtimeManager.Status().State == "running" {
 		t.Fatal("automatic subscription updates started the core")
+	}
+}
+
+func TestAutomaticSubscriptionUpdateRechecksSelectionAndExcludesFiles(t *testing.T) {
+	s, f, now, first := scheduledService(t)
+	state, err := s.ImportSubscriptionURL(subscription.ImportURLInput{Name: "Second", SourceURL: "https://example.test/second", AutoUpdateIntervalMinutes: 30})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var second string
+	for _, item := range state.Subscriptions {
+		if item.ID != first {
+			second = item.ID
+		}
+	}
+	before, err := s.Subscription(first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	*now = now.Add(2 * time.Hour)
+	if _, err := s.SelectSubscription(second); err != nil {
+		t.Fatal(err)
+	}
+	// The old selection was captured before a foreground switch acquired the lock.
+	s.reconcileMu.Lock()
+	changed := s.updateDueSubscriptionLocked(context.Background(), first, *now)
+	s.reconcileMu.Unlock()
+	if changed || f.calls.Load() != 2 || len(s.autoUpdateAttempts) != 0 {
+		t.Fatal("stale selection fetched an inactive subscription")
+	}
+	s.updateDueSubscriptions(context.Background(), *now)
+	s.updateDueSubscriptions(context.Background(), now.Add(15*time.Second))
+	if f.calls.Load() != 3 {
+		t.Fatal("new selection must catch up once using its original fetch time")
+	}
+	after, err := s.Subscription(first)
+	if err != nil || !reflect.DeepEqual(before, after) {
+		t.Fatal("switching changed inactive metadata", err)
+	}
+	file := filepath.Join(t.TempDir(), "fixture.yaml")
+	if err := os.WriteFile(file, []byte(fallbackFixture), 0600); err != nil {
+		t.Fatal(err)
+	}
+	state, err = s.ImportSubscriptionFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fileID string
+	for _, item := range state.Subscriptions {
+		if item.SourceKind == subscription.SourceFile {
+			fileID = item.ID
+		}
+	}
+	if _, err := s.SelectSubscription(fileID); err != nil {
+		t.Fatal(err)
+	}
+	*now = now.Add(24 * time.Hour)
+	s.updateDueSubscriptions(context.Background(), *now)
+	if f.calls.Load() != 3 {
+		t.Fatal("file selection refreshed another URL subscription")
+	}
+	// Manual refresh remains available for subscriptions outside the selection.
+	if state, err := s.RefreshSubscription(first); err != nil || state.SelectedSubscriptionID != fileID || f.calls.Load() != 4 {
+		t.Fatal("manual refresh of an inactive subscription was blocked or changed selection", err)
+	}
+	if _, err := s.settingsStore.SetSelectedSubscription(""); err != nil {
+		t.Fatal(err)
+	}
+	*now = now.Add(24 * time.Hour)
+	s.updateDueSubscriptions(context.Background(), *now)
+	if f.calls.Load() != 4 {
+		t.Fatal("empty selection refreshed a subscription")
 	}
 }
 
