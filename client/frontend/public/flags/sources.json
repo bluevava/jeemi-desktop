@@ -1,0 +1,1066 @@
+{
+  "flagIcons": {
+    "version": "7.6.0",
+    "url": "https://github.com/lipis/flag-icons",
+    "tarball": "https://registry.npmjs.org/flag-icons/-/flag-icons-7.6.0.tgz",
+    "integrity": "sha512-hir/PsXwr0EESyizKrXJzmkzpLIMf+1vlNKLqAfvdh+bsU94a7LYWTiubkHKqptGoCPzOUGcm6c4PfC9/BaGSQ==",
+    "license": "MIT"
+  },
+  "twemoji": {
+    "version": "17.0.3",
+    "url": "https://github.com/jdecked/twemoji",
+    "license": "CC-BY-4.0",
+    "author": "Twitter, Inc. and other contributors"
+  },
+  "files": {
+    "ac": {
+      "source": "flags/4x3/sh-ac.svg",
+      "sha256": "0de767417786626c6a9005113298c5943cdd61c3ba32d774c32977af75195128"
+    },
+    "ad": {
+      "source": "flags/4x3/ad.svg",
+      "sha256": "1914f0d751b810056fdde2fa27d5c255082b4eeaa5942f8ac27e48dca3a377ed"
+    },
+    "ae": {
+      "source": "flags/4x3/ae.svg",
+      "sha256": "3bc52a4aac7c6c68cd7c0a04013fa14f715abfe6958e7a6e3194f0793c9eb816"
+    },
+    "af": {
+      "source": "flags/4x3/af.svg",
+      "sha256": "313a7dd89f3d4bdceae673908ede1bca4a2f1aa0ea3562d8e96fe430d3b4c690"
+    },
+    "ag": {
+      "source": "flags/4x3/ag.svg",
+      "sha256": "131282135f0f5cfca72efa3a6dc6a3392b5999b5b15e1cbd0f3f73253c24080d"
+    },
+    "ai": {
+      "source": "flags/4x3/ai.svg",
+      "sha256": "974c6af4adba3aed291f00a7eddaa8940853f8a7ca9be0c17ff8064714f27c51"
+    },
+    "al": {
+      "source": "flags/4x3/al.svg",
+      "sha256": "4ae4d2950f6a08528639700e48d19930b964478a2548cb9bf41b898c2b757b11"
+    },
+    "am": {
+      "source": "flags/4x3/am.svg",
+      "sha256": "efb6cdaad5658ae5024c86b099a96c4e3769028894240f4015cbc090a0e90e0f"
+    },
+    "ao": {
+      "source": "flags/4x3/ao.svg",
+      "sha256": "3a4b1f9b0c95729b128ed86c7446ce82733f29ad9f6387e7a2ca951fa488e763"
+    },
+    "aq": {
+      "source": "flags/4x3/aq.svg",
+      "sha256": "1cdfb7443088d61a5747d4d7538d3c5bef85cd1f7ec649f5e44e8e4029cefb07"
+    },
+    "ar": {
+      "source": "flags/4x3/ar.svg",
+      "sha256": "da39bfbe83fd35fae781f605c4a297b632f03ccf72d4cb0499e86dac8370663d"
+    },
+    "as": {
+      "source": "flags/4x3/as.svg",
+      "sha256": "6f356d18cc09efabdae58579373f5dc89b25695b42cb4e92d7ebc9e94477b81f"
+    },
+    "at": {
+      "source": "flags/4x3/at.svg",
+      "sha256": "c0e5cb3c1d59fd002afd6e2b0dd03787677ca3c9e7b2321f4af6d9e28256ebcd"
+    },
+    "au": {
+      "source": "flags/4x3/au.svg",
+      "sha256": "cbb2206c5e59a25d79228306af973666a191e163f0ae337681f447977e6edb18"
+    },
+    "aw": {
+      "source": "flags/4x3/aw.svg",
+      "sha256": "6cabd9394138d55a421da65a8a5b7aebd612c5df48d97fd23790ebfbd59bd1ac"
+    },
+    "ax": {
+      "source": "flags/4x3/ax.svg",
+      "sha256": "1f2bddd37b8663637561e785b3dd0286a9dd6b9966d2a7955ff5d3bfb87654a4"
+    },
+    "az": {
+      "source": "flags/4x3/az.svg",
+      "sha256": "33ad245b2125c36fbf0f863b0edd5c85cbef37587900e101db3a615870504502"
+    },
+    "ba": {
+      "source": "flags/4x3/ba.svg",
+      "sha256": "b321fe9b47c1cd741c61b330aee66cf00550622a6a9e740161a9f240a14e0787"
+    },
+    "bb": {
+      "source": "flags/4x3/bb.svg",
+      "sha256": "46cfd88ab5ea96e75627e044d008462586fbd04a346205dfd258984a46ffc27a"
+    },
+    "bd": {
+      "source": "flags/4x3/bd.svg",
+      "sha256": "1aabb4a772651fb9a673660233d5bc6f3d78dfc71df09d567769bc97b9eb554f"
+    },
+    "be": {
+      "source": "flags/4x3/be.svg",
+      "sha256": "d6aff6fa4c913404eafd53f91c0a9b240fcecaddc8f0ac2160d362e38469342c"
+    },
+    "bf": {
+      "source": "flags/4x3/bf.svg",
+      "sha256": "b20f529ca2c8bdfed6727afad4b24c7fe97c2dc87afbdc20ee209fbea66ae8d3"
+    },
+    "bg": {
+      "source": "flags/4x3/bg.svg",
+      "sha256": "b6d979fc96dc6b46c1697a5e05ecfe1fac1fa912ed480ca7a2a9b450f087faf6"
+    },
+    "bh": {
+      "source": "flags/4x3/bh.svg",
+      "sha256": "7a519f58c9007731d70a975a48cc81fcf516ab52ab972f9739eace370431e0c2"
+    },
+    "bi": {
+      "source": "flags/4x3/bi.svg",
+      "sha256": "5ef1a56b4ebe90326d6d807bbf61bd2d6f0b752fd6966588cd42471a886307bb"
+    },
+    "bj": {
+      "source": "flags/4x3/bj.svg",
+      "sha256": "0a46cbae6018acdbc4a485f6b1c4a3df7a7b36680439f6eb5d1bfb957f704888"
+    },
+    "bl": {
+      "source": "flags/4x3/bl.svg",
+      "sha256": "d511eb84cf9313e11f8b648de6a0122d4fa6c1662b0111890303b7867ad71d24"
+    },
+    "bm": {
+      "source": "flags/4x3/bm.svg",
+      "sha256": "65e4636aa41be4ff0613f19d2c56af41a2b43cd44522f83cf3e6d89fbd16aba0"
+    },
+    "bn": {
+      "source": "flags/4x3/bn.svg",
+      "sha256": "4fc01eb8e4b3d4776d179cd06dfca4f21ee7ca833751eb564e7943d3203b6851"
+    },
+    "bo": {
+      "source": "flags/4x3/bo.svg",
+      "sha256": "ee1075ebb655dd8252ec317827baa0a75cf0a5e4f0b0b35d6e9766b30686d183"
+    },
+    "bq": {
+      "source": "flags/4x3/bq.svg",
+      "sha256": "23881e6caad00e2f7f8ce50448bf419e1e1c44029db022a4a12d49416469c4d3"
+    },
+    "br": {
+      "source": "flags/4x3/br.svg",
+      "sha256": "b0a912826c3ffd7287435ebed66e18fe058e992309c00dc10b430dd41a29ba91"
+    },
+    "bs": {
+      "source": "flags/4x3/bs.svg",
+      "sha256": "1f179c39f296e5e3e062114d62fea394ff0ea487bd29cdffbe3837b7238d46dc"
+    },
+    "bt": {
+      "source": "flags/4x3/bt.svg",
+      "sha256": "05ff0d4d7258357823180eec1e53baa11846505234f51061a47c2f95641d1f43"
+    },
+    "bv": {
+      "source": "flags/4x3/bv.svg",
+      "sha256": "d972d58c5ff46de1c76f3bd465f42300bb5777d37be2c006079ce3b3b21aec50"
+    },
+    "bw": {
+      "source": "flags/4x3/bw.svg",
+      "sha256": "180bfa4e76b78fa7b52bf9f3c8e99d3c1b4aa520b97a239661a8953dc90658b3"
+    },
+    "by": {
+      "source": "flags/4x3/by.svg",
+      "sha256": "a1efa44ad1167d6d77abbe59ce85aa3a68ff4bd57af79454c08a3ade5c178578"
+    },
+    "bz": {
+      "source": "flags/4x3/bz.svg",
+      "sha256": "9aef8f4ef9d86bf989fbdd714d64c5440dceaa2bc1a23e493942129022e6b677"
+    },
+    "ca": {
+      "source": "flags/4x3/ca.svg",
+      "sha256": "345ec9dac057e203f1331b2d3f9f473789864edaee1182a26bc261356bcf72f1"
+    },
+    "cc": {
+      "source": "flags/4x3/cc.svg",
+      "sha256": "57265e7cd109321f517c6e8d6e82318f1a82814cd00b9fd405943feb09911bc9"
+    },
+    "cd": {
+      "source": "flags/4x3/cd.svg",
+      "sha256": "ad93c1afd68e6a7364d141e0989a798e81a202fe4674f21fece3ceea83fd167c"
+    },
+    "cf": {
+      "source": "flags/4x3/cf.svg",
+      "sha256": "1b58dc2035ff0039c82e4dfb16a536dcf74ee09ab4d95b75221d404ad616dc0f"
+    },
+    "cg": {
+      "source": "flags/4x3/cg.svg",
+      "sha256": "628dcfc7f00ab09cc9074b837863c31fe4472c7c3e17c30e233332d94c37585b"
+    },
+    "ch": {
+      "source": "flags/4x3/ch.svg",
+      "sha256": "ac676cd39d7032988598ef2dd73f6bebcd767738e3e469705d6a437835ac485c"
+    },
+    "ci": {
+      "source": "flags/4x3/ci.svg",
+      "sha256": "7a09020c7263a1c35a2fab646bdb4ee16fcc06a292f63d5a1d9f1feb2501ecd2"
+    },
+    "ck": {
+      "source": "flags/4x3/ck.svg",
+      "sha256": "b17c039f7195b292265dd28b50f85b3668e28e490b48df760e953e3ab0bc3557"
+    },
+    "cl": {
+      "source": "flags/4x3/cl.svg",
+      "sha256": "bcf0ccdf0999a1cd82061202988e1f6088c2070e3e76794d67cb375ef325ef76"
+    },
+    "cm": {
+      "source": "flags/4x3/cm.svg",
+      "sha256": "c9a327dc0e355739a9f2bc0a91e1293f8e08e13910e718bc63fda35a244acef5"
+    },
+    "cn": {
+      "source": "flags/4x3/cn.svg",
+      "sha256": "981da9bdf82d48e31691f20578cefcb26cf7d0bd95e4ebd5c0df00bdfe988c1a"
+    },
+    "co": {
+      "source": "flags/4x3/co.svg",
+      "sha256": "6bab3c96c1657510c6e49354dd40203c69401bee54da497392ab9267334e5fd4"
+    },
+    "cp": {
+      "source": "flags/4x3/cp.svg",
+      "sha256": "bd880fc59f9db3264a52432cca962e1b2408f4836458677f12583d3285dfacb2"
+    },
+    "cq": {
+      "source": "assets/svg/1f1e8-1f1f6.svg",
+      "sha256": "d71f31f55455434522bbfe8f27a2689590abd34f32393097df67b6a6351457fb",
+      "modification": "viewBox cropped to 0 4.5 36 27 (4:3), artwork unchanged"
+    },
+    "cr": {
+      "source": "flags/4x3/cr.svg",
+      "sha256": "4775ef01d28b8a887cde3dbe2826466ed77c87aae4d00517c99d4977afdbdc20"
+    },
+    "cu": {
+      "source": "flags/4x3/cu.svg",
+      "sha256": "15013e0bb414c074af963bab167806dc81b7e1bb6dabc05dac20b2583511e535"
+    },
+    "cv": {
+      "source": "flags/4x3/cv.svg",
+      "sha256": "2fa67e0a2477306f0427877b78d2276c58c496ff50faf4b3d69252350821e138"
+    },
+    "cw": {
+      "source": "flags/4x3/cw.svg",
+      "sha256": "c845d0cad7f00344a2729257315afbf81c70c08bf0772211eb913a716b9aae7c"
+    },
+    "cx": {
+      "source": "flags/4x3/cx.svg",
+      "sha256": "316d011952bf1b8ea518ee829006529e105187c8075457c9a5060c6b28a1e9ae"
+    },
+    "cy": {
+      "source": "flags/4x3/cy.svg",
+      "sha256": "d2ddf86c24e9d4dc4e2f5cd298b189b9d04a08c0f6497c35249f07d6f1969e33"
+    },
+    "cz": {
+      "source": "flags/4x3/cz.svg",
+      "sha256": "d601fcc2e5b1fd48b79d53c55108af4c0e90793f146db51f3ee449d8d69512bc"
+    },
+    "de": {
+      "source": "flags/4x3/de.svg",
+      "sha256": "efd480af5a154a7651f29da23ee0d09dbc892410fb4041898ddf8face336c575"
+    },
+    "dg": {
+      "source": "flags/4x3/dg.svg",
+      "sha256": "5001a14a3dac15f3c4ac3bdd5d66aa009ae05642e244be83b23f4be3308e32d6"
+    },
+    "dj": {
+      "source": "flags/4x3/dj.svg",
+      "sha256": "2a22d382f85cef20ba39a9abb6e6ecffdfa806d46afea3f6d26b8a23a5c12e43"
+    },
+    "dk": {
+      "source": "flags/4x3/dk.svg",
+      "sha256": "d2847c0bd7a1fb97977ee51f2f618c5ebc5898dd66ef9804f187613c27bdca1a"
+    },
+    "dm": {
+      "source": "flags/4x3/dm.svg",
+      "sha256": "0a4bf1a27390308c62675099f3fb7c86ac3098fce4e8c5e95046c7a15c54226d"
+    },
+    "do": {
+      "source": "flags/4x3/do.svg",
+      "sha256": "02e5f5efbc60a73716f754ecb3f112dcccfeab1da925cb7b8a1764736a3a3ebd"
+    },
+    "dz": {
+      "source": "flags/4x3/dz.svg",
+      "sha256": "9ea0cf93222ab7b5e7b77b9576afcad80dad1eff33827e8e58dbfbb42aeb8213"
+    },
+    "ea": {
+      "source": "flags/4x3/es.svg",
+      "sha256": "f9cfaff858e95f830733ade9591037b5322dfb5827a53b70956a3d190bb49b9a"
+    },
+    "ec": {
+      "source": "flags/4x3/ec.svg",
+      "sha256": "4472b0618e2f5e31d31d16c0d7d811310c33b07d5a101b54f60fcb7ec84d1d4d"
+    },
+    "ee": {
+      "source": "flags/4x3/ee.svg",
+      "sha256": "25642310e287fbdc02e1ac3e0e08fadca9a32eae195f67b6863bf0fc6247176b"
+    },
+    "eg": {
+      "source": "flags/4x3/eg.svg",
+      "sha256": "3f85d1d2bdb03692ad68f84efff36be2f5b1b5b7438b7b7be50def3837bf532f"
+    },
+    "eh": {
+      "source": "flags/4x3/eh.svg",
+      "sha256": "a957f2aedbb4178a79710d178de3fdb77ebdd3b441ef8fb59e51d9b11966b06b"
+    },
+    "er": {
+      "source": "flags/4x3/er.svg",
+      "sha256": "64c98a80601fc019f9ca7a71f7dd384ca995da1403e7775edcbfd79118564e45"
+    },
+    "es": {
+      "source": "flags/4x3/es.svg",
+      "sha256": "f9cfaff858e95f830733ade9591037b5322dfb5827a53b70956a3d190bb49b9a"
+    },
+    "et": {
+      "source": "flags/4x3/et.svg",
+      "sha256": "a136cd1152e5ab4b02f2ff2eab4f5ae5b48ed3594afd7f3160899f12575b41c7"
+    },
+    "eu": {
+      "source": "flags/4x3/eu.svg",
+      "sha256": "67040ccd286857e513262bc59a6825ea8520b3e6990e42f1075712c072460c09"
+    },
+    "fi": {
+      "source": "flags/4x3/fi.svg",
+      "sha256": "012edd984cf1879463c2855b7df02dea2f7de7f7a66b244fb1e22b4227f7aa65"
+    },
+    "fj": {
+      "source": "flags/4x3/fj.svg",
+      "sha256": "b23cbee897c889ce2d057aaca7c221b74a386ea58efb29da1982418564b58343"
+    },
+    "fk": {
+      "source": "flags/4x3/fk.svg",
+      "sha256": "34676edea491307813e055ea141cc6886f266e958ea35825a0bc6adbccb5ae63"
+    },
+    "fm": {
+      "source": "flags/4x3/fm.svg",
+      "sha256": "23db3e9fe582cc8dd5d3b9ad58aff1ef5cb359c330bbed59fc053d76355434de"
+    },
+    "fo": {
+      "source": "flags/4x3/fo.svg",
+      "sha256": "ec85991b8a9255cae6ea4241413ae3bd836d8afd985cc3a6cc5f91a37a00a1b4"
+    },
+    "fr": {
+      "source": "flags/4x3/fr.svg",
+      "sha256": "a526851c372e3372b1596be71af355ea72b1650bbc4c06e6e2c226900d3de6cc"
+    },
+    "ga": {
+      "source": "flags/4x3/ga.svg",
+      "sha256": "f7b775c474b0331222ed84a3d1b5a5d66af1c097c8565766db17a5cff5237c93"
+    },
+    "gb": {
+      "source": "flags/4x3/gb.svg",
+      "sha256": "c8be1e7208798a4ae692ee1e937065d498bb29e741943f6172b29118b8ed8066"
+    },
+    "gb-eng": {
+      "source": "flags/4x3/gb-eng.svg",
+      "sha256": "53797ba9e2dd9b18cd5344255f4e9ae9fad743ecb628fc9feb98abea4f48f90e"
+    },
+    "gb-sct": {
+      "source": "flags/4x3/gb-sct.svg",
+      "sha256": "7b55bce70824742222ccd804a4bc3d0e0f0f9416d103d05a46dd60825ce559f7"
+    },
+    "gb-wls": {
+      "source": "flags/4x3/gb-wls.svg",
+      "sha256": "61ad944644250599da53b344e16bb40529677a7f35b84aaf6bc81fd18eb09e24"
+    },
+    "gd": {
+      "source": "flags/4x3/gd.svg",
+      "sha256": "eecc1f130ed02b2166c6f185439b7c95cabfa4a41b33c1a834ca59ffe4780785"
+    },
+    "ge": {
+      "source": "flags/4x3/ge.svg",
+      "sha256": "0280a1279c3d1d772f1e885ee821e37a1cdb4aa085ca2870825fe10bad8d7ff1"
+    },
+    "gf": {
+      "source": "flags/4x3/gf.svg",
+      "sha256": "cb5464e28e5fafd01fa1222c9605d6b7e67eb683e881fe59a3eb048f7f0b7b6b"
+    },
+    "gg": {
+      "source": "flags/4x3/gg.svg",
+      "sha256": "ea806b4831074904a767c9744ca6defc2d8f44b8565c56528f5dcd1ecc54e9f5"
+    },
+    "gh": {
+      "source": "flags/4x3/gh.svg",
+      "sha256": "53c55ca455293bceecfe6a5d6b12dc0bb670734c50bfd95cb21dc4ef12197405"
+    },
+    "gi": {
+      "source": "flags/4x3/gi.svg",
+      "sha256": "483f5768d4c360c28a751dd121872ed9a2f6568fc358816a95378284526e1d0b"
+    },
+    "gl": {
+      "source": "flags/4x3/gl.svg",
+      "sha256": "15a60b078ed13383947233241fd26f2a3a6e7e88658ef3b90f2bd6c4e658411e"
+    },
+    "gm": {
+      "source": "flags/4x3/gm.svg",
+      "sha256": "2aa3fad4e8820fb42386f62d3efee1d3923817a49ed2bb05ba364c58d0ca4d3f"
+    },
+    "gn": {
+      "source": "flags/4x3/gn.svg",
+      "sha256": "ee01e7dd4abb0a995980ec8d0ba2bf314b564c73fcaba39fed8a5f48a7c49753"
+    },
+    "gp": {
+      "source": "flags/4x3/gp.svg",
+      "sha256": "ee9d78d0ee512858949eb8571960d1366e73ce751833b0da91154c2f74f88456"
+    },
+    "gq": {
+      "source": "flags/4x3/gq.svg",
+      "sha256": "61ddf0a98d1d4bf93c6ec53eec080662efceabc37d1361eda4e7d291e10976d8"
+    },
+    "gr": {
+      "source": "flags/4x3/gr.svg",
+      "sha256": "a184070f7678b06777be8ac38cb05ba41829591a6dac9b64b2b72db66aec82f5"
+    },
+    "gs": {
+      "source": "flags/4x3/gs.svg",
+      "sha256": "71b1be86c54f5066be18bd92b32bc45df56780ce8c38e7aa3a1b81b4b2d1f58e"
+    },
+    "gt": {
+      "source": "flags/4x3/gt.svg",
+      "sha256": "a20814d011af90ab2e80ea88eae9928cfce824cb9b50edf7b74ce2a98a159059"
+    },
+    "gu": {
+      "source": "flags/4x3/gu.svg",
+      "sha256": "f49a02cc01b2c97d43e89260ed852e9bf7c5006fbbc384a2c786819ba6a6695f"
+    },
+    "gw": {
+      "source": "flags/4x3/gw.svg",
+      "sha256": "6b81a234b51ceacb4b67e889bb5b7ccf5f1084ac34b4fded2b97af5336f4797e"
+    },
+    "gy": {
+      "source": "flags/4x3/gy.svg",
+      "sha256": "5bd7a7b326efd9c28c3ec3b23118b241cb7643967fe9410611f392bc3deb65b0"
+    },
+    "hk": {
+      "source": "flags/4x3/hk.svg",
+      "sha256": "d9d142b2b97ec3b8190bff3802072c1b4f15573a679eead89a0ce59986dcad0c"
+    },
+    "hm": {
+      "source": "flags/4x3/hm.svg",
+      "sha256": "b57fb521c08a8f80adf13aa96f151db87e192c9ea3d22e0918fa57a187b3792f"
+    },
+    "hn": {
+      "source": "flags/4x3/hn.svg",
+      "sha256": "67130fa043e9d30dda7691e0d59567ff32db435a0d72e4e57309bd439fd79995"
+    },
+    "hr": {
+      "source": "flags/4x3/hr.svg",
+      "sha256": "3c98eae5ee93f0d75e10170beb96e26908830e2e6f7f7af2a4b281a097aeb946"
+    },
+    "ht": {
+      "source": "flags/4x3/ht.svg",
+      "sha256": "d45f0285b56379b6816ab02ac0fcef2dc47b3f9a926a661e51a5c546b259e5d6"
+    },
+    "hu": {
+      "source": "flags/4x3/hu.svg",
+      "sha256": "4891ce591bf29b5b68609c29d973a30f1ef109032d8dab369208d0d5f615bc74"
+    },
+    "ic": {
+      "source": "flags/4x3/ic.svg",
+      "sha256": "9a584e048b173dfdde0a5f007f9240072c32a42ad06021f8ee58368b26bbfac0"
+    },
+    "id": {
+      "source": "flags/4x3/id.svg",
+      "sha256": "5cd3acc4939dd7eae6318c8d75df8c0d1733f650e2504a2635b0dbf3dfabb040"
+    },
+    "ie": {
+      "source": "flags/4x3/ie.svg",
+      "sha256": "f82568d70bd1624ff7ce3ced8712a718a224ff2424fd2ade2da4339be3bba463"
+    },
+    "il": {
+      "source": "flags/4x3/il.svg",
+      "sha256": "04a099ac4370b5e856f5f8d44ce0822ec47a6d3bc395a7d048d3a46d69274d68"
+    },
+    "im": {
+      "source": "flags/4x3/im.svg",
+      "sha256": "6edaeb06a7ad667f801dec7deda2aa6aa9632df904c3cb7fc558f0c5061516e4"
+    },
+    "in": {
+      "source": "flags/4x3/in.svg",
+      "sha256": "91185efa1a9b52cdc0e470712518efeefc4e4d6a6555bae9de997ba71885bb98"
+    },
+    "io": {
+      "source": "flags/4x3/io.svg",
+      "sha256": "3b82705371d04eb663b1e477d24f91e55063f2a9ed4ffb542449abe90f2e12a2"
+    },
+    "iq": {
+      "source": "flags/4x3/iq.svg",
+      "sha256": "073b07113d582dfea58fbd7e7e63cd9626bfa4afc87b3446a2a798981e26a412"
+    },
+    "ir": {
+      "source": "flags/4x3/ir.svg",
+      "sha256": "cb363e09bafbff6de7c2fba6a002ca33f0563dc83a2328d34adb492cf80ca629"
+    },
+    "is": {
+      "source": "flags/4x3/is.svg",
+      "sha256": "4ef2de6fb25ff5a16789e8ffc3b68894527e68c89dce3b4e1118f5bbcc0bb7ae"
+    },
+    "it": {
+      "source": "flags/4x3/it.svg",
+      "sha256": "9fa88118818d9b64838f578e2babcca3d0630aed21b5c33b34aff7ac5ce506bc"
+    },
+    "je": {
+      "source": "flags/4x3/je.svg",
+      "sha256": "200badc2286f389d5f36d63e8bfbb9adf1f16b7b996d0e40d2a19833b8fbc7cb"
+    },
+    "jm": {
+      "source": "flags/4x3/jm.svg",
+      "sha256": "f837df1ac21a4c64be2c977e2faeb6d6593624703d7c61b71a857fa8355b7f47"
+    },
+    "jo": {
+      "source": "flags/4x3/jo.svg",
+      "sha256": "e3a570d5c50c15f4aca73d27b2543ee335fd04151847e3d8ef2b42e5ac1ebe12"
+    },
+    "jp": {
+      "source": "flags/4x3/jp.svg",
+      "sha256": "bfea80baf9989383dc4bf7ca594ed95be0df0ff125bfc88d0bfa878eb0198022"
+    },
+    "ke": {
+      "source": "flags/4x3/ke.svg",
+      "sha256": "699163d87382eb969d8a26d4ce1a99a00264e8b7b95276abf585476506f46e82"
+    },
+    "kg": {
+      "source": "flags/4x3/kg.svg",
+      "sha256": "b0cf3e6806af23d8712a7007a27e8669403c00aef75faa2d7a15d183fc3d0587"
+    },
+    "kh": {
+      "source": "flags/4x3/kh.svg",
+      "sha256": "21a9681682a2158cab294bd1826a2dda2e3edf17aff891d692c6c976c3d9c874"
+    },
+    "ki": {
+      "source": "flags/4x3/ki.svg",
+      "sha256": "01206661587925daf1e57d8b6a6eb85f07a8ccf2230b89ed9b6e3a39b83f0ce0"
+    },
+    "km": {
+      "source": "flags/4x3/km.svg",
+      "sha256": "81e1befbbdeab3b2a4ec451e060b161bbcc6de00b97ef9d99791bc5741dfddab"
+    },
+    "kn": {
+      "source": "flags/4x3/kn.svg",
+      "sha256": "0832acb7396986c7ba99bdfdadc563df322363f91659775f14aeeeacdd546c7e"
+    },
+    "kp": {
+      "source": "flags/4x3/kp.svg",
+      "sha256": "f79bc8b6502445b51fd6db4bb9b6fa9d49f7fbe00da77b6af4d052b6d9fec4d3"
+    },
+    "kr": {
+      "source": "flags/4x3/kr.svg",
+      "sha256": "7a6cd5b51d0e2841ed8b79b1147ad8a66cf3c09f6344d4a63b5e4413ffa5d15b"
+    },
+    "kw": {
+      "source": "flags/4x3/kw.svg",
+      "sha256": "172a4281fdaf4b168471afcffc9e9ea277d6b5e54acc1a18b2f8ddc0a255cd7c"
+    },
+    "ky": {
+      "source": "flags/4x3/ky.svg",
+      "sha256": "a15e10f11df6e945230ea2870d578330065e56b7e0624e40c9cba6ab28b64272"
+    },
+    "kz": {
+      "source": "flags/4x3/kz.svg",
+      "sha256": "381b22e4c287b13e191c208bccfc2cfb9156cd657de248f033b920a0c713a1f3"
+    },
+    "la": {
+      "source": "flags/4x3/la.svg",
+      "sha256": "da591b989d90a90d03c736d8515fe567832eb9f24dcfa7a2870b1cf3196fdb05"
+    },
+    "lb": {
+      "source": "flags/4x3/lb.svg",
+      "sha256": "94b12b3f1dc43809f93516592f07bb4eb85dabbfdd6010b736f467fa64283e7f"
+    },
+    "lc": {
+      "source": "flags/4x3/lc.svg",
+      "sha256": "99645e005699eba454a0c3bf052b84d161267b615d8be60c41acb41f9355e47d"
+    },
+    "li": {
+      "source": "flags/4x3/li.svg",
+      "sha256": "77a33513c5288a0f2044f918efd2f82ba789d599f2e934b2af39b60fba8d9458"
+    },
+    "lk": {
+      "source": "flags/4x3/lk.svg",
+      "sha256": "ed3eee24d19872d6adcecd589513c057c6ecfe4997af36e8d25ef9ed58660d23"
+    },
+    "lr": {
+      "source": "flags/4x3/lr.svg",
+      "sha256": "69f2ce4b9490ab3c94ca30dc94862e5f1e8cb0f84344e5db0eb9300df5c66146"
+    },
+    "ls": {
+      "source": "flags/4x3/ls.svg",
+      "sha256": "83d2e4152ef06ed39f5792dd2d5b9aa9953e3cbfe645f0384449e87b73dc96fb"
+    },
+    "lt": {
+      "source": "flags/4x3/lt.svg",
+      "sha256": "dc0401993f6e14b3a58fa496d874b95dfcb58614052a868b14492166782c1006"
+    },
+    "lu": {
+      "source": "flags/4x3/lu.svg",
+      "sha256": "a0a530e396ac2e2490d32d432a89c08a3d35081816ba089241b9b2b2a76a049e"
+    },
+    "lv": {
+      "source": "flags/4x3/lv.svg",
+      "sha256": "d0d1ac1c0e301f808be3db32bcd7cdbc8986b6ec15574f557f440caed8b7bb31"
+    },
+    "ly": {
+      "source": "flags/4x3/ly.svg",
+      "sha256": "47d96b6e011cd540bdeb30155cbd7994f929cd2f5b84cffdd50936b876823f41"
+    },
+    "ma": {
+      "source": "flags/4x3/ma.svg",
+      "sha256": "28cfcdecf9675b0a14fbfae176324aea03711edab1a13592cfb7d58e6772b25c"
+    },
+    "mc": {
+      "source": "flags/4x3/mc.svg",
+      "sha256": "690c23fe64b6ac71770657fd87f744b88196a7853abb28017b5bff54473ae0da"
+    },
+    "md": {
+      "source": "flags/4x3/md.svg",
+      "sha256": "987ca12a752ec2b3594c115923d50160343a7d30af8ea5e316ae04fb12b8e9dd"
+    },
+    "me": {
+      "source": "flags/4x3/me.svg",
+      "sha256": "d284332e23ef88ae4f1b957ce1c6d9b9f691f94e4726f15d1a4219840008387b"
+    },
+    "mf": {
+      "source": "flags/4x3/mf.svg",
+      "sha256": "137b371d2ccb0e2901e0eec84e9273cfc8b0b941fcb0e3239ab62a8af0eda649"
+    },
+    "mg": {
+      "source": "flags/4x3/mg.svg",
+      "sha256": "59246c21300e2456c0c5170791698e43399b089de80a69474deeac00697d2b7b"
+    },
+    "mh": {
+      "source": "flags/4x3/mh.svg",
+      "sha256": "96d7c0b917a5c064636d11239b2a3031e574bc782e2445ec917208eeb051ccaa"
+    },
+    "mk": {
+      "source": "flags/4x3/mk.svg",
+      "sha256": "22488dc890fe1e5f7a8bea423dfe2e74f8ccf04402e75090cdeca030b12ca010"
+    },
+    "ml": {
+      "source": "flags/4x3/ml.svg",
+      "sha256": "49e84081981f2b8ec245dcc66ebf44521fc91b3eae6e9f10c925616f78951f14"
+    },
+    "mm": {
+      "source": "flags/4x3/mm.svg",
+      "sha256": "c0b2e23a7e202ff2ad69421ea1b528e58af4e541fc2f4b986479a9cdef7f18e0"
+    },
+    "mn": {
+      "source": "flags/4x3/mn.svg",
+      "sha256": "92d5422514f63fc10800714e71e14b576437e69a22645cf74a7ac0f516d67a69"
+    },
+    "mo": {
+      "source": "flags/4x3/mo.svg",
+      "sha256": "e1f783f6a43285a4338ee45cfe6f76db67801174968935b9f985d44d17914c83"
+    },
+    "mp": {
+      "source": "flags/4x3/mp.svg",
+      "sha256": "fffb725bb0e0cdcdfb548bcd43f3eb9e10201d48a050d1249ebd35419d5cabbe"
+    },
+    "mq": {
+      "source": "flags/4x3/mq.svg",
+      "sha256": "94315e14207c968bbaae8673d446075bd406263756986a86dd19852aff91a20e"
+    },
+    "mr": {
+      "source": "flags/4x3/mr.svg",
+      "sha256": "ea338a9f7744fb25c3664f3cee5b2355e70bed7b0d79d952d246436cb600edb9"
+    },
+    "ms": {
+      "source": "flags/4x3/ms.svg",
+      "sha256": "c5d14004b158c9e4d8693b3cb50f4331b72516877a6af805316c0b54da6ae1fc"
+    },
+    "mt": {
+      "source": "flags/4x3/mt.svg",
+      "sha256": "a2ad157eeb5f1bb92dc9706ad90faa111dd39ec019586bc5d12e67c5a6aa6cd5"
+    },
+    "mu": {
+      "source": "flags/4x3/mu.svg",
+      "sha256": "51f86810118855ca9a0b0501f3d363e0556fe74f429a66d1be9af5c027b3b593"
+    },
+    "mv": {
+      "source": "flags/4x3/mv.svg",
+      "sha256": "5546d527d669b3935bbff11e0344fb8522200cf5ea84eba730d8a7a0b1e86f15"
+    },
+    "mw": {
+      "source": "flags/4x3/mw.svg",
+      "sha256": "29a3e7057ec47f18bd8dd54312074335263b607c1543fcd969f89f14e307985f"
+    },
+    "mx": {
+      "source": "flags/4x3/mx.svg",
+      "sha256": "9dbc8ad8b35e52ce7cb686d5cd93bd95e4c0dd8505c184186a740148ffd34901"
+    },
+    "my": {
+      "source": "flags/4x3/my.svg",
+      "sha256": "bb30e84a099d2d9dc286ab091bdd40ae7a8e332eb49827f2df4f11803e613667"
+    },
+    "mz": {
+      "source": "flags/4x3/mz.svg",
+      "sha256": "ad91c2f8e6d6f80f19dca1fb080488539e2e39a4670ead32169d491bc88c3c03"
+    },
+    "na": {
+      "source": "flags/4x3/na.svg",
+      "sha256": "caa43fcdebb595ebf9808be7c5ba326a65bb40f78172182b1470102dd97a0182"
+    },
+    "nc": {
+      "source": "flags/4x3/nc.svg",
+      "sha256": "3218c5f11739faa287b6b7595b2ceb8a1d91234ff8f8c94ed81e50c3c55e4654"
+    },
+    "ne": {
+      "source": "flags/4x3/ne.svg",
+      "sha256": "4b91653d53f76ddaf492a61adad3c1be86528ee9f23d7a18a6044c4eed165cad"
+    },
+    "nf": {
+      "source": "flags/4x3/nf.svg",
+      "sha256": "c42c0423a879ba6131dc1342d42139a2fa5a714fa3c7c2cbb265ae1d85bb281c"
+    },
+    "ng": {
+      "source": "flags/4x3/ng.svg",
+      "sha256": "b7a2a45a6499095efce41592428ff558ec5bd83d2751858dfe5fa4589334b66f"
+    },
+    "ni": {
+      "source": "flags/4x3/ni.svg",
+      "sha256": "b9dfe1fc2aded19b2796ad7b9b681b64457250ca6043f2865b4160e9230d097f"
+    },
+    "nl": {
+      "source": "flags/4x3/nl.svg",
+      "sha256": "8f691f17fe70894537af8e92f2ca47761d353639b0defc15cbe561eb503ab010"
+    },
+    "no": {
+      "source": "flags/4x3/no.svg",
+      "sha256": "ceea17af051dceefd5759a824213eb40ac8a8095aa88a6874a7bbc8de637357a"
+    },
+    "np": {
+      "source": "flags/4x3/np.svg",
+      "sha256": "b84c02e2fa659d0be6fc6b5963d5e9fbd25c3a6ab4d469aa61f1e3cdbd3f4637"
+    },
+    "nr": {
+      "source": "flags/4x3/nr.svg",
+      "sha256": "f1de4b06479d454bb0a23a1bfee221e97d68e0a128002bfef1a1b3ea4c88ad46"
+    },
+    "nu": {
+      "source": "flags/4x3/nu.svg",
+      "sha256": "835c94f3f7aa08d717e2f4254234947bfab26eaa925cbd50871b1de3d31676c5"
+    },
+    "nz": {
+      "source": "flags/4x3/nz.svg",
+      "sha256": "794a2c8c09796090ab748a74bc35aed825e701eaddc46b138f300401ac9a25cd"
+    },
+    "om": {
+      "source": "flags/4x3/om.svg",
+      "sha256": "3204f5aa802cf3b2b782ba0ddfd798b42c0ba7c3125606245ac34bbb1cf26cc1"
+    },
+    "pa": {
+      "source": "flags/4x3/pa.svg",
+      "sha256": "5e034a8ad127c43b19f52c648fe808160ab4ddb117afa4204772af96566d31bc"
+    },
+    "pe": {
+      "source": "flags/4x3/pe.svg",
+      "sha256": "e9dd299d453d9c173203e60f69623ef2148dbee24b2a1763328e94d4dfece05f"
+    },
+    "pf": {
+      "source": "flags/4x3/pf.svg",
+      "sha256": "67391766bf25f74433f1de41d7c2370215b23a375064b1345b12f9d0e0b6d35c"
+    },
+    "pg": {
+      "source": "flags/4x3/pg.svg",
+      "sha256": "43e492331c192a947d9bd72ac6e1f4edcab1d86af097b8840faa9ac24e439d97"
+    },
+    "ph": {
+      "source": "flags/4x3/ph.svg",
+      "sha256": "c3bd5e08ddc5f6dbdfa899af9efb45577e3841402e6a7f5d00fef754816b2884"
+    },
+    "pk": {
+      "source": "flags/4x3/pk.svg",
+      "sha256": "89e851c0d541d8166b297e13bed97e0cb500bdb4ae48fd83a86b606a078352a8"
+    },
+    "pl": {
+      "source": "flags/4x3/pl.svg",
+      "sha256": "06687a4b90fc00195d0795aea1c26a9f73f1b6ea6a76e358724b2f1f32b7c8f4"
+    },
+    "pm": {
+      "source": "flags/4x3/pm.svg",
+      "sha256": "10cc79ca2b0f93864b6b16599a55f82c6b1c3af3f2b6be81ecde99031fc5f5f2"
+    },
+    "pn": {
+      "source": "flags/4x3/pn.svg",
+      "sha256": "b647b2f7d9c6961b120f05a8ce196d6a79ec2082163e2b33f831947849aa7da4"
+    },
+    "pr": {
+      "source": "flags/4x3/pr.svg",
+      "sha256": "968c343f7074f4312871383337f26454040aaa84f304460d518da549b2549f8d"
+    },
+    "ps": {
+      "source": "flags/4x3/ps.svg",
+      "sha256": "5d95ca7526bf8edd90a913d7de08130688d68b7c2dd2825cbf0dde3a6aec20e3"
+    },
+    "pt": {
+      "source": "flags/4x3/pt.svg",
+      "sha256": "a7a2cf0b44aaaaf4f3bdc0ee0fa308ec7085bdfedd3f72da1473d43fd2a569fb"
+    },
+    "pw": {
+      "source": "flags/4x3/pw.svg",
+      "sha256": "a61ab9d94f2968304eaf62d838e0ba1674977da8a5056beae5776fe912a8e233"
+    },
+    "py": {
+      "source": "flags/4x3/py.svg",
+      "sha256": "fe0968470b7910543b23f7621b00cdeeebde8d90cffbd4fbcbfa97783a01cc04"
+    },
+    "qa": {
+      "source": "flags/4x3/qa.svg",
+      "sha256": "fb955ef352ff3ba1ea980090c31d5cf15257729d32949d04b18402651e93b986"
+    },
+    "re": {
+      "source": "flags/4x3/re.svg",
+      "sha256": "7b5a5202ed96511c206fd9fcbcd07c6fd36588941ea013f16d942e525e75635c"
+    },
+    "ro": {
+      "source": "flags/4x3/ro.svg",
+      "sha256": "17a3a747fc5e63302aaa670a667e5812f3676f46768e5a3e87b254bd41762840"
+    },
+    "rs": {
+      "source": "flags/4x3/rs.svg",
+      "sha256": "b6e08e2eca1ec4c287e5d5d7c36d7d4ad9503ad030133b04cf315f95ab49961c"
+    },
+    "ru": {
+      "source": "flags/4x3/ru.svg",
+      "sha256": "7100aaae51ff3b6a2bf0ca932b3bc518bdc760814725e7cca31d821a26c3dd7c"
+    },
+    "rw": {
+      "source": "flags/4x3/rw.svg",
+      "sha256": "9512100aa3e8079ed3780e8b3d6cd6a49639d0986ad78a709f81e9d0827b65b2"
+    },
+    "sa": {
+      "source": "flags/4x3/sa.svg",
+      "sha256": "5738c8cfca5fea63587cbcf69237996c8ce6283f8016853150686f37311b620e"
+    },
+    "sb": {
+      "source": "flags/4x3/sb.svg",
+      "sha256": "b34eabf373af639cec1d7de7c0dff84df6487737f04510efcc356810147c2cfa"
+    },
+    "sc": {
+      "source": "flags/4x3/sc.svg",
+      "sha256": "30cdbe42a1aed2dab0b26cb7b510901813cad3289835ef58e07d5ff1b554ec61"
+    },
+    "sd": {
+      "source": "flags/4x3/sd.svg",
+      "sha256": "25b3fa24693ccbb80991235e235e9370895f182c509c687e96824faf6b65809a"
+    },
+    "se": {
+      "source": "flags/4x3/se.svg",
+      "sha256": "b3b5071e6c1d4a0e3db828bab5c7dfd68d0e90fcf3b25b15e9a2c4f96c1f79c9"
+    },
+    "sg": {
+      "source": "flags/4x3/sg.svg",
+      "sha256": "25de9044c2e2775f7ccf9c1df02dd02342f915715b22c43248452b7ae24079a5"
+    },
+    "sh": {
+      "source": "flags/4x3/sh.svg",
+      "sha256": "559acea1c3e57186410e4058e3eca3a51c6b54744342434fdf6a74d71f0c2383"
+    },
+    "si": {
+      "source": "flags/4x3/si.svg",
+      "sha256": "3a5e0cac44baaea6b6d8e91054844b6ea72764f6dbe363c11ea11fd81203733a"
+    },
+    "sj": {
+      "source": "flags/4x3/sj.svg",
+      "sha256": "b60dad0ef05ccf28511eda8bfb21773223c696ef597378e77b7d518fdfb21a76"
+    },
+    "sk": {
+      "source": "flags/4x3/sk.svg",
+      "sha256": "578d0693bc95214334248b47c5719dd01cfc9839bd909a726df045d499fabbb6"
+    },
+    "sl": {
+      "source": "flags/4x3/sl.svg",
+      "sha256": "d0c384b03a037f4eeb6c967346e3faafb4a09a3706667ac762999e54b55bc647"
+    },
+    "sm": {
+      "source": "flags/4x3/sm.svg",
+      "sha256": "fc3388637c187533a086e1a25253cd96ce657bd7d105886624d21addb380af16"
+    },
+    "sn": {
+      "source": "flags/4x3/sn.svg",
+      "sha256": "6437db13c13fa5cc1b121e6b59739902c6583be6db361260873ce2664f666478"
+    },
+    "so": {
+      "source": "flags/4x3/so.svg",
+      "sha256": "249e1acb87efcd0ef0f685285f14f5063f0bf260e0d28ca462e713c3f6178e7d"
+    },
+    "sr": {
+      "source": "flags/4x3/sr.svg",
+      "sha256": "5194a6af4e0d8a350ba7c1f66873725a9e1c91f2054fb9e85fc59cf7f7f2c0f2"
+    },
+    "ss": {
+      "source": "flags/4x3/ss.svg",
+      "sha256": "f7ac7017201841eee0b261f66be6787200a80fbeadbb869dc6e8823e3b2ec220"
+    },
+    "st": {
+      "source": "flags/4x3/st.svg",
+      "sha256": "880c17f94cb564b1818f604b764ac8c3b87e019d97724a7ebb9e69aa96821238"
+    },
+    "sv": {
+      "source": "flags/4x3/sv.svg",
+      "sha256": "4c2b4e2b8bbb85d6cb97a5a35399f6fa9f269dc4b4c17591350441b61137041d"
+    },
+    "sx": {
+      "source": "flags/4x3/sx.svg",
+      "sha256": "3088bb73f80188d67a504d8b34921a719720ab8e5839c6bdb56397670bb224f6"
+    },
+    "sy": {
+      "source": "flags/4x3/sy.svg",
+      "sha256": "04c5e853ade8f2e5585a3c42e9c1a1a80248125acf6a44afa85e9bbf36cd96c5"
+    },
+    "sz": {
+      "source": "flags/4x3/sz.svg",
+      "sha256": "5d6399c149d143306981f386048047b984586b2f85b0cf11fd7aeaa5757a81e9"
+    },
+    "ta": {
+      "source": "flags/4x3/sh-ta.svg",
+      "sha256": "6dec9556409088047ba423cc9d9d33948fca699adbe35107925e66398eb42d1a"
+    },
+    "tc": {
+      "source": "flags/4x3/tc.svg",
+      "sha256": "b8d8c6898f888af85d64bb33aeaf1c507f28489215fae298d8a152f1d0156961"
+    },
+    "td": {
+      "source": "flags/4x3/td.svg",
+      "sha256": "19a278fbd88e7fa245b44b40a829bd2bc83f4a2b5521feb665cee8d629e2f026"
+    },
+    "tf": {
+      "source": "flags/4x3/tf.svg",
+      "sha256": "0bf7174a781219bcc47895ff64101403a41632e62711f96a1d3dc8a1e1bbb531"
+    },
+    "tg": {
+      "source": "flags/4x3/tg.svg",
+      "sha256": "f52b955fb48669d149991f511db818761589e8d45ce4dcc84478737cc0156d75"
+    },
+    "th": {
+      "source": "flags/4x3/th.svg",
+      "sha256": "329cc0d520536d6eb4b9304105f23650c2d02bbdba8f8696e996dbf166de6f2e"
+    },
+    "tj": {
+      "source": "flags/4x3/tj.svg",
+      "sha256": "cd1afa9808833e4983986fa8818b73a9e1640f42c827692123a9639220c4a720"
+    },
+    "tk": {
+      "source": "flags/4x3/tk.svg",
+      "sha256": "8040c00b82d542b3ff7c2b4cf4542ea7d36bb4f252fd3a954dcf60f3a99303a2"
+    },
+    "tl": {
+      "source": "flags/4x3/tl.svg",
+      "sha256": "09c763aa3e5a48e2092348367b0bc93b1bc0536f5b527b31175e493132c55e19"
+    },
+    "tm": {
+      "source": "flags/4x3/tm.svg",
+      "sha256": "378178e3d5c91c62dafd0416b3f2b789f9505d26db0aef93dab8f5979ad60841"
+    },
+    "tn": {
+      "source": "flags/4x3/tn.svg",
+      "sha256": "8e0274e5762a4d5f783e64f1206dd69008454f750de21d3ba61439d0af3c577c"
+    },
+    "to": {
+      "source": "flags/4x3/to.svg",
+      "sha256": "b351703fccc1e08a13d2d57260dd71bee8280e393030b879b9df1c7ccd3a9538"
+    },
+    "tr": {
+      "source": "flags/4x3/tr.svg",
+      "sha256": "256a1d6afbedb9f731566982331a1cd1ad14aba211b8a61d338855879505e74f"
+    },
+    "tt": {
+      "source": "flags/4x3/tt.svg",
+      "sha256": "04c13dcd0b3690f91e752680653def1c2bbe5b4553b9e5dc75748b9339636749"
+    },
+    "tv": {
+      "source": "flags/4x3/tv.svg",
+      "sha256": "d94fa5f107cbacdba29731226bc5ad06edc95784e3d29c20e1ea41fe384530b7"
+    },
+    "tw": {
+      "source": "flags/4x3/tw.svg",
+      "sha256": "931757f06b9ee751fd1a0cc8dd7cf862e21fdcaf894d10ed7bcc68dabcca59ad"
+    },
+    "tz": {
+      "source": "flags/4x3/tz.svg",
+      "sha256": "fd317abae009fa3629c51b82a6b9f1c529a7254406478047734bb52de83611cd"
+    },
+    "ua": {
+      "source": "flags/4x3/ua.svg",
+      "sha256": "b7892e2bee1b25eb5407d6f5249b020dcece29ee1c9cc1a8a6a10c4f38ce6801"
+    },
+    "ug": {
+      "source": "flags/4x3/ug.svg",
+      "sha256": "ab6aa03e1324d54ffbed5ea4560f757797f4729da58fc977527cedd586e928a5"
+    },
+    "um": {
+      "source": "flags/4x3/um.svg",
+      "sha256": "60a633301685f6e5218db358980dadd36a6994034ab5edfbebf24422ee7ce27b"
+    },
+    "un": {
+      "source": "flags/4x3/un.svg",
+      "sha256": "c7632022c033930994c65e495eeb49c34e28f4716e34563eacc36ccbc4da20ae"
+    },
+    "us": {
+      "source": "flags/4x3/us.svg",
+      "sha256": "e7be4240cf57987926673708f09233be1ab6bdf35acc7b86bd32a263f197a2a7"
+    },
+    "uy": {
+      "source": "flags/4x3/uy.svg",
+      "sha256": "47656c0bf4961a1f7233841eb78756cd45d074e7d4061b8a1217bba7754a30fe"
+    },
+    "uz": {
+      "source": "flags/4x3/uz.svg",
+      "sha256": "62ce6f1073416e8d3d599639ec8b105f4de167c0730f036e47c650e686c4ff5d"
+    },
+    "va": {
+      "source": "flags/4x3/va.svg",
+      "sha256": "e0c5f2ab3c7cc99a89c8a0b02253229b5eb7239ed2969103d5f2e49c0de91fc8"
+    },
+    "vc": {
+      "source": "flags/4x3/vc.svg",
+      "sha256": "4e0a86447af4924dc11f26179f5cbb91195451ae766b2f777effe9c5f7cbc8f6"
+    },
+    "ve": {
+      "source": "flags/4x3/ve.svg",
+      "sha256": "5712f1c63ba0bfa25a853c100cdebfd6698cce98fc2e0ba8d3fab35df541efa1"
+    },
+    "vg": {
+      "source": "flags/4x3/vg.svg",
+      "sha256": "986913ded6a6365a65906d9185ead0c4411c5d71710fc2dfa4f47c16e4f708ab"
+    },
+    "vi": {
+      "source": "flags/4x3/vi.svg",
+      "sha256": "69e264ecc5c61b1750863f7863d74860a8f3ef152167c0537deb633eadced21f"
+    },
+    "vn": {
+      "source": "flags/4x3/vn.svg",
+      "sha256": "2355037201315d74581ab0ad60b5587a29a087d26b0525bdeb8676e64fae5b86"
+    },
+    "vu": {
+      "source": "flags/4x3/vu.svg",
+      "sha256": "9e17ce7f20ce2b44b12fa872f368f471abcadb1539126e15aa5339bbbf61735a"
+    },
+    "wf": {
+      "source": "flags/4x3/wf.svg",
+      "sha256": "ad34db05b0badcbab865a0cbcd45cd0251479a20aa505173f276ca4a45b4fc6e"
+    },
+    "ws": {
+      "source": "flags/4x3/ws.svg",
+      "sha256": "6b1a7ebcce97d75020af84da13b918875ba38ba4535b4d990b2be8985a67b8ad"
+    },
+    "xk": {
+      "source": "flags/4x3/xk.svg",
+      "sha256": "290d7f74bc73f362f9679a0bb09b7de0f679ab9aeaedf3952e40d79e0e3d25af"
+    },
+    "ye": {
+      "source": "flags/4x3/ye.svg",
+      "sha256": "ead644b90bc8cc74407d5f4680ada429bf0dc3d0dbd1e8a11fbfc7663a2d7fc2"
+    },
+    "yt": {
+      "source": "flags/4x3/yt.svg",
+      "sha256": "f6ed4975d7f834a036bbd8a5cb59147c1515922055d41d7f1bb3291df2e43bfe"
+    },
+    "za": {
+      "source": "flags/4x3/za.svg",
+      "sha256": "1755a5e16f1c9f5120e4871e8454bdee663beb4fb4827012bcd02cb9044249c2"
+    },
+    "zm": {
+      "source": "flags/4x3/zm.svg",
+      "sha256": "2753554062cd3761e53a180c3c8f8e245af622fb6ecf1c02020c79db0ff2d644"
+    },
+    "zw": {
+      "source": "flags/4x3/zw.svg",
+      "sha256": "e27fcdcc882d7175cc4c07542779911043dc56262fe43b42f39bdaca09b762d5"
+    }
+  }
+}

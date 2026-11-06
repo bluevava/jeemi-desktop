@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import { Button, Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -35,7 +36,7 @@ export function SubscriptionAssociations({
         <div className={`subscription-association-row${bound ? " bound" : ""}`} key={kind}>
           <span className="subscription-association-label">{label}</span>
           {bound ? (
-            <Tooltip title={name}>
+            <Tooltip title={<FlagText>{name}</FlagText>}>
               <button
                 aria-label={t("subscription.card.changeBinding", { type: label, name })}
                 className="subscription-association-name"
@@ -43,7 +44,7 @@ export function SubscriptionAssociations({
                 onClick={() => onBind(kind)}
                 type="button"
               >
-                {name}
+                <FlagText>{name}</FlagText>
               </button>
             </Tooltip>
           ) : <span className="subscription-association-space" />}

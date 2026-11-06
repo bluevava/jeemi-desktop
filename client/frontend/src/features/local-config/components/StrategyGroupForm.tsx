@@ -195,7 +195,9 @@ export function StrategyGroupForm({
             {draft.kind === "selector" ? (
               <div
                 className={`config-resource-form-row strategy-selector-basics${
-                  draft.type !== "select" ? " with-lazy" : ""
+                  draft.type !== "select" || draft.autoSelect
+                    ? " with-lazy"
+                    : ""
                 }`}
               >
                 <label>
@@ -205,6 +207,7 @@ export function StrategyGroupForm({
                       setDraft({
                         ...draft,
                         type,
+                        autoSelect: type === "select" && draft.autoSelect,
                         url:
                           type === "select"
                             ? draft.url
@@ -228,7 +231,7 @@ export function StrategyGroupForm({
                     value={draft.icon}
                   />
                 </label>
-                {draft.type !== "select" ? (
+                {draft.type !== "select" || draft.autoSelect ? (
                   <div className="config-resource-field">
                     <ResourceFieldLabel
                       helpBase="localConfig.resources.groups.help.lazy"
@@ -245,7 +248,31 @@ export function StrategyGroupForm({
                 ) : null}
               </div>
             ) : null}
-            {draft.kind === "selector" && draft.type !== "select" ? (
+            {draft.type === "select" ? (
+              <div className="config-resource-field">
+                <ResourceFieldLabel
+                  helpBase="offlineConfig.help.auto"
+                  label={t("offlineConfig.auto")}
+                />
+                <div className="config-resource-switch-control">
+                  <Switch
+                    aria-label={t("offlineConfig.auto")}
+                    checked={Boolean(draft.autoSelect)}
+                    onChange={(autoSelect) =>
+                      setDraft({
+                        ...draft,
+                        autoSelect,
+                        url: draft.url || DEFAULT_SELECTOR_TEST_URL,
+                        interval: draft.interval || 300,
+                      })
+                    }
+                  />
+                  <span>url-test</span>
+                </div>
+              </div>
+            ) : null}
+            {draft.kind === "selector" &&
+            (draft.type !== "select" || draft.autoSelect) ? (
               <div className="config-resource-form-row three-columns">
                 <label>
                   <span>{t("localConfig.resources.groups.testUrl")}</span>
@@ -268,7 +295,7 @@ export function StrategyGroupForm({
                     value={draft.interval}
                   />
                 </label>
-                {draft.type === "url-test" ? (
+                {draft.type === "url-test" || draft.autoSelect ? (
                   <label>
                     <span>{t("localConfig.resources.groups.tolerance")}</span>
                     <InputNumber

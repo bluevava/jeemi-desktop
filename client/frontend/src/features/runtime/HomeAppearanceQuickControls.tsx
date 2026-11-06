@@ -1,5 +1,6 @@
 import { Segmented } from "antd";
 import { useTranslation } from "react-i18next";
+import { FlagText } from "../../components/common/FlagText";
 
 import {
   usePreferences,
@@ -34,7 +35,7 @@ export function HomeAppearanceQuickControls() {
           ["zh-CN", "settings.home.chineseShort"],
           ["en-US", "settings.home.englishShort"],
         ] as const).map(([value, labelKey]) => ({
-          label: t(labelKey),
+          label: <FlagText>{t(labelKey)}</FlagText>,
           value,
         }))}
         value={language}

@@ -120,6 +120,9 @@ func (s *Service) commitSubscriptionRefresh(candidate subscription.RefreshCandid
 	if _, err := s.subscriptions.CommitRefresh(candidate, detach); err != nil {
 		return SubscriptionRefreshResult{}, err
 	}
+	s.mu.Lock()
+	delete(s.autoUpdateAttempts, candidate.Before.ID)
+	s.mu.Unlock()
 	_ = s.reconcileSelectedWithTimeoutLocked(reconcileTriggerSubscription, nil, reconcileAutomatic)
 	state, err := s.SubscriptionState()
 	if err != nil {

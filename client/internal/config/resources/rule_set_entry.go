@@ -114,7 +114,7 @@ func prepareRuleSetEntry(input RuleSetEntryInput, state State) (RuleSet, RuleSet
 	} else {
 		// Read only validated payload documents; the AST keeps existing comments,
 		// strings and order, including flow-style lists and end-of-document markers.
-		if _, _, err := normalizeRuleSetPayloadYAML(candidate.PayloadYAML); err != nil {
+		if _, _, err := normalizeRuleSetPayloadYAML(candidate.PayloadYAML, candidate.DefaultBrowser); err != nil {
 			return fail("invalidPayload")
 		}
 		if err := yaml.Unmarshal([]byte(candidate.PayloadYAML), &doc); err != nil {

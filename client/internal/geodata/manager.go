@@ -15,11 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"jeemi/internal/config/document"
 	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
-
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -53,9 +50,13 @@ type Manager struct {
 	downloading string
 	cancel      context.CancelFunc
 
-	healthMu       sync.Mutex
-	healthCacheKey string
-	healthCache    Health
+	healthMu    sync.Mutex
+	healthCache map[string]healthCacheEntry
+}
+
+type healthCacheEntry struct {
+	signature string
+	health    Health
 }
 
 type manifest struct {
@@ -125,7 +126,7 @@ func (m *Manager) stateLocked(preferences Preferences) (State, error) {
 		Directory: m.directory, RuntimeDirectory: m.runtimeDirectory, Preferences: preferences,
 		ActiveGeoIPMode: activeMode(document), ActiveLoader: activeLoader(document),
 		LastCheckedAt: document.LastCheckedAt, DownloadingKind: downloading,
-		RestartRequired: m.pendingLocked(document, preferences), Health: m.healthForDocument(document, preferences),
+		RestartRequired: m.pendingLocked(document, preferences), Health: m.healthForDocument(document, preferences, SelectedKinds(preferences)),
 		Assets: make([]AssetState, 0, len(allKinds())),
 	}
 	selected := make(map[Kind]struct{}, len(SelectedKinds(preferences)))
@@ -180,30 +181,61 @@ func (m *Manager) Health(preferences Preferences) (Health, error) {
 	if err != nil {
 		return Health{Status: HealthInvalid}, err
 	}
-	return m.healthForDocument(document, preferences), nil
+	return m.healthForDocument(document, preferences, SelectedKinds(preferences)), nil
 }
 
-func (m *Manager) healthForDocument(document manifest, preferences Preferences) Health {
-	cacheKey := m.healthSignature(document, preferences)
+// HealthForKinds is the home-page diagnostic for a composed configuration.
+// Empty requirements are ready even when unrelated databases are absent.
+// The settings library continues to use Health/State for all selected assets.
+func (m *Manager) HealthForKinds(preferences Preferences, kinds []Kind) (Health, error) {
+	if len(kinds) == 0 {
+		return Health{Status: HealthReady, MissingKinds: []Kind{}, InvalidKinds: []Kind{}}, nil
+	}
+	preferences = Normalize(preferences)
+	if err := ValidatePreferences(preferences); err != nil {
+		return Health{Status: HealthInvalid}, err
+	}
+	document, err := m.loadManifest()
+	if err != nil {
+		return Health{Status: HealthInvalid}, err
+	}
+	// Normalize the set to keep at most one cache entry per subset of kinds.
+	selected := []Kind{}
+	for _, kind := range SelectedKinds(preferences) {
+		for _, required := range kinds {
+			if required == kind {
+				selected = append(selected, kind)
+				break
+			}
+		}
+	}
+	return m.healthForDocument(document, preferences, selected), nil
+}
+
+func (m *Manager) healthForDocument(document manifest, preferences Preferences, kinds []Kind) Health {
+	cacheKey := fmt.Sprint(kinds)
+	signature := m.healthSignature(document, preferences, kinds)
 	m.healthMu.Lock()
 	defer m.healthMu.Unlock()
-	if cacheKey == m.healthCacheKey && m.healthCache.Status != "" {
-		return m.healthCache
+	if cached, ok := m.healthCache[cacheKey]; ok && cached.signature == signature {
+		return cached.health
 	}
-	health := m.calculateHealth(document, preferences)
-	m.healthCacheKey = cacheKey
-	m.healthCache = health
+	health := m.calculateHealth(document, preferences, kinds)
+	if m.healthCache == nil {
+		m.healthCache = make(map[string]healthCacheEntry)
+	}
+	m.healthCache[cacheKey] = healthCacheEntry{signature: signature, health: health}
 	return health
 }
 
-func (m *Manager) calculateHealth(document manifest, preferences Preferences) Health {
+func (m *Manager) calculateHealth(document manifest, preferences Preferences, kinds []Kind) Health {
 	health := Health{
 		Status:       HealthReady,
 		MissingKinds: []Kind{},
 		InvalidKinds: []Kind{},
 	}
-	pending := activeMode(document) != preferences.GeoIPMode || activeLoader(document) != preferences.Loader
-	for _, kind := range SelectedKinds(preferences) {
+	pending := len(kinds) > 0 && (activeMode(document) != preferences.GeoIPMode || activeLoader(document) != preferences.Loader)
+	for _, kind := range kinds {
 		desiredSHA := document.Desired[string(kind)]
 		if desiredSHA == "" {
 			health.MissingKinds = append(health.MissingKinds, kind)
@@ -250,12 +282,13 @@ func (m *Manager) calculateHealth(document manifest, preferences Preferences) He
 	return health
 }
 
-func (m *Manager) healthSignature(document manifest, preferences Preferences) string {
+func (m *Manager) healthSignature(document manifest, preferences Preferences, kinds []Kind) string {
 	var signature strings.Builder
 	signature.WriteString(preferences.GeoIPMode)
 	signature.WriteByte('|')
 	signature.WriteString(preferences.Loader)
-	for _, kind := range SelectedKinds(preferences) {
+	fmt.Fprintf(&signature, "|%s:%s", activeMode(document), activeLoader(document))
+	for _, kind := range kinds {
 		desiredSHA := document.Desired[string(kind)]
 		activeSHA := document.Active[string(kind)]
 		fmt.Fprintf(&signature, "|%s:%s:%s", kind, desiredSHA, activeSHA)
@@ -380,7 +413,7 @@ func (m *Manager) ValidateActiveRequirements(configuration []byte, preferences P
 }
 
 func (m *Manager) validateRequirements(configuration []byte, preferences Preferences, revisions map[string]string, active bool) error {
-	requirements, err := requiredKinds(configuration, preferences)
+	requirements, err := RequiredKinds(configuration, preferences)
 	if err != nil {
 		return err
 	}
@@ -407,47 +440,6 @@ func (m *Manager) validateRequirements(configuration []byte, preferences Prefere
 		}
 	}
 	return nil
-}
-
-func requiredKinds(configuration []byte, preferences Preferences) ([]Kind, error) {
-	parsed, err := document.Parse(configuration)
-	if err != nil {
-		return nil, fmt.Errorf("inspect GEO data requirements: %w", err)
-	}
-	needed := map[Kind]bool{}
-	var visit func(*yaml.Node)
-	visit = func(node *yaml.Node) {
-		if node == nil {
-			return
-		}
-		if node.Kind == yaml.ScalarNode {
-			value := strings.ToUpper(node.Value)
-			if strings.Contains(value, "GEOIP,") || strings.Contains(value, "GEOIP:") {
-				if preferences.GeoIPMode == GeoIPModeDAT {
-					needed[KindGeoIPDAT] = true
-				} else {
-					needed[KindGeoIPMMDB] = true
-				}
-			}
-			if strings.Contains(value, "GEOSITE,") || strings.Contains(value, "GEOSITE:") {
-				needed[KindGeoSite] = true
-			}
-			if strings.Contains(value, "IP-ASN,") {
-				needed[KindASN] = true
-			}
-		}
-		for _, child := range node.Content {
-			visit(child)
-		}
-	}
-	visit(parsed)
-	result := make([]Kind, 0, len(needed))
-	for _, kind := range SelectedKinds(preferences) {
-		if needed[kind] {
-			result = append(result, kind)
-		}
-	}
-	return result, nil
 }
 
 type Activation struct {

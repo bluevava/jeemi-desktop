@@ -168,6 +168,39 @@ func TestPreferencesJSONPreservesExplicitNonSilentLogLevel(t *testing.T) {
 	}
 }
 
+func TestFakeIPFilterDefaultsPreserveSavedLists(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		json string
+		want []string
+	}{
+		{"missing", `{}`, DefaultPreferences().DNSFakeIPFilter},
+		{"existing LAN list", `{"dnsFakeIpFilter":["+.lan","+.local","+.home.arpa","+.localdomain","+.localhost","+.msftconnecttest.com","+.msftncsi.com"]}`, []string{"+.lan", "+.local", "+.home.arpa", "+.localdomain", "+.localhost", "+.msftconnecttest.com", "+.msftncsi.com"}},
+		{"custom", `{"dnsFakeIpFilter":["+.internal.example","ntp.custom.example"]}`, []string{"+.internal.example", "ntp.custom.example"}},
+		{"explicit empty", `{"dnsFakeIpFilter":[]}`, []string{}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var value Preferences
+			if err := json.Unmarshal([]byte(test.json), &value); err != nil {
+				t.Fatal(err)
+			}
+			value = Normalize(value)
+			if err := Validate(value); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(value.DNSFakeIPFilter, test.want) {
+				t.Fatalf("saved filter replaced: %v", value.DNSFakeIPFilter)
+			}
+			if len(value.DNSFakeIPFilter) != 0 {
+				value.DNSFakeIPFilter[0] = "changed.example"
+				if DefaultPreferences().DNSFakeIPFilter[0] == "changed.example" {
+					t.Fatal("editing a preference changed shared defaults")
+				}
+			}
+		})
+	}
+}
+
 func TestPreferencesJSONDoesNotEnableOptionalDNSFromValues(t *testing.T) {
 	var preferences Preferences
 	if err := json.Unmarshal([]byte(`{

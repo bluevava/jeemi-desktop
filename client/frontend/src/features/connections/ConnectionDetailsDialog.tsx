@@ -1,3 +1,4 @@
+import { FlagText } from "../../components/common/FlagText";
 import { useEffect, useState, type ReactNode } from "react";
 import { Button, Descriptions, Modal, Tag } from "antd";
 import { useTranslation } from "react-i18next";
@@ -136,7 +137,7 @@ export function ConnectionDetailsDialog({
                 {
                   key: "rule",
                   label: t("connections.rule"),
-                  children: connectionMatchedRule(connection),
+                  children: <FlagText>{connectionMatchedRule(connection)}</FlagText>,
                   span: "filled",
                 },
                 {
@@ -152,13 +153,13 @@ export function ConnectionDetailsDialog({
                 {
                   key: "outbound",
                   label: t("connections.outbound"),
-                  children: connectionOutbound(connection),
+                  children: <FlagText>{connectionOutbound(connection)}</FlagText>,
                   span: "filled",
                 },
                 {
                   key: "chain",
                   label: t("connections.details.chain"),
-                  children: connection.chains.join(" → ") || "—",
+                  children: <FlagText>{connection.chains.join(" → ") || "—"}</FlagText>,
                   span: "filled",
                 },
                 {

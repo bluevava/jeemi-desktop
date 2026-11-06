@@ -55,17 +55,18 @@ type Store struct {
 }
 
 type createInput struct {
-	Name             string
-	Description      string
-	SourceKind       SourceKind
-	ImportMethod     ImportMethod
-	SourceURL        string
-	OriginalFileName string
-	IconKind         IconKind
-	Icon             string
-	Format           Format
-	Contents         []byte
-	RemoteProfile    RemoteProfile
+	AutoUpdateIntervalMinutes int
+	Name                      string
+	Description               string
+	SourceKind                SourceKind
+	ImportMethod              ImportMethod
+	SourceURL                 string
+	OriginalFileName          string
+	IconKind                  IconKind
+	Icon                      string
+	Format                    Format
+	Contents                  []byte
+	RemoteProfile             RemoteProfile
 }
 
 func NewStore(options StoreOptions) (*Store, error) {
@@ -128,24 +129,25 @@ func (s *Store) Create(input createInput) (Detail, error) {
 	now := s.now().UTC().Format(time.RFC3339Nano)
 	revision := newRevision(prepared.Format, prepared.Contents, now)
 	metadata := metadataDocument{
-		Fallback:              fallbackoverride.Selection{Mode: fallbackoverride.ModeNone},
-		ManifestVersion:       manifestVersion,
-		ID:                    id,
-		Name:                  prepared.Name,
-		Description:           prepared.Description,
-		SourceKind:            prepared.SourceKind,
-		ImportMethod:          prepared.ImportMethod,
-		SourceURL:             prepared.SourceURL,
-		OriginalFileName:      prepared.OriginalFileName,
-		IconKind:              prepared.IconKind,
-		Icon:                  prepared.Icon,
-		DisabledRuleProviders: []string{},
-		CurrentRevisionID:     revision.ID,
-		Revisions:             []revisionDocument{revision},
-		CreatedAt:             now,
-		UpdatedAt:             now,
-		LastFetchedAt:         now,
-		RemoteProfile:         observedRemoteProfile(prepared.RemoteProfile, now),
+		AutoUpdateIntervalMinutes: prepared.AutoUpdateIntervalMinutes,
+		Fallback:                  fallbackoverride.Selection{Mode: fallbackoverride.ModeNone},
+		ManifestVersion:           manifestVersion,
+		ID:                        id,
+		Name:                      prepared.Name,
+		Description:               prepared.Description,
+		SourceKind:                prepared.SourceKind,
+		ImportMethod:              prepared.ImportMethod,
+		SourceURL:                 prepared.SourceURL,
+		OriginalFileName:          prepared.OriginalFileName,
+		IconKind:                  prepared.IconKind,
+		Icon:                      prepared.Icon,
+		DisabledRuleProviders:     []string{},
+		CurrentRevisionID:         revision.ID,
+		Revisions:                 []revisionDocument{revision},
+		CreatedAt:                 now,
+		UpdatedAt:                 now,
+		LastFetchedAt:             now,
+		RemoteProfile:             observedRemoteProfile(prepared.RemoteProfile, now),
 	}
 	if err := s.writeNewUnlocked(metadata, prepared.Contents); err != nil {
 		return Detail{}, err
@@ -169,6 +171,10 @@ func (s *Store) UpdateMetadata(input UpdateInput) (Detail, error) {
 		return Detail{}, err
 	}
 	metadata.Name = name
+	metadata.AutoUpdateIntervalMinutes, err = normalizeAutoUpdateInterval(metadata.SourceKind, input.AutoUpdateIntervalMinutes)
+	if err != nil {
+		return Detail{}, err
+	}
 	metadata.Description = description
 	metadata.IconKind = iconKind
 	metadata.Icon = icon
@@ -195,6 +201,10 @@ func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent
 	}
 	if metadata.SourceKind != SourceURL {
 		return Detail{}, fmt.Errorf("file subscriptions do not have a remote source")
+	}
+	interval, err := normalizeAutoUpdateInterval(SourceURL, input.AutoUpdateIntervalMinutes)
+	if err != nil {
+		return Detail{}, err
 	}
 	name, description, err := validateMetadata(input.Name, input.Description)
 	if err != nil {
@@ -235,6 +245,7 @@ func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent
 	metadata.Name = name
 	metadata.Description = description
 	metadata.SourceURL = parsedURL.String()
+	metadata.AutoUpdateIntervalMinutes = interval
 	metadata.IconKind = iconKind
 	metadata.Icon = icon
 	metadata.CurrentRevisionID = revision.ID
@@ -652,6 +663,11 @@ func (s *Store) writeMetadataUnlocked(metadata metadataDocument) error {
 }
 
 func prepareCreateInput(input createInput) (createInput, error) {
+	interval, err := normalizeAutoUpdateInterval(input.SourceKind, input.AutoUpdateIntervalMinutes)
+	if err != nil {
+		return createInput{}, err
+	}
+	input.AutoUpdateIntervalMinutes = interval
 	name, description, err := validateMetadata(input.Name, input.Description)
 	if err != nil {
 		return createInput{}, err
@@ -732,6 +748,9 @@ func validateContents(format Format, contents []byte) error {
 }
 
 func validateStoredMetadata(metadata metadataDocument, id string) error {
+	if _, err := normalizeAutoUpdateInterval(metadata.SourceKind, metadata.AutoUpdateIntervalMinutes); err != nil {
+		return err
+	}
 	if err := validateChainGroups(metadata.ChainProxyGroupIDs, metadata.ChainProxyRevision); err != nil {
 		return err
 	}
@@ -852,7 +871,9 @@ func newRevision(format Format, contents []byte, createdAt string) revisionDocum
 
 func summaryFromMetadata(metadata metadataDocument) Summary {
 	revision, _ := findRevision(metadata.Revisions, metadata.CurrentRevisionID)
+	interval, _ := normalizeAutoUpdateInterval(metadata.SourceKind, metadata.AutoUpdateIntervalMinutes)
 	return Summary{
+		AutoUpdateIntervalMinutes:    interval,
 		ChainProxyGroupIDs:           append([]string{}, metadata.ChainProxyGroupIDs...),
 		ChainProxyRevision:           metadata.ChainProxyRevision,
 		Fallback:                     metadata.Fallback,

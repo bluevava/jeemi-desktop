@@ -2,12 +2,12 @@ import { CloseCircleOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import { useMemo, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { FlagText } from "../common/FlagText";
+import { leadingFlagEmoji } from "../../lib/flagEmoji";
 
 import { useProxyOverview } from "../../app/runtime/ProxyOverviewContext";
 import { useRuntimeStatus } from "../../app/runtime/RuntimeStatusContext";
 import { useTraffic } from "../../app/runtime/TrafficContext";
-
-const leadingFlagPattern = /^(\p{Regional_Indicator}{2})/u;
 
 export function TopBarRuntimeIndicators() {
   const { t, i18n } = useTranslation();
@@ -113,13 +113,13 @@ export function TopBarRuntimeIndicators() {
           {exits.map((exit) => (
             <Tooltip
               key={exit.selector}
-              title={t("topBar.selectorExit", {
+              title={<FlagText>{t("topBar.selectorExit", {
                 selector: exit.selector,
                 node: exit.node,
-              })}
+              })}</FlagText>}
             >
               <span className="top-bar-selector-flag">
-                {exit.flag || <CloseCircleOutlined />}
+                {exit.flag ? <FlagText>{exit.flag}</FlagText> : <CloseCircleOutlined />}
               </span>
             </Tooltip>
           ))}
@@ -130,7 +130,7 @@ export function TopBarRuntimeIndicators() {
 }
 
 export function leadingCountryFlag(name: string): string {
-  return name.match(leadingFlagPattern)?.[1] ?? "";
+  return leadingFlagEmoji(name);
 }
 
 export function resolveSelectedLeaf(

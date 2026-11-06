@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import { useState } from "react";
 import {
   DeleteOutlined,
@@ -83,7 +84,7 @@ export function StrategyGroupLibraryPanel({
                 )}
               </span>
               <div>
-                <strong>{strategyGroupDisplayName(item)}</strong>
+                <strong><FlagText>{strategyGroupDisplayName(item)}</FlagText></strong>
                 <small>
                   {item.description || t("localConfig.list.noDescription")}
                 </small>
@@ -222,7 +223,7 @@ export function RuleSetLibraryPanel({
                 <GlobalOutlined />
               </span>
               <div>
-                <strong>{item.name}</strong>
+                <strong><FlagText>{item.name}</FlagText></strong>
                 <small>
                   {item.description || t("localConfig.list.noDescription")}
                 </small>

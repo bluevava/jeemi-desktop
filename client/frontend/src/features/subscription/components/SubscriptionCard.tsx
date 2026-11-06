@@ -1,7 +1,9 @@
+import { FlagText } from "../../../components/common/FlagText";
 import {
   CopyOutlined,
   MoreOutlined,
   ReloadOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Dropdown, Progress, Tag, Tooltip } from "antd";
 import type { MenuProps } from "antd";
@@ -17,7 +19,10 @@ import {
   subscriptionUsedBytes,
 } from "../model";
 import { SubscriptionIcon } from "./SubscriptionIcon";
-import { SubscriptionAssociations, type SubscriptionAssociationKind } from "./SubscriptionAssociations";
+import {
+  SubscriptionAssociations,
+  type SubscriptionAssociationKind,
+} from "./SubscriptionAssociations";
 
 interface SubscriptionCardProps {
   busy: boolean;
@@ -91,12 +96,24 @@ export function SubscriptionCard({
             iconKind={subscription.iconKind}
             sourceKind={subscription.sourceKind}
           />
-          <strong>{subscription.name}</strong>
+          <strong>
+            <FlagText>{subscription.name}</FlagText>
+          </strong>
         </span>
         <span className="subscription-card-actions">
-          <Tooltip title={t(subscription.sourceKind === "url" ? "subscription.card.copyURL" : "subscription.card.copyFilePath")}>
+          <Tooltip
+            title={t(
+              subscription.sourceKind === "url"
+                ? "subscription.card.copyURL"
+                : "subscription.card.copyFilePath",
+            )}
+          >
             <Button
-              aria-label={t(subscription.sourceKind === "url" ? "subscription.card.copyURL" : "subscription.card.copyFilePath")}
+              aria-label={t(
+                subscription.sourceKind === "url"
+                  ? "subscription.card.copyURL"
+                  : "subscription.card.copyFilePath",
+              )}
               disabled={disabled}
               icon={<CopyOutlined />}
               loading={copying}
@@ -153,18 +170,35 @@ export function SubscriptionCard({
 
       <div className="subscription-card-metadata">
         {subscription.remoteProfile.hasTraffic ? (
-          <strong title={`${formatSubscriptionBytes(used, locale)} / ${total > 0 ? formatSubscriptionBytes(total, locale) : "—"}`}>
-            {formatSubscriptionBytes(used, locale)} / {total > 0 ? formatSubscriptionBytes(total, locale) : "—"}
+          <strong
+            title={`${formatSubscriptionBytes(used, locale)} / ${total > 0 ? formatSubscriptionBytes(total, locale) : "—"}`}
+          >
+            {formatSubscriptionBytes(used, locale)} /{" "}
+            {total > 0 ? formatSubscriptionBytes(total, locale) : "—"}
           </strong>
         ) : (
           <span>{t("subscription.card.trafficUnavailable")}</span>
         )}
-        <span title={expiry ?? t("subscription.card.expiryUnavailable")}>{expiry ?? "—"}</span>
-        <time dateTime={subscription.lastFetchedAt} title={t("subscription.card.updated")}>
-          {formatSubscriptionUpdateAge(
-            subscription.lastFetchedAt,
-            locale,
-          )}
+        <span title={expiry ?? t("subscription.card.expiryUnavailable")}>
+          {expiry ?? "—"}
+        </span>
+        <time
+          dateTime={subscription.lastFetchedAt}
+          title={t("subscription.card.updated")}
+        >
+          {subscription.autoUpdateError ? (
+            <Tooltip
+              title={t(
+                `subscriptionAutoUpdate.${subscription.autoUpdateError}`,
+              )}
+            >
+              <WarningOutlined
+                aria-label={t("subscriptionAutoUpdate.failed")}
+                style={{ color: "var(--color-warning)", marginRight: 4 }}
+              />
+            </Tooltip>
+          ) : null}
+          {formatSubscriptionUpdateAge(subscription.lastFetchedAt, locale)}
         </time>
       </div>
 

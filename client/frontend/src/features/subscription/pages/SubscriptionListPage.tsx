@@ -1,3 +1,5 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
+import { FlagText } from "../../../components/common/FlagText";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CameraOutlined,
@@ -34,6 +36,7 @@ import {
 import type { MihomoRuleProviderRuntimeState } from "../../../lib/mihomo/client";
 import {
   deleteSubscription,
+  createLocalConfigPreset,
   getLocalConfigState,
   getLocalScriptState,
   getProxyDelayCache,
@@ -82,18 +85,23 @@ import { SelectorIconProvider } from "../useSelectorIcon";
 import { ScriptAssociationModal } from "../components/ScriptAssociationModal";
 import { SubscriptionShelf } from "../components/SubscriptionShelf";
 import { SubscriptionIconEditor } from "../components/SubscriptionIconEditor";
+import { SubscriptionUpdateInterval } from "../components/SubscriptionUpdateInterval";
 import { RuntimeConfigurationViewer } from "../../runtime/RuntimeConfigurationViewer";
 import { connectionIDsForNodeSwitch } from "../connectionReset";
 import { useProxyDelayQueue } from "../useProxyDelayQueue";
 import { screenImportErrorKey } from "../screenImport";
 import { selectAndRememberProxy } from "../proxySelection";
-import { delayTargetsForSearch, filterSelectorsByNodeName } from "../selectorSearch";
+import {
+  delayTargetsForSearch,
+  filterSelectorsByNodeName,
+} from "../selectorSearch";
 import { shouldDisplaySelector } from "../selectorPresentation";
 
 const noLocalHandlerValue = "__none__";
 const emptySelections: Record<string, string> = {};
 
 interface SubscriptionDraft {
+  autoUpdateIntervalMinutes: number;
   name: string;
   description: string;
   sourceUrl: string;
@@ -102,6 +110,7 @@ interface SubscriptionDraft {
 }
 
 const emptyDraft: SubscriptionDraft = {
+  autoUpdateIntervalMinutes: 60,
   name: "",
   description: "",
   sourceUrl: "",
@@ -132,6 +141,7 @@ export function SubscriptionListPage({
   const { isWindowVisible } = useWindowActivity();
   const {
     proxyRuntime,
+    subscriptionUpdateRevision,
     syncSubscriptionState,
     commitProxySelection,
     refreshProxyRuntime,
@@ -143,7 +153,9 @@ export function SubscriptionListPage({
   const [localScripts, setLocalScripts] = useState<LocalScriptState | null>(
     null,
   );
-  const [chainGroupNames, setChainGroupNames] = useState<Record<string, string>>({});
+  const [chainGroupNames, setChainGroupNames] = useState<
+    Record<string, string>
+  >({});
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [errorKey, setErrorKey] = useState<string | null>(null);
@@ -165,7 +177,8 @@ export function SubscriptionListPage({
   const [scriptAssociationDraft, setScriptAssociationDraft] =
     useState(noLocalHandlerValue);
   const [associationError, setAssociationError] = useState("");
-  const [chainAssociationTarget, setChainAssociationTarget] = useState<SubscriptionSummary | null>(null);
+  const [chainAssociationTarget, setChainAssociationTarget] =
+    useState<SubscriptionSummary | null>(null);
   const [runtimeViewerSignal, setRuntimeViewerSignal] = useState(0);
   const [ruleProvidersOpen, setRuleProvidersOpen] = useState(false);
   const [fallbackBusy, setFallbackBusy] = useState(false);
@@ -188,10 +201,19 @@ export function SubscriptionListPage({
 
   const activeSelections = proxyRuntime?.selections ?? emptySelections;
   const cardActions = useSubscriptionCardActions({
-    busyAction, setBusyAction, onSaved: setState, onError: setErrorKey,
-    onReordered: (ids) => setState((current) => current ? {
-      ...current, subscriptions: applySubscriptionOrder(current.subscriptions, ids),
-    } : current),
+    busyAction,
+    setBusyAction,
+    onSaved: setState,
+    onError: setErrorKey,
+    onReordered: (ids) =>
+      setState((current) =>
+        current
+          ? {
+              ...current,
+              subscriptions: applySubscriptionOrder(current.subscriptions, ids),
+            }
+          : current,
+      ),
   });
 
   useEffect(() => {
@@ -202,26 +224,43 @@ export function SubscriptionListPage({
       getLocalScriptState(),
       getChainProxyState(),
     ])
-      .then(([subscriptionState, localConfigState, localScriptState, chainState]) => {
-        if (active) {
-          if (subscriptionState.status === "fulfilled")
-            setState(subscriptionState.value);
-          if (localConfigState.status === "fulfilled")
-            setLocalConfigs(localConfigState.value);
-          else setLocalConfigs({ directory: "", configs: [] });
-          if (localScriptState.status === "fulfilled")
-            setLocalScripts(localScriptState.value);
-          else setLocalScripts({ directory: "", scripts: [] });
-          if (chainState.status === "fulfilled")
-            setChainGroupNames(Object.fromEntries(chainState.value.groups.map((group) => [group.id, group.name])));
-          if (
-            [subscriptionState, localConfigState, localScriptState, chainState].some(
-              (item) => item.status === "rejected",
+      .then(
+        ([
+          subscriptionState,
+          localConfigState,
+          localScriptState,
+          chainState,
+        ]) => {
+          if (active) {
+            if (subscriptionState.status === "fulfilled")
+              setState(subscriptionState.value);
+            if (localConfigState.status === "fulfilled")
+              setLocalConfigs(localConfigState.value);
+            else setLocalConfigs({ directory: "", configs: [] });
+            if (localScriptState.status === "fulfilled")
+              setLocalScripts(localScriptState.value);
+            else setLocalScripts({ directory: "", scripts: [] });
+            if (chainState.status === "fulfilled")
+              setChainGroupNames(
+                Object.fromEntries(
+                  chainState.value.groups.map((group) => [
+                    group.id,
+                    group.name,
+                  ]),
+                ),
+              );
+            if (
+              [
+                subscriptionState,
+                localConfigState,
+                localScriptState,
+                chainState,
+              ].some((item) => item.status === "rejected")
             )
-          )
-            setErrorKey("subscription.errors.load");
-        }
-      })
+              setErrorKey("subscription.errors.load");
+          }
+        },
+      )
       .catch(() => {
         if (active) setErrorKey("subscription.errors.load");
       })
@@ -238,6 +277,21 @@ export function SubscriptionListPage({
   }, [state, syncSubscriptionState]);
 
   useEffect(() => {
+    if (!isWindowVisible || busyAction) return;
+    let active = true;
+    void getSubscriptionState()
+      .then((next) => {
+        if (active) setState(next);
+      })
+      .catch(() => {
+        if (active) setErrorKey("subscription.errors.load");
+      });
+    return () => {
+      active = false;
+    };
+  }, [subscriptionUpdateRevision, isWindowVisible, busyAction]);
+
+  useEffect(() => {
     if (state?.subscriptions.length === 0) setShelfExpanded(true);
   }, [state?.subscriptions.length]);
 
@@ -247,8 +301,10 @@ export function SubscriptionListPage({
     runtime?.mihomo.controllerReady === true &&
     controllerSession !== null &&
     runtime.mihomo.subscriptionId === state?.selectedSubscriptionId &&
-    runtime.mihomo.source.normalizationFingerprint === state?.projection?.normalizationFingerprint &&
-    runtime.mihomo.source.chainProxyFingerprint === state?.projection?.chainProxyFingerprint &&
+    runtime.mihomo.source.normalizationFingerprint ===
+      state?.projection?.normalizationFingerprint &&
+    runtime.mihomo.source.chainProxyFingerprint ===
+      state?.projection?.chainProxyFingerprint &&
     runtime.mihomo.source.subscriptionRevision ===
       state?.projection?.revisionId &&
     runtime.mihomo.source.localConfigId === state?.projection?.localConfigId &&
@@ -317,7 +373,7 @@ export function SubscriptionListPage({
               referencedByRules: true,
             },
           ]
-        : state?.projection?.selectors ?? [];
+        : (state?.projection?.selectors ?? []);
     return filterSelectorsByNodeName(
       modeSelectors.filter((selector) =>
         shouldDisplaySelector(selector.hidden, showHiddenSelectors),
@@ -483,6 +539,8 @@ export function SubscriptionListPage({
   const localConfigOptions = useMemo(
     () => [
       { label: t("subscription.association.none"), value: noLocalHandlerValue },
+      { label: t("offlineConfig.createGeneral"), value: "preset:general" },
+      { label: t("offlineConfig.createProcess"), value: "preset:process" },
       ...(localConfigs?.configs ?? []).map((config) => ({
         label: config.name,
         value: config.id,
@@ -532,7 +590,9 @@ export function SubscriptionListPage({
       });
       if (!result.cancelled) setState(result.state);
     } catch (cause) {
-      setOperationError(normalizationErrorKey(cause, "subscription.errors.fileImport"));
+      setOperationError(
+        normalizationErrorKey(cause, "subscription.errors.fileImport"),
+      );
     } finally {
       setBusyAction(null);
     }
@@ -548,7 +608,9 @@ export function SubscriptionListPage({
       });
       if (!result.cancelled) setState(result.state);
     } catch (cause) {
-      setOperationError(normalizationErrorKey(cause, "subscription.errors.qrImport"));
+      setOperationError(
+        normalizationErrorKey(cause, "subscription.errors.qrImport"),
+      );
     } finally {
       setBusyAction(null);
     }
@@ -579,6 +641,7 @@ export function SubscriptionListPage({
     try {
       setState(
         await importSubscriptionURL({
+          autoUpdateIntervalMinutes: urlDraft.autoUpdateIntervalMinutes,
           name: urlDraft.name,
           description: urlDraft.description,
           sourceUrl: urlDraft.sourceUrl,
@@ -591,7 +654,9 @@ export function SubscriptionListPage({
       setURLDraft(emptyDraft);
       setIconFeedback("");
     } catch (cause) {
-      setOperationError(normalizationErrorKey(cause, "subscription.errors.urlImport"));
+      setOperationError(
+        normalizationErrorKey(cause, "subscription.errors.urlImport"),
+      );
     } finally {
       setBusyAction(null);
     }
@@ -606,7 +671,9 @@ export function SubscriptionListPage({
       setRefreshError("");
       setRefreshConflict(result.conflict);
     } catch (cause) {
-      setOperationError(normalizationErrorKey(cause, "subscription.errors.refresh"));
+      setOperationError(
+        normalizationErrorKey(cause, "subscription.errors.refresh"),
+      );
       setRefreshError(errorText(cause, t("subscription.errors.refresh")));
     } finally {
       setBusyAction(null);
@@ -655,6 +722,7 @@ export function SubscriptionListPage({
       const detail = await getSubscription(subscription.id);
       setEditing(detail);
       setEditDraft({
+        autoUpdateIntervalMinutes: detail.autoUpdateIntervalMinutes,
         name: detail.name,
         description: detail.description,
         sourceUrl: detail.sourceUrl,
@@ -679,6 +747,10 @@ export function SubscriptionListPage({
     try {
       setState(
         await updateSubscription({
+          autoUpdateIntervalMinutes:
+            editing.sourceKind === "url"
+              ? editDraft.autoUpdateIntervalMinutes
+              : 0,
           id: editing.id,
           name: editDraft.name,
           description: editDraft.description,
@@ -689,7 +761,9 @@ export function SubscriptionListPage({
       );
       setEditing(null);
     } catch (cause) {
-      setOperationError(normalizationErrorKey(cause, "subscription.errors.edit"));
+      setOperationError(
+        normalizationErrorKey(cause, "subscription.errors.edit"),
+      );
     } finally {
       setBusyAction(null);
     }
@@ -721,15 +795,26 @@ export function SubscriptionListPage({
   };
 
   const saveAssociation = async () => {
-    if (!associationTarget) return;
+    if (!associationTarget || busyAction === "association") return;
     setBusyAction("association");
     setErrorKey(null);
     try {
+      let configID =
+        associationDraft === noLocalHandlerValue ? "" : associationDraft;
+      if (configID === "preset:general" || configID === "preset:process") {
+        const created = await createLocalConfigPreset(
+          configID === "preset:general" ? "general" : "process",
+        );
+        configID = created.id;
+        setAssociationDraft(created.id);
+        setLocalConfigs((current) =>
+          current
+            ? { ...current, configs: [...current.configs, created] }
+            : { directory: "", configs: [created] },
+        );
+      }
       setState(
-        await setSubscriptionLocalConfig(
-          associationTarget.id,
-          associationDraft === noLocalHandlerValue ? "" : associationDraft,
-        ),
+        await setSubscriptionLocalConfig(associationTarget.id, configID),
       );
       setAssociationTarget(null);
     } catch (cause) {
@@ -863,11 +948,17 @@ export function SubscriptionListPage({
         group,
         proxy,
         () => {
-          commitProxySelection(group, proxy, controllerSession.id, subscriptionId);
+          commitProxySelection(
+            group,
+            proxy,
+            controllerSession.id,
+            subscriptionId,
+          );
           void refreshProxyRuntime().catch(() => undefined);
         },
       );
-      if (!remembered) setOperationError("subscription.errors.proxySelectionSave");
+      if (!remembered)
+        setOperationError("subscription.errors.proxySelectionSave");
       const resetMode = state?.preferences.connectionResetMode ?? "selector";
       if (resetMode !== "off") {
         try {
@@ -1092,7 +1183,9 @@ export function SubscriptionListPage({
         else if (kind === "config") openAssociation(subscription);
         else setChainAssociationTarget(subscription);
       }}
-      onUnbind={(subscription, kind) => void cardActions.unbind(subscription, kind)}
+      onUnbind={(subscription, kind) =>
+        void cardActions.unbind(subscription, kind)
+      }
       onReorder={(ids) => void cardActions.reorder(ids)}
       onExpandedChange={(expanded) =>
         setShelfExpanded(state.subscriptions.length === 0 ? true : expanded)
@@ -1117,7 +1210,13 @@ export function SubscriptionListPage({
       {overlayHost ? createPortal(subscriptionShelf, overlayHost) : null}
 
       <div className="page-stack subscription-page">
-        {chainAssociationTarget && <ChainProxyAssociation target={chainAssociationTarget} onClose={() => setChainAssociationTarget(null)} onSaved={setState} />}
+        {chainAssociationTarget && (
+          <ChainProxyAssociation
+            target={chainAssociationTarget}
+            onClose={() => setChainAssociationTarget(null)}
+            onSaved={setState}
+          />
+        )}
         <RuntimeConfigurationViewer
           hideTrigger
           openSignal={runtimeViewerSignal}
@@ -1133,14 +1232,23 @@ export function SubscriptionListPage({
           />
         ) : null}
 
-        <ChainProxyCompositionNotice composition={state.projection?.chainProxy} />
-        <SelectorIconProvider active={isWindowVisible} retryKey={runtime?.mihomo.controllerReady ? runtime.mihomo.generationId : ""}>
+        <ChainProxyCompositionNotice
+          composition={state.projection?.chainProxy}
+        />
+        <SelectorIconProvider
+          active={isWindowVisible}
+          retryKey={
+            runtime?.mihomo.controllerReady ? runtime.mihomo.generationId : ""
+          }
+        >
           <SelectorWorkspace
             subscription={state.subscriptions.find(
               (item) => item.id === state.selectedSubscriptionId,
             )}
             fallbackBusy={
-              fallbackBusy || busyAction !== null || busyRuleProviderToggle !== ""
+              fallbackBusy ||
+              busyAction !== null ||
+              busyRuleProviderToggle !== ""
             }
             onFallbackChange={changeFallback}
             activeSelections={
@@ -1313,6 +1421,16 @@ export function SubscriptionListPage({
                 value={urlDraft.sourceUrl}
               />
             </label>
+            <SubscriptionUpdateInterval
+              value={urlDraft.autoUpdateIntervalMinutes}
+              onChange={(autoUpdateIntervalMinutes) =>
+                setURLDraft((draft) => ({
+                  ...draft,
+                  autoUpdateIntervalMinutes,
+                }))
+              }
+              disabled={busyAction === "url"}
+            />
             <label>
               <span>{t("subscription.form.description")}</span>
               <Input.TextArea
@@ -1423,6 +1541,18 @@ export function SubscriptionListPage({
                 <strong>{editing?.sourceLabel}</strong>
               </div>
             )}
+            {editing?.sourceKind === "url" ? (
+              <SubscriptionUpdateInterval
+                value={editDraft.autoUpdateIntervalMinutes}
+                onChange={(autoUpdateIntervalMinutes) =>
+                  setEditDraft((draft) => ({
+                    ...draft,
+                    autoUpdateIntervalMinutes,
+                  }))
+                }
+                disabled={busyAction === "edit"}
+              />
+            ) : null}
             <label>
               <span>{t("subscription.form.description")}</span>
               <Input.TextArea
@@ -1464,8 +1594,13 @@ export function SubscriptionListPage({
         <Modal
           cancelText={t("common.cancel")}
           confirmLoading={busyAction === "association"}
+          cancelButtonProps={{ disabled: busyAction === "association" }}
+          closable={busyAction !== "association"}
+          keyboard={busyAction !== "association"}
+          maskClosable={busyAction !== "association"}
           okText={t("subscription.association.save")}
           onCancel={() => {
+            if (busyAction === "association") return;
             setAssociationTarget(null);
             setAssociationError("");
           }}
@@ -1483,17 +1618,19 @@ export function SubscriptionListPage({
               <Alert description={associationError} showIcon type="error" />
             ) : null}
             <strong className="subscription-association-target">
-              {associationTarget?.name}
+              <FlagText>{associationTarget?.name ?? ""}</FlagText>
             </strong>
             <Select
+              {...flagSelectRenderers}
               aria-label={t("subscription.association.title")}
+              disabled={busyAction === "association"}
               onChange={setAssociationDraft}
               options={localConfigOptions}
               value={associationDraft}
             />
             {localConfigs.configs.length === 0 ? (
               <Alert
-                description={t("subscription.association.empty")}
+                description={t("offlineConfig.emptyBindings")}
                 showIcon
                 type="info"
               />

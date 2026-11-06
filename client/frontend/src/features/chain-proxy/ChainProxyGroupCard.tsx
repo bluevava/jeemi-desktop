@@ -1,3 +1,4 @@
+import { FlagText } from "../../components/common/FlagText";
 import { DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button, Collapse, Dropdown, Empty, Tag, Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
@@ -13,7 +14,7 @@ export function ChainProxyGroupCard({ group, expanded, disabled, onExpand, onAdd
   const { t, i18n } = useTranslation();
   const nodes = (sourceId: string) => <div className="chain-proxy-node-grid">
     {group.nodes.filter(node => node.sourceId === sourceId).map(node => <article className="chain-proxy-node" key={node.id}>
-      <strong title={node.name}>{node.name}</strong>
+      <strong title={node.name}><FlagText>{node.name}</FlagText></strong>
       <div className="chain-proxy-node-footer"><span>{node.type.toUpperCase()}</span><span>
         <Tooltip title={t(`chainProxy.${sourceId ? "viewNode" : "editNode"}`)}><Button type="text" size="small" disabled={disabled}
           aria-label={t(`chainProxy.${sourceId ? "viewNode" : "editNode"}`)} icon={sourceId ? <EyeOutlined /> : <EditOutlined />} onClick={() => onNode(node.id, !!sourceId)} /></Tooltip>
@@ -24,7 +25,7 @@ export function ChainProxyGroupCard({ group, expanded, disabled, onExpand, onAdd
   </div>;
   return <Collapse className="chain-proxy-group" activeKey={expanded ? [group.id] : []} onChange={keys => onExpand(keys.includes(group.id))} items={[{
     key: group.id,
-    label: <span className="chain-proxy-group-title"><strong>{group.name}</strong><Tag>{t(`chainProxy.${group.kind}`)}</Tag><span>{t("chainProxy.nodeCount", { count: group.nodes.length })}</span></span>,
+    label: <span className="chain-proxy-group-title"><strong><FlagText>{group.name}</FlagText></strong><Tag>{t(`chainProxy.${group.kind}`)}</Tag><span>{t("chainProxy.nodeCount", { count: group.nodes.length })}</span></span>,
     extra: <span className="chain-proxy-actions" onClick={event => event.stopPropagation()} onKeyDown={event => event.stopPropagation()}>
       <Tooltip title={t(`chainProxy.${group.kind === "manual" ? "addNodes" : "addSource"}`)}><Button type="text" size="small" disabled={disabled} icon={<PlusOutlined />} onClick={onAdd}
         aria-label={t(`chainProxy.${group.kind === "manual" ? "addNodes" : "addSource"}`)} /></Tooltip>
@@ -38,12 +39,12 @@ export function ChainProxyGroupCard({ group, expanded, disabled, onExpand, onAdd
     </span>,
     children: <div className="page-stack">
       <div className="chain-proxy-filters chain-proxy-filter-summary">
-        <div><span>{t("chainProxy.selectorFilter")}</span><code>{group.selectorFilter || t("chainProxy.matchDefault")}</code></div>
-        <div><span>{t("chainProxy.nodeFilter")}</span><code>{group.nodeFilter || t("chainProxy.allNodes")}</code></div>
+        <div><span>{t("chainProxy.selectorFilter")}</span><code><FlagText>{group.selectorFilter || t("chainProxy.matchDefault")}</FlagText></code></div>
+        <div><span>{t("chainProxy.nodeFilter")}</span><code><FlagText>{group.nodeFilter || t("chainProxy.allNodes")}</FlagText></code></div>
       </div>
       {group.kind === "manual" && nodes("")}
       {group.sources.map((source, index) => <section className="chain-proxy-source" key={source.id}>
-        <div className="chain-proxy-source-title"><strong>{t("chainProxy.sourceLabel", { index: index + 1, label: source.label })}</strong><span>{t("chainProxy.nodeCount", { count: source.nodeCount })}</span>
+        <div className="chain-proxy-source-title"><strong><FlagText>{t("chainProxy.sourceLabel", { index: index + 1, label: source.label })}</FlagText></strong><span>{t("chainProxy.nodeCount", { count: source.nodeCount })}</span>
           <span className="chain-proxy-actions">
             <Tooltip title={t("chainProxy.editSource")}><Button disabled={disabled} type="text" size="small" icon={<EditOutlined />} onClick={() => onSource(source.id)} aria-label={t("chainProxy.editSource")} /></Tooltip>
             <Tooltip title={t("chainProxy.deleteSource")}><Button disabled={disabled} type="text" size="small" icon={<DeleteOutlined />} onClick={() => onDelete("source", source.id, source.label)} aria-label={t("chainProxy.deleteSource")} /></Tooltip>

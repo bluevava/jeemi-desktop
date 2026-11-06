@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"jeemi/internal/application"
 	"jeemi/internal/configfile"
 	"jeemi/internal/platform/dialogs"
@@ -82,6 +83,9 @@ func (a *App) InitializeClient(language string) error {
 			return
 		}
 		a.service = service
+		service.SetSubscriptionUpdateNotifier(func() {
+			wailsRuntime.EventsEmit(ctx, "jeemi:subscription-updated")
+		})
 		service.Startup(ctx)
 		if !a.quitRequested.Load() {
 			if service.AcknowledgeJeemiRestart() {

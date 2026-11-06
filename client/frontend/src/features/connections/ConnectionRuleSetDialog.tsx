@@ -1,3 +1,4 @@
+import { flagSelectRenderers } from "../../components/common/flagSelectRenderers";
 import {
   Alert,
   App,
@@ -92,6 +93,7 @@ export function ConnectionRuleSetDialog({
               </Button>
             </div>
             <Select
+              {...flagSelectRenderers}
               id="rule-entry-destination"
               showSearch
               optionFilterProp="label"
@@ -125,6 +127,7 @@ export function ConnectionRuleSetDialog({
               {t("ruleSetEntry.matchType")}
             </label>
             <Select
+              {...flagSelectRenderers}
               id="rule-entry-type"
               value={draft.matchType}
               onChange={draft.setMatchType}

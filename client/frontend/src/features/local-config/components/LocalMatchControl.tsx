@@ -1,3 +1,4 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
 import { Alert, Select } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -45,6 +46,7 @@ export function LocalMatchControl({
         />
       </div>
       <Select
+        {...flagSelectRenderers}
         aria-label={t("localConfig.editorResources.localMatch")}
         disabled={value.rulesDisabled}
         status={invalid ? "error" : undefined}

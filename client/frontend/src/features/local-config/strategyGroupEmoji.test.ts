@@ -8,7 +8,8 @@ import {
 
 describe("local selector presets", () => {
   it("keeps the controlled Emoji catalog unique", () => {
-    expect(STRATEGY_GROUP_EMOJIS).toHaveLength(91);
+    expect(STRATEGY_GROUP_EMOJIS).toHaveLength(92);
+    expect(STRATEGY_GROUP_EMOJIS).toContain("🤖");
     expect(new Set(STRATEGY_GROUP_EMOJIS).size).toBe(
       STRATEGY_GROUP_EMOJIS.length,
     );

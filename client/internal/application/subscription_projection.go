@@ -249,7 +249,11 @@ func (s *Service) composeSubscriptionCandidate(summary subscription.Summary, run
 			}
 			resourceState = &loaded
 		}
-		result.Contents, err = configresources.Apply(result.Contents, *resourceState, local.ResourcePlan)
+		resourceOptions, optionsErr := s.localResourceOptions(*resourceState, local.ResourcePlan)
+		if optionsErr != nil {
+			return composedSubscription{}, projectionCompositionFailed, optionsErr
+		}
+		result.Contents, err = configresources.Apply(result.Contents, *resourceState, local.ResourcePlan, resourceOptions)
 		if err != nil {
 			return composedSubscription{}, projectionCompositionFailed, fmt.Errorf("compose local strategy groups and rule sets: %w", err)
 		}

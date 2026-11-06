@@ -39,6 +39,7 @@ func TestConvertedSubscriptionSharesLocalAndRuntimeComposition(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, s)
 	raw := "\ufeff" + base64.StdEncoding.EncodeToString([]byte(normalizedURIFixture)) + "\r\n"
 	path := filepath.Join(t.TempDir(), "fixture.txt")
 	if err := os.WriteFile(path, []byte(raw), 0600); err != nil {
@@ -105,7 +106,10 @@ func TestConvertedSubscriptionSharesLocalAndRuntimeComposition(t *testing.T) {
 		t.Fatal("script/runtime precedence is incorrect")
 	}
 
-	prefs := runtimeconfig.DefaultPreferences()
+	prefs, err := s.RuntimePreferences()
+	if err != nil {
+		t.Fatal(err)
+	}
 	prefs.DNSProxyServerNameserverPolicyEnabled = true
 	prefs.DNSProxyServerNameserverPolicyMerge = runtimeconfig.MergeModeOverride
 	prefs.DNSProxyServerNameserverPolicyYAML = "'*.entry.test': [https://home.example.test/dns-query]"
@@ -127,6 +131,7 @@ func TestConvertedImportCoreRequirementFailsBeforePersistence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, s)
 	if _, err := s.settingsStore.SetMihomoVersion("v1.19.20"); err != nil {
 		t.Fatal(err)
 	}

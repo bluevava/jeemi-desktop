@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import { useEffect, useState } from "react";
 import {
   DeleteOutlined,
@@ -15,6 +16,7 @@ import { FeatureHelp } from "../../../components/help/FeatureHelp";
 import { LibraryCreateCard } from "../../../components/layout/LibraryCreateCard";
 import {
   deleteLocalConfig,
+  createLocalConfigPreset,
   getLocalConfigResources,
   getLocalConfigState,
   getLocalScriptState,
@@ -34,10 +36,11 @@ import { useLocalPackageTransfer } from "../components/useLocalPackageTransfer";
 import { useNavigationGuard } from "../../../app/navigationGuard/NavigationGuardContext";
 import { ChainProxyWorkspace } from "../../chain-proxy/ChainProxyWorkspace";
 import { isConfigSection, useConfigPageState } from "../ConfigPageStateContext";
+import { LocalConfigPresets } from "../components/LocalConfigPresets";
 
 export function LocalConfigListPage() {
   const { t, i18n } = useTranslation();
-  const { modal } = App.useApp();
+  const { modal, message } = App.useApp();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const guard = useNavigationGuard();
@@ -53,6 +56,19 @@ export function LocalConfigListPage() {
   const [loading, setLoading] = useState(true);
   const [busyID, setBusyID] = useState<string | null>(null);
   const [error, setError] = useState(false);
+
+  const createPreset = async (kind: "general" | "process") => {
+    if (busyID !== null) return;
+    setBusyID(`preset:${kind}`);
+    try {
+      const created = await createLocalConfigPreset(kind);
+      navigate(`/config/${created.id}/edit`);
+    } catch {
+      void message.error(t("offlineConfig.createFailed"));
+    } finally {
+      setBusyID(null);
+    }
+  };
 
   const transfer = useLocalPackageTransfer(setBusyID, async () => {
     const results = await Promise.allSettled([
@@ -213,6 +229,10 @@ export function LocalConfigListPage() {
             }),
             children: (
               <div className="local-config-card-grid">
+                <LocalConfigPresets
+                  busy={busyID}
+                  onCreate={(kind) => void createPreset(kind)}
+                />
                 {state.configs.map((config) => (
                   <Card
                     className="local-config-card"
@@ -226,7 +246,9 @@ export function LocalConfigListPage() {
                           <FileTextOutlined />
                         </span>
                         <span className="local-config-card-copy">
-                          <strong title={config.name}>{config.name}</strong>
+                          <strong title={config.name}>
+                            <FlagText>{config.name}</FlagText>
+                          </strong>
                           <small title={config.description}>
                             {config.description ||
                               t("localConfig.list.noDescription")}

@@ -1,3 +1,4 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
 import { useState } from "react";
 import { Button, Select } from "antd";
 import {
@@ -117,6 +118,7 @@ export function StrategyRuleSetReferencesEditor({
             >
               <HolderOutlined className="strategy-drag-handle" />
               <Select
+                {...flagSelectRenderers}
                 onChange={(ruleSetId) => updateReference(index, { ruleSetId })}
                 options={state.ruleSets.map((item) => ({
                   value: item.id,

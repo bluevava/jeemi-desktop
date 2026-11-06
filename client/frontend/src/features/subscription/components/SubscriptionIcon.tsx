@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import { FileTextOutlined, LinkOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
@@ -29,7 +30,7 @@ export function SubscriptionIcon({
       className={`subscription-icon ${className}`.trim()}
     >
       {iconKind === "emoji" && icon ? (
-        <span className="subscription-icon-emoji">{icon}</span>
+        <span className="subscription-icon-emoji"><FlagText>{icon}</FlagText></span>
       ) : iconKind === "url" && icon && !failed ? (
         <img
           alt=""

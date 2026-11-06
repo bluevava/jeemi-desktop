@@ -29,6 +29,7 @@ import {
 import { selectorPresentation } from "../selectorPresentation";
 import { filterSelectorsByName, hasNodeNameSearch } from "../selectorSearch";
 import { createSelectorEgressResolver } from "../selectorEgress";
+import { FlagText } from "../../../components/common/FlagText";
 import { FallbackControl } from "./FallbackControl";
 import { NormalizationNotice } from "./NormalizationNotice";
 import { SelectorGroupContent } from "./SelectorGroupContent";
@@ -413,7 +414,7 @@ export function SelectorWorkspace({
                     <SelectorIcon selector={selector} />
                     <span className="selector-summary-copy">
                       <strong title={selector.name}>
-                        {presentation.displayName}
+                        <FlagText>{presentation.displayName}</FlagText>
                       </strong>
                       <small title={t("subscription.selector.memberBreakdown", selectorMemberCounts(selector))}>
                         {t(selectorTypeKey(selector.type))}
@@ -426,7 +427,7 @@ export function SelectorWorkspace({
                   </span>
                   <span className="selector-summary-side">
                     <span className="selector-current" title={egressTitle(egress)}>
-                      <strong>{egress}</strong>
+                      <strong><FlagText>{egress}</FlagText></strong>
                     </span>
                     <DownOutlined className="selector-toggle-icon" />
                   </span>
@@ -457,7 +458,7 @@ function SelectorTabLabel({
       <SelectorIcon selector={selector} />
       <span className="selector-tab-copy">
         <span className="selector-tab-title">
-          <strong title={selector.name}>{presentation.displayName}</strong>
+          <strong title={selector.name}><FlagText>{presentation.displayName}</FlagText></strong>
           <small title={t("subscription.selector.memberBreakdown", selectorMemberCounts(selector))}>
             {t("subscription.selector.memberCount", {
               count: selector.members.length,
@@ -465,7 +466,7 @@ function SelectorTabLabel({
           </small>
         </span>
         <span className="selector-tab-current" title={egressTitle}>
-          {egress}
+          <FlagText>{egress}</FlagText>
         </span>
       </span>
     </span>

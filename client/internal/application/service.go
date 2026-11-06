@@ -94,9 +94,16 @@ type Service struct {
 	authorizeCore        func(context.Context, coreauth.Target) error
 	coreOperationCancel  context.CancelFunc
 	pendingRefresh       *pendingSubscriptionRefresh
+	autoUpdateCancel     context.CancelFunc
+	autoUpdateDone       chan struct{}
+	autoUpdateAttempts   map[string]subscriptionUpdateAttempt
+	autoUpdateNotify     func()
 	pendingPackage       *pendingLocalPackage
 	shuttingDown         bool
 	jeemiUpdater         *appupdate.Manager
+
+	desiredGeoRequirements runtimeGeoRequirements
+	activeGeoRequirements  runtimeGeoRequirements
 }
 
 func NewService(dataDirectory string) (*Service, error) {
@@ -406,6 +413,7 @@ func (s *Service) SubscriptionState() (subscription.State, error) {
 	if err != nil {
 		return subscription.State{}, err
 	}
+	s.decorateSubscriptionUpdates(&state)
 	return s.decorateSubscriptionState(state)
 }
 
@@ -668,6 +676,7 @@ func (s *Service) Startup(ctx context.Context) {
 	go func() {
 		_ = s.reconcileSelected(reconcileTriggerStartup, nil, reconcileSnapshot)
 	}()
+	s.startSubscriptionAutoUpdates(ctx)
 }
 
 func (s *Service) Shutdown(ctx context.Context) error {
@@ -686,6 +695,7 @@ func (s *Service) Shutdown(ctx context.Context) error {
 	if cancel != nil {
 		cancel()
 	}
+	s.stopSubscriptionAutoUpdates(ctx)
 	return s.runtimeManager.Shutdown(ctx)
 }
 
@@ -705,14 +715,7 @@ func (s *Service) RuntimeStatus() RuntimeStatus {
 		status.Configuration.LastError = &failure
 	}
 	s.mu.RUnlock()
-	document, err := s.settingsStore.Load()
-	if err != nil {
-		status.GeoData = geodata.Health{Status: geodata.HealthInvalid, MissingKinds: []geodata.Kind{}, InvalidKinds: []geodata.Kind{}}
-	} else if health, healthErr := s.geoDataManager.Health(document.GeoData); healthErr != nil {
-		status.GeoData = geodata.Health{Status: geodata.HealthInvalid, MissingKinds: []geodata.Kind{}, InvalidKinds: []geodata.Kind{}}
-	} else {
-		status.GeoData = health
-	}
+	status.GeoData = s.runtimeGeoDataHealth(status.Mihomo)
 	ctx, cancel := s.operationContext(1500 * time.Millisecond)
 	defer cancel()
 	status.Memory = captureRuntimeMemory(ctx, status.Mihomo.PID)

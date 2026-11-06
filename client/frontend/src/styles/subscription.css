@@ -901,10 +901,11 @@
 
 .selector-node-select {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   min-width: 0;
   align-content: center;
-  padding: 11px 76px 11px 13px;
+  padding: 11px 13px;
   border: 0;
   border-radius: inherit;
   background: transparent;
@@ -913,10 +914,6 @@
   font: inherit;
   gap: 5px;
   text-align: left;
-}
-
-.selector-node.no-delay .selector-node-select {
-  padding-right: 13px;
 }
 
 .selector-node:hover {
@@ -945,8 +942,13 @@
 }
 
 .selector-node-select > span {
+  max-width: calc(100% - 63px);
   color: var(--color-text-secondary);
   font-size: var(--font-size-caption);
+}
+
+.selector-node.no-delay .selector-node-select > span {
+  max-width: 100%;
 }
 
 .selector-node-delay-wrap {
@@ -1012,11 +1014,11 @@
 }
 
 .density-medium .selector-node-select {
-  padding: 8px 68px 8px 10px;
+  padding: 8px 10px;
 }
 
-.density-medium .selector-node.no-delay .selector-node-select {
-  padding-right: 10px;
+.density-medium .selector-node-select > span {
+  max-width: calc(100% - 58px);
 }
 
 .density-medium .selector-node-select strong {
@@ -1053,10 +1055,6 @@
   font-size: var(--font-size-caption);
   line-height: 1;
   max-width: calc(100% - 54px);
-}
-
-.density-small .selector-node.no-delay .selector-node-select > span {
-  max-width: 100%;
 }
 
 .density-small .selector-node-delay-wrap {

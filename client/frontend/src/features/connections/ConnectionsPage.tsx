@@ -1,3 +1,4 @@
+import { FlagText } from "../../components/common/FlagText";
 import {
   CloseCircleOutlined,
   DeleteOutlined,
@@ -320,13 +321,13 @@ export function ConnectionsPage() {
                   <div className="connection-detail connection-rule">
                     <span>{t("connections.rule")}</span>
                     <strong title={matchedRule}>
-                      {matchedRule}
+                      <FlagText>{matchedRule}</FlagText>
                     </strong>
                   </div>
                   <div className="connection-detail connection-outbound">
                     <span>{t("connections.outbound")}</span>
                     <strong title={outbound}>
-                      {outbound}
+                      <FlagText>{outbound}</FlagText>
                     </strong>
                   </div>
                   <div className="connection-traffic">

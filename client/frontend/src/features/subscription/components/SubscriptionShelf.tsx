@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import {
   DatabaseOutlined,
   DownOutlined,
@@ -170,7 +171,7 @@ export function SubscriptionShelf({
                   iconKind={selected.iconKind}
                   sourceKind={selected.sourceKind}
                 />
-                <strong>{selected.name}</strong>
+                <strong><FlagText>{selected.name}</FlagText></strong>
               </span>
               <span
                 aria-label={trafficLabel}

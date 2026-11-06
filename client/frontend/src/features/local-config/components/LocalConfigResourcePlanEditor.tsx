@@ -1,3 +1,5 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
+import { FlagText } from "../../../components/common/FlagText";
 import { emptyStrategyGroup } from "../resourceModel";
 import { LocalMatchControl } from "./LocalMatchControl";
 import { useState } from "react";
@@ -79,6 +81,7 @@ export function LocalConfigRulesEditor({
         <label>
           <span>{t("localConfig.editorResources.ruleStrategy")}</span>
           <Select
+            {...flagSelectRenderers}
             aria-label={t("localConfig.editorResources.ruleStrategy")}
             disabled={!rulesEnabled}
             onSelect={(ruleStrategy) => onChange({ ...value, ruleStrategy })}
@@ -128,6 +131,7 @@ export function LocalConfigRulesEditor({
             <strong>{t("localConfig.editorResources.groupsTitle")}</strong>
           </div>
           <Select<string>
+            {...flagSelectRenderers}
             disabled={!rulesEnabled || availableGroups.length === 0}
             onSelect={(id) =>
               onChange({
@@ -176,7 +180,7 @@ export function LocalConfigRulesEditor({
                   )}
                 </span>
                 <div>
-                  <strong>{strategyGroupDisplayName(group)}</strong>
+                  <strong><FlagText>{strategyGroupDisplayName(group)}</FlagText></strong>
                   <small>
                     {t(`localConfig.resources.groups.kinds.${group.kind}`)} ·{" "}
                     {group.ruleOutput === "inline" ? "inline" : "RULE-SET"} ·{" "}
@@ -297,6 +301,7 @@ function DefaultProxySelector({
         />
       </div>
       <Select
+        {...flagSelectRenderers}
         allowClear
         aria-label={t("localConfig.editorResources.proxySelector")}
         disabled={value.rulesDisabled}

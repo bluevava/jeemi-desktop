@@ -1,5 +1,6 @@
 import { useMemo, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { FlagText } from "../../../components/common/FlagText";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
 import type { SubscriptionSelector } from "../../../types/subscription";
@@ -52,7 +53,7 @@ export function SelectorGroupContent({
                   disabled={index === path.length - 1}
                   onClick={() => changePath(path.slice(1, index + 1).map((item) => item.name))}
                   title={group.name}
-                >{group.name}</button>
+                ><FlagText>{group.name}</FlagText></button>
               </span>
             ))}
           </nav>

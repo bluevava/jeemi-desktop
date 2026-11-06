@@ -1,3 +1,4 @@
+import { FlagText } from "../../components/common/FlagText";
 import { Spin } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -26,7 +27,7 @@ export function DNSResultCard({ kind, result, pending, proxyUnavailable }: Props
       ) : result ? (
         <>
           <div className="dns-result-server">{result.server}</div>
-          {result.node ? <div className="dns-result-node">{t("dnsQuery.selectedNode", { selector: result.selector, node: result.node })}</div> : null}
+          {result.node ? <div className="dns-result-node"><FlagText>{t("dnsQuery.selectedNode", { selector: result.selector, node: result.node })}</FlagText></div> : null}
           <div className="dns-result-status" data-status={result.status}>
             <span>{t(`dnsQuery.states.${result.status}`)}</span>
             <span>{t("dnsQuery.duration", { duration: result.durationMS })}</span>

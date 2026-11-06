@@ -68,15 +68,6 @@ var (
 		"114.114.114.114",
 		"223.5.5.5",
 	}
-	defaultDNSFakeIPFilter = []string{
-		"+.lan",
-		"+.local",
-		"+.home.arpa",
-		"+.localdomain",
-		"+.localhost",
-		"+.msftconnecttest.com",
-		"+.msftncsi.com",
-	}
 	defaultLANBypassRules = []string{
 		"DOMAIN,localhost,DIRECT",
 		"DOMAIN-SUFFIX,lan,DIRECT",

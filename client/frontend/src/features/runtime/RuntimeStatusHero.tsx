@@ -97,7 +97,7 @@ export function RuntimeStatusHero({ preferences }: RuntimeStatusHeroProps) {
           ? t(`runtime.status.${displayState}`)
           : coreUsable && geoUnavailable
             ? t(
-                geoStatus === "missing" && !running
+                geoStatus === "missing"
                   ? "home.statusControl.geoMissing"
                   : "home.statusControl.geoInvalid",
               )

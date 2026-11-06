@@ -9,6 +9,8 @@ import recoveryLabels from "../recovery-labels.json";
 import startupLabels from "../startup-labels.json";
 import { zhLocalConfigFieldHelp } from "./local-config-field-help";
 import { zhRuleSetEntry } from "./rule-set-entry";
+import { zhOfflineConfig } from "./offline-config";
+import { zhSubscriptionAutoUpdate } from "./subscription-auto-update";
 import { zhSubscriptionNormalization } from "./subscription-normalization";
 import { zhDNSQuery, zhDNSQueryHelp } from "./dns-query";
 import { zhAppUpdate } from "./app-update";
@@ -16,6 +18,8 @@ import { zhExternalUI, zhExternalUIHelp } from "./external-ui";
 import { zhChainProxy, zhChainProxyHelp, zhChainProxyFilterHelp, zhChainProxyImportHelp } from "./chain-proxy";
 
 export const zhCN = {
+  subscriptionAutoUpdate: zhSubscriptionAutoUpdate,
+  offlineConfig: zhOfflineConfig,
   externalUI: zhExternalUI,
   chainProxy: zhChainProxy,
   appUpdate: zhAppUpdate,
@@ -143,8 +147,8 @@ export const zhCN = {
     statusControl: {
       healthy: "运行正常",
       mihomoMissing: "mihomo未安装，去安装",
-      geoMissing: "GEO 未安装，去安装",
-      geoInvalid: "GEO 配置异常，去处理",
+      geoMissing: "所需 GEO 库缺失，去安装",
+      geoInvalid: "所需 GEO 库异常，去处理",
       pending: "代理进程正常，但最新代理参数或配置尚未应用。",
       noSubscription: "没有可用订阅配置，请先在订阅页面选择一份订阅配置。",
       failure: "运行异常（{{phase}} / {{code}}）：{{message}}",
@@ -1467,10 +1471,6 @@ export const zhCN = {
       },
     },
     subscriptions: {
-      fetchTitle: "订阅拉取",
-      fetchMode: "拉取方式",
-      manual: "手动",
-      onLaunch: "启动时",
       displayTitle: "订阅显示",
       displayMode: "节点卡片密度",
       density: {
@@ -1566,8 +1566,8 @@ export const zhCN = {
       runtimeFakeIpFilter: {
         title: "Fake IP 过滤列表",
         purpose: "指定不分配 Fake IP 的域名，使局域网或与 Fake IP 不兼容的服务获得真实地址。",
-        scenarios: "局域网域名、设备发现、游戏或特定应用在 Fake IP 模式下解析异常时调整。",
-        cautions: "关闭资源会完整保留订阅的 fake-ip-filter 及其模式；过宽的规则会降低 Fake IP 模式的覆盖范围。",
+        scenarios: "默认涵盖局域网、时间同步、运营商认证、连通性检测、设备管理、游戏、国内服务、音乐及开发服务，可按需编辑。已有列表不会被新默认值覆盖。",
+        cautions: "默认的 geosite:private 和 geosite:cn 需要本地 GeoSite 库，进程分流方案也一样。返回真实 IP 不等于直连，仍按分流规则选出口。关闭资源会保留订阅的过滤列表及模式；过宽的过滤会降低 Fake IP 覆盖范围。",
       },
       runtimeDnsPolicies: {
         title: "DNS 解析策略映射",
@@ -1660,7 +1660,7 @@ export const zhCN = {
         title: "订阅设置",
         purpose: "管理节点卡片密度、测速并发和切换后的链接重置方式，以适配浏览习惯和网络条件。",
         scenarios: "需要手动控制网络请求、切换节点卡片密度或限制大量节点同时测速时使用。",
-        cautions: "确认后保存设置。提高测速并发会增加网络请求；切换重置链接会中断对应的已有会话。启动时自动拉取目前尚未启用。",
+        cautions: "确认后保存设置。提高测速并发会增加网络请求；切换重置链接会中断对应的已有会话。每份订阅的自动更新间隔在添加或编辑订阅时设置。",
       },
       emptySettings: {
         title: "页面设置",
@@ -1693,10 +1693,10 @@ export const zhCN = {
         cautions: "文件不会在运行中的 mihomo 下方直接替换；更新会等待完整重启并支持回滚。自定义源可能没有发布者摘要，只能证明下载完整性与核心可读性，不能证明发布者身份。",
       },
       subscriptionFetch: {
-        title: "订阅拉取方式",
-        purpose: "选择何时拉取订阅，以兼顾内容更新与网络请求频率；此选项目前尚未启用。",
-        scenarios: "订阅更新频率不同或需要避免启动时访问订阅服务时调整。",
-        cautions: "当前不会按此选项自动更新；需要更新时，在订阅页面手动重新拉取。",
+        title: "订阅自动更新",
+        purpose: "为每份 URL 订阅设置固定更新间隔，可选 10分钟、30分钟、1小时、3小时、12小时，默认1小时。",
+        scenarios: "从上次成功拉取计时，到期后自动更新；隐藏到托盘仍继续。启动或休眠恢复时已到期的订阅补拉取一次，不连续补齐错过的次数。",
+        cautions: "只在客户端运行且初始化完成后执行，文件订阅不参与；二维码订阅默认1小时，可在编辑中调整。服务端推荐间隔不会覆盖此设置。失败保留旧修订及本地关联，等下个间隔重试；手动拉取成功会重新计时。退出会取消后台任务。",
       },
       subscriptionDelayTest: {
         title: "节点测速并发",

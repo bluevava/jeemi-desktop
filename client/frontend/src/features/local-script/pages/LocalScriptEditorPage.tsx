@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import {
   CloseOutlined,
   ExperimentOutlined,
@@ -206,7 +207,7 @@ export function LocalScriptEditorPage() {
           </div>
           {subscriptionID ? (
             <Tag>
-              {t("localScript.editor.testTarget", { name: subscriptionName })}
+              <FlagText>{t("localScript.editor.testTarget", { name: subscriptionName })}</FlagText>
             </Tag>
           ) : null}
         </div>
@@ -287,7 +288,7 @@ export function LocalScriptEditorPage() {
                     : "localScript.test.corePending",
                 )}
               </Tag>
-              <span>{testResult.subscriptionName}</span>
+              <span><FlagText>{testResult.subscriptionName}</FlagText></span>
             </div>
             <pre>{testResult.contents}</pre>
           </div>

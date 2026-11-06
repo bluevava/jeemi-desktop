@@ -1,0 +1,50 @@
+{
+  "repository": "MetaCubeX/meta-rules-dat",
+  "revision": "1fc5de325d54d3b77d6b86a1db900c5e48ae1003",
+  "snapshotDate": "2026-11-06",
+  "license": "GPL-3.0",
+  "files": [
+    {
+      "file": "ai.list",
+      "path": "geo/geosite/category-ai-!cn.list",
+      "sha256": "c83107db044f54980cbaecccfa4042b680cbada46c65abf6656fbbeaae086399",
+      "bytes": 4093
+    },
+    {
+      "file": "telegram-domain.list",
+      "path": "geo/geosite/telegram.list",
+      "sha256": "2448b2699519cd258b10232fcacd01e89b7db04c8ce7fc860a4962518370a329",
+      "bytes": 293
+    },
+    {
+      "file": "instagram.list",
+      "path": "geo/geosite/instagram.list",
+      "sha256": "e5cba6ce4fa5a0dddbd4710d9dd5b6693c249e6f5be4179401843109ecbca228",
+      "bytes": 1447
+    },
+    {
+      "file": "youtube.list",
+      "path": "geo/geosite/youtube.list",
+      "sha256": "e95f241fa4357918fc1066390c352aad750b571ddea15e3421d30c84e947ac10",
+      "bytes": 2743
+    },
+    {
+      "file": "netflix-domain.list",
+      "path": "geo/geosite/netflix.list",
+      "sha256": "aa3e83152b51840332440177399fcae048733419f4dde7a65383757beedf369a",
+      "bytes": 454
+    },
+    {
+      "file": "telegram-ip.list",
+      "path": "geo/geoip/telegram.list",
+      "sha256": "b0a0a5a4280f2c713a26bf1763317be5aefeda02e4e78dab7c2efbda02663181",
+      "bytes": 192
+    },
+    {
+      "file": "netflix-ip.list",
+      "path": "geo/geoip/netflix.list",
+      "sha256": "21b6ddeeac461f72bd0097e203d82916b38da6b53dce0cc768d7e4386a8baad0",
+      "bytes": 2244
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { FlagText } from "../../../components/common/FlagText";
 
 import type {
   SelectorSortMode,
@@ -106,10 +107,10 @@ export function SelectorNodeGrid({
               onClick={() => void onSelect(groupName, member.name)}
               type="button"
             >
-              <strong title={member.name}>{member.name}</strong>
+              <strong title={member.name}><FlagText>{member.name}</FlagText></strong>
               <span>
                 {member.type || t("subscription.selector.unknownType")}
-                {member.providerName ? ` · ${member.providerName}` : ""}
+                <FlagText>{member.providerName ? ` · ${member.providerName}` : ""}</FlagText>
               </span>
             </button>
             {delaySupported ? (

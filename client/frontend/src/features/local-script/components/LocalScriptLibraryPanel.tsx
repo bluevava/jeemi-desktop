@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import {
   CodeOutlined,
   DeleteOutlined,
@@ -99,7 +100,7 @@ export function LocalScriptLibraryPanel({
                 <CodeOutlined />
               </span>
               <span className="local-config-card-copy">
-                <strong title={script.name}>{script.name}</strong>
+                <strong title={script.name}><FlagText>{script.name}</FlagText></strong>
                 <small title={script.description}>
                   {script.description || t("localScript.list.noDescription")}
                 </small>

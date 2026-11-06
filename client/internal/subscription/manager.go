@@ -81,6 +81,10 @@ func (m *Manager) Get(id string) (Detail, error) {
 }
 
 func (m *Manager) ImportURL(ctx context.Context, input ImportURLInput) (State, error) {
+	interval, err := normalizeAutoUpdateInterval(SourceURL, input.AutoUpdateIntervalMinutes)
+	if err != nil {
+		return State{}, err
+	}
 	method := input.ImportMethod
 	if method == "" {
 		method = ImportURL
@@ -109,16 +113,17 @@ func (m *Manager) ImportURL(ctx context.Context, input ImportURLInput) (State, e
 		return State{}, err
 	}
 	_, err = m.store.Create(createInput{
-		Name:          name,
-		Description:   input.Description,
-		SourceKind:    SourceURL,
-		ImportMethod:  method,
-		SourceURL:     input.SourceURL,
-		IconKind:      iconKind,
-		Icon:          icon,
-		Format:        fetched.Format,
-		Contents:      fetched.Contents,
-		RemoteProfile: fetched.RemoteProfile,
+		AutoUpdateIntervalMinutes: interval,
+		Name:                      name,
+		Description:               input.Description,
+		SourceKind:                SourceURL,
+		ImportMethod:              method,
+		SourceURL:                 input.SourceURL,
+		IconKind:                  iconKind,
+		Icon:                      icon,
+		Format:                    fetched.Format,
+		Contents:                  fetched.Contents,
+		RemoteProfile:             fetched.RemoteProfile,
 	})
 	if err != nil {
 		return State{}, err
@@ -234,7 +239,8 @@ func (m *Manager) PrepareRefresh(ctx context.Context, id string) (RefreshCandida
 		iconKind, icon = m.detectIconBestEffort(ctx, detail.SourceURL)
 	}
 	return RefreshCandidate{Before: detail, Fetched: fetched, Input: UpdateInput{
-		ID: detail.ID, Name: detail.Name, Description: detail.Description, SourceURL: detail.SourceURL, IconKind: iconKind, Icon: icon,
+		AutoUpdateIntervalMinutes: detail.AutoUpdateIntervalMinutes,
+		ID:                        detail.ID, Name: detail.Name, Description: detail.Description, SourceURL: detail.SourceURL, IconKind: iconKind, Icon: icon,
 	}}, nil
 }
 
@@ -259,6 +265,10 @@ func (m *Manager) Update(ctx context.Context, input UpdateInput) (State, error) 
 
 func (m *Manager) UpdateValidated(ctx context.Context, input UpdateInput, validate func(Summary, []byte) error) (State, error) {
 	detail, err := m.store.Get(input.ID)
+	if err != nil {
+		return State{}, err
+	}
+	input.AutoUpdateIntervalMinutes, err = normalizeAutoUpdateInterval(detail.SourceKind, input.AutoUpdateIntervalMinutes)
 	if err != nil {
 		return State{}, err
 	}

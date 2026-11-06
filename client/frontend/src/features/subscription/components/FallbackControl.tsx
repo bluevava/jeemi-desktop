@@ -1,3 +1,4 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
 import { Alert, App, Button, Modal, Select, Tooltip } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -148,6 +149,7 @@ export function FallbackControl({
       >
         <div className="subscription-fallback-editor">
           <Select
+            {...flagSelectRenderers}
             aria-label={t("subscription.fallback.title")}
             className="subscription-fallback-select"
             disabled={locked || !ready}

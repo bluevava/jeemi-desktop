@@ -30,6 +30,7 @@ export interface RuntimeStatus {
   statusMessageKey: string;
   mihomo: MihomoRuntimeStatus;
   configuration: RuntimeConfigurationStatus;
+  // Required assets for the active configuration, or the stopped candidate.
   geoData: import("./geodata").GeoDataHealth;
   memory: RuntimeMemoryStatus;
 }

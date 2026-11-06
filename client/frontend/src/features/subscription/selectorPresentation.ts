@@ -1,3 +1,5 @@
+import { leadingFlagEmoji } from "../../lib/flagEmoji";
+
 export interface SelectorPresentation {
   displayName: string;
   emoji: string;
@@ -33,7 +35,8 @@ export function selectorPresentation(
 ): SelectorPresentation {
   const trimmedName = name.trim();
   const trimmedIcon = configuredIcon.trim();
-  const emojiMatch = trimmedName.match(leadingEmojiPattern);
+  const flag = leadingFlagEmoji(trimmedName);
+  const emojiMatch = flag ? [flag, flag] : trimmedName.match(leadingEmojiPattern);
   const useNameEmoji = trimmedIcon === "" && emojiMatch !== null;
   const nameWithoutEmoji = useNameEmoji
     ? trimmedName.slice(emojiMatch[0].length).trimStart()

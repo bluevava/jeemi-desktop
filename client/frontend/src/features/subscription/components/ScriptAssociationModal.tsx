@@ -1,3 +1,5 @@
+import { flagSelectRenderers } from "../../../components/common/flagSelectRenderers";
+import { FlagText } from "../../../components/common/FlagText";
 import { Alert, Modal, Select, Spin } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -41,8 +43,9 @@ export function ScriptAssociationModal({
     >
       <div className="subscription-association-form">
         {error ? <Alert description={error} showIcon type="error" /> : null}
-        <strong className="subscription-association-target">{targetName}</strong>
+        <strong className="subscription-association-target"><FlagText>{targetName}</FlagText></strong>
         <Select
+          {...flagSelectRenderers}
           aria-label={t("subscription.scriptAssociation.title")}
           aria-busy={busy}
           disabled={busy}

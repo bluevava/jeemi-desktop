@@ -9,6 +9,8 @@ import recoveryLabels from "../recovery-labels.json";
 import startupLabels from "../startup-labels.json";
 import { enLocalConfigFieldHelp } from "./local-config-field-help";
 import { enRuleSetEntry } from "./rule-set-entry";
+import { enOfflineConfig } from "./offline-config";
+import { enSubscriptionAutoUpdate } from "./subscription-auto-update";
 import { enSubscriptionNormalization } from "./subscription-normalization";
 import { enDNSQuery, enDNSQueryHelp } from "./dns-query";
 import { enAppUpdate } from "./app-update";
@@ -16,6 +18,8 @@ import { enExternalUI, enExternalUIHelp } from "./external-ui";
 import { enChainProxy, enChainProxyHelp, enChainProxyFilterHelp, enChainProxyImportHelp } from "./chain-proxy";
 
 export const enUS = {
+  subscriptionAutoUpdate: enSubscriptionAutoUpdate,
+  offlineConfig: enOfflineConfig,
   externalUI: enExternalUI,
   chainProxy: enChainProxy,
   appUpdate: enAppUpdate,
@@ -150,8 +154,8 @@ export const enUS = {
     statusControl: {
       healthy: "Running normally",
       mihomoMissing: "mihomo is not installed — install it",
-      geoMissing: "GEO data is not installed — install it",
-      geoInvalid: "GEO configuration is invalid — review it",
+      geoMissing: "Required GEO data is missing — install it",
+      geoInvalid: "Required GEO data is invalid — review it",
       pending:
         "The proxy process is healthy, but the latest parameters or configuration have not been applied.",
       noSubscription:
@@ -1543,10 +1547,6 @@ export const enUS = {
       },
     },
     subscriptions: {
-      fetchTitle: "Subscription fetching",
-      fetchMode: "Fetch method",
-      manual: "Manual",
-      onLaunch: "On launch",
       displayTitle: "Subscription display",
       displayMode: "Node card density",
       density: {
@@ -1642,8 +1642,8 @@ export const enUS = {
       runtimeFakeIpFilter: {
         title: "Fake IP filter list",
         purpose: "Choose domains that receive real addresses instead of Fake IP, for LAN services or applications incompatible with Fake IP.",
-        scenarios: "Adjust it when local domains, discovery, games, or specific applications resolve incorrectly in Fake IP mode.",
-        cautions: "Disabling the resource preserves the subscription fake-ip-filter and mode. Overly broad matchers reduce Fake IP coverage.",
+        scenarios: "Defaults cover LAN, time sync, carrier authentication, connectivity checks, device management, games, Chinese services, music, and developer services. Edit as needed; new defaults do not replace saved lists.",
+        cautions: "The default geosite:private and geosite:cn entries require a local GeoSite database, including with process routing. Real IP answers still follow routing rules. Disabling this resource preserves the subscription filter and mode. Broad filters reduce Fake IP coverage.",
       },
       runtimeDnsPolicies: {
         title: "DNS resolver policy maps",
@@ -1735,8 +1735,8 @@ export const enUS = {
       subscriptionSettings: {
         title: "Subscription settings",
         purpose: "Manage node card density, test concurrency, and connection reset behavior after switching to suit browsing preferences and network conditions.",
-        scenarios: "Use it to keep fetching manual, change node-card density, or limit simultaneous tests for large node lists.",
-        cautions: "Settings are saved on confirmation. Higher test concurrency creates more network requests; resetting connections interrupts the affected sessions. Automatic fetching at startup is not available yet.",
+        scenarios: "Use it to change node-card density or limit simultaneous tests for large node lists.",
+        cautions: "Settings are saved on confirmation. Higher test concurrency creates more network requests; resetting connections interrupts the affected sessions. Set automatic update intervals when adding or editing each subscription.",
       },
       emptySettings: {
         title: "Page settings",
@@ -1769,10 +1769,10 @@ export const enUS = {
         cautions: "Files are never replaced beneath a running mihomo process. Updates wait for a full restart and can be rolled back. A custom source without a publisher digest proves readability and content integrity only, not publisher identity.",
       },
       subscriptionFetch: {
-        title: "Subscription fetch method",
-        purpose: "Choose when to fetch subscriptions to balance freshness and network requests. This option is not enabled yet.",
-        scenarios: "Adjust it when subscriptions have different update needs or startup requests should be avoided.",
-        cautions: "This option does not currently trigger automatic updates. Fetch the subscription manually from the Subscriptions page when needed.",
+        title: "Automatic subscription updates",
+        purpose: "Set each URL subscription to update every 10 minutes, 30 minutes, 1 hour, 3 hours or 12 hours. The default is 1 hour.",
+        scenarios: "Intervals start from the last successful fetch. Updates continue while hidden in the tray. After startup or resume, overdue subscriptions refresh once without replaying every missed interval.",
+        cautions: "Runs only while the initialized client is open; file subscriptions are excluded. QR subscriptions default to 1 hour and can be edited. Server recommendations do not override this choice. Failures preserve the previous revision and local association, then retry at the next interval. A successful manual fetch resets the timer. Exiting cancels background work.",
       },
       subscriptionDelayTest: {
         title: "Node-test concurrency",

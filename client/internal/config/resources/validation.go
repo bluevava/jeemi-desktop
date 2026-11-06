@@ -83,6 +83,7 @@ func normalizeStrategyGroup(input StrategyGroup, now time.Time) (StrategyGroup, 
 		input.Tolerance = 0
 		input.Strategy = ""
 		input.Lazy = false
+		input.AutoSelect = false
 		input.Filter = NodeFilter{ProxyTypes: []string{}, NamePatterns: []string{}}
 	} else {
 		input.Policy = PolicyTarget{}
@@ -92,7 +93,10 @@ func normalizeStrategyGroup(input StrategyGroup, now time.Time) (StrategyGroup, 
 		if input.Icon != "" && !isHTTPURL(input.Icon) {
 			return StrategyGroup{}, fmt.Errorf("selector icon must use http or https")
 		}
-		if input.Type == "select" {
+		if input.Type != "select" {
+			input.AutoSelect = false
+		}
+		if input.Type == "select" && !input.AutoSelect {
 			input.URL = ""
 			input.Interval = 0
 			input.Tolerance = 0
@@ -111,7 +115,7 @@ func normalizeStrategyGroup(input StrategyGroup, now time.Time) (StrategyGroup, 
 			if input.Interval < 10 || input.Interval > 86400 {
 				return StrategyGroup{}, fmt.Errorf("selector interval must be between 10 and 86400 seconds")
 			}
-			if input.Type == "url-test" {
+			if input.Type == "url-test" || input.AutoSelect {
 				if input.Tolerance < 0 || input.Tolerance > 60000 {
 					return StrategyGroup{}, fmt.Errorf("selector tolerance is invalid")
 				}
@@ -193,6 +197,9 @@ func normalizeRuleSet(input RuleSet, now time.Time) (RuleSet, error) {
 	if !contains([]string{"domain", "ipcidr", "classical"}, input.Behavior) {
 		return RuleSet{}, fmt.Errorf("rule set behavior is unsupported")
 	}
+	if input.DefaultBrowser && (input.SourceType != "inline" || input.Behavior != "classical") {
+		return RuleSet{}, fmt.Errorf("built-in browser matching requires a local classical rule set")
+	}
 	if input.Behavior != "ipcidr" {
 		input.NoResolve = false
 	}
@@ -215,7 +222,7 @@ func normalizeRuleSet(input RuleSet, now time.Time) (RuleSet, error) {
 		input.Format = "yaml"
 		input.URL = ""
 		input.Interval = 0
-		payloadYAML, payload, err := normalizeRuleSetPayloadYAML(input.PayloadYAML)
+		payloadYAML, payload, err := normalizeRuleSetPayloadYAML(input.PayloadYAML, input.DefaultBrowser)
 		if err != nil {
 			return RuleSet{}, err
 		}

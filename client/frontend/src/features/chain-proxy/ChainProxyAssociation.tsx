@@ -1,3 +1,5 @@
+import { flagSelectRenderers } from "../../components/common/flagSelectRenderers";
+import { FlagText } from "../../components/common/FlagText";
 import { useEffect, useState } from "react";
 import { Alert, Form, Modal, Select, Spin, Tag } from "antd";
 import { useTranslation } from "react-i18next";
@@ -36,13 +38,15 @@ export function ChainProxyAssociation({ target, onClose, onSaved }: { target: Su
       {!state && !error && <Spin />}
       {state && <>
         <Form layout="vertical"><Form.Item label={<>{t("chainProxy.associationGroups")}<FeatureHelp topic="chainProxy" compact /></>}>
-          <Select aria-label={t("chainProxy.associationGroups")} mode="multiple" allowClear disabled={busy} value={selected} onChange={setSelected} optionFilterProp="label" placeholder={t("chainProxy.associationPlaceholder")}
+          <Select
+            {...flagSelectRenderers}
+            aria-label={t("chainProxy.associationGroups")} mode="multiple" allowClear disabled={busy} value={selected} onChange={setSelected} optionFilterProp="label" placeholder={t("chainProxy.associationPlaceholder")}
             options={[...state.groups.map(g => ({ value: g.id, label: `${g.name} (${g.nodes.length})` })), ...missing.map(id => ({ value: id, label: t("chainProxy.missingGroup"), disabled: true }))]} />
         </Form.Item></Form>
         <p>{t("chainProxy.linkedNodes")}</p>
         {!state.groups.length && <Alert type="info" title={t("chainProxy.noGroups")} />}
         {state.groups.filter(g => selected.includes(g.id)).map(group => <div className="chain-proxy-association-group" key={group.id}>
-          <strong>{group.name}</strong><div>{group.nodes.map(node => <Tag key={node.id}>{node.name}</Tag>)}</div>
+          <strong><FlagText>{group.name}</FlagText></strong><div>{group.nodes.map(node => <Tag key={node.id}><FlagText>{node.name}</FlagText></Tag>)}</div>
         </div>)}
       </>}
     </div>

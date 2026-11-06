@@ -11,13 +11,14 @@ Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络�
 
 ## 主要功能
 
-- 导入和更新订阅，支持 URL、文件和二维码，显示订阅流量及有效期信息。
+- 导入和更新订阅，支持 URL、文件和二维码，显示订阅流量及有效期信息。URL 订阅可设置每10分钟、30分钟、1小时、3小时或12小时自动更新，默认1小时，隐藏到托盘仍继续，失败保留旧修订。
 - 在配置页管理链式代理：手动组批量导入 URI/YAML，订阅组从 URL 筛选和刷新落地节点；关联分组后按选择器和中继名称生成链路。
 - 使用可视化本地配置或隔离 JavaScript 脚本重构订阅；每份订阅选择其中一种处理方式。
 - 管理可复用的本地策略组、选择器和规则集，支持排序、启用开关、节点名称与协议筛选。
+- 内置常规通用、进程规则两套本地可编辑配置。🚀 Jeemi、🤖 AI、✈️ Telegram、🎬 Video 各带 Auto，AI 主组和 Auto 均排除 HK；规则离线保存，支持可视化增删改与 YAML 编辑，无仓库更新。通用方案 inline 展开 CN 直连规则，使用已安装的本地 GeoSite/GeoIP；进程方案的路由规则不引用 GEO，国内常用应用与系统内置浏览器直连（Windows Edge、Ubuntu/Linux Firefox、macOS Safari），需要可用的进程查询。两套方案均让专用站点优先、漏网走 Jeemi。主页 Fake IP 过滤默认包含 96 项，其中 geosite:private 和 geosite:cn 仍需要 GeoSite 库，进程方案也一样；已有过滤列表不被新默认值覆盖。
 - 本地配置和脚本支持 JSON 导入导出；配置包包含关联策略组和规则集。
 - 保存或关联前验证候选配置，失败时保留旧配置并允许继续编辑；运行配置更新失败时保留上一份可用状态。
-- 管理 mihomo 版本和 GEO 数据，配置系统代理、TUN、DNS、端口和局域网访问。
+- 管理 mihomo 版本和 GEO 数据，配置系统代理、TUN、DNS、端口和局域网访问。主页只提醒当前配置实际引用的 GEO 库缺失或异常，未使用 GEO 时无需安装。
 - 查看实时流量、连接、日志和节点延迟；提供浅色/深色主题和中英文界面。
 - 按订阅记住手动选择器和全局模式的节点选择，代理或客户端重启后恢复仍有效的选择。
 
@@ -47,7 +48,7 @@ Linux 当前系统代理适配 Ubuntu/GNOME。公开二进制使用 Ubuntu 22.04
 
 ### Windows 字体建议
 
-建议 Windows 用户安装 [Flag Emojis for Windows 提供的 Emoji 字体](https://github.com/Chasmical/flag-emojis-for-windows/releases)，以便正常显示 Jeemi 中的区域 / 国旗图标。
+区域 / 国旗图标使用随客户端内置的 SVG，无需额外安装国旗字体。
 
 1. 打开上面的下载页面，下载 Emoji 字体文件。
 2. 双击下载的字体文件，打开字体预览窗口。
@@ -137,8 +138,11 @@ Linux 开发需要追加 `-tags webkit2_41`。完整环境准备、macOS 开发�
 
 ## 致谢
 
+- [MetaCubeX/meta-rules-dat](https://github.com/MetaCubeX/meta-rules-dat)：内置离线规则基线；固定版本、摘要及 GPL-3.0 许可证见 [规则资源声明](client/internal/config/presets/data/README.md)。
+
 - [Wails](https://github.com/wailsapp/wails)：应用框架。
 - [Mihomo](https://github.com/MetaCubeX/mihomo)：代理核心。
+- [flag-icons](https://github.com/lipis/flag-icons) 与 [Twemoji](https://github.com/jdecked/twemoji)：内置国家及地区 SVG 旗帜，无需安装国旗字体；来源、修改说明和许可证见 [资源声明](client/frontend/public/flags/README.md)。
 - [FlClash](https://github.com/chen08209/FlClash)：参考项目。
 - [Jeeyio](https://t.me/jeeyio_channel)：赞助支持。
 

@@ -39,6 +39,7 @@ func fallbackService(t *testing.T) (*Service, *fallbackFetcher, subscription.Sta
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, s)
 	f := &fallbackFetcher{contents: fallbackFixture}
 	s.subscriptions, err = subscription.NewManager(subscription.ManagerOptions{DataDirectory: dataDirectory, Fetcher: f})
 	if err != nil {
@@ -49,6 +50,20 @@ func fallbackService(t *testing.T) (*Service, *fallbackFetcher, subscription.Sta
 		t.Fatal(err)
 	}
 	return s, f, state
+}
+
+// Keep routing and lifecycle fixtures independent of installed GEO assets.
+// Tests of the default DNS/GEO behavior use unmodified preferences explicitly.
+func useDomainOnlyFakeIPFilter(t *testing.T, s *Service) {
+	t.Helper()
+	preferences, err := s.RuntimePreferences()
+	if err != nil {
+		t.Fatal(err)
+	}
+	preferences.DNSFakeIPFilter = []string{"+.lan"}
+	if _, err := s.settingsStore.SetRuntimePreferences(preferences); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestSubscriptionFallbackIsPerSubscriptionAndNeverStartsCore(t *testing.T) {
@@ -101,7 +116,10 @@ func TestSubscriptionFallbackIsPerSubscriptionAndNeverStartsCore(t *testing.T) {
 	if err != nil || state.Projection.Fallback.Selection != chosen {
 		t.Fatalf("switching lost per-subscription override: %+v %v", state.Projection, err)
 	}
-	preferences := runtimeconfig.DefaultPreferences()
+	preferences, err := s.RuntimePreferences()
+	if err != nil {
+		t.Fatal(err)
+	}
 	preferences.OutboundMode = runtimeconfig.OutboundModeGlobal
 	if _, err := s.SaveRuntimePreferences(preferences); err != nil {
 		t.Fatal(err)

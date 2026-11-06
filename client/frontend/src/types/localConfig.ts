@@ -17,11 +17,7 @@ export type ConfigValueKind =
   | "rules";
 
 export type ConfigEditorKind =
-  | "boolean"
-  | "number"
-  | "string"
-  | "enum"
-  | "yaml";
+  "boolean" | "number" | "string" | "enum" | "yaml";
 
 export interface ConfigCatalogField {
   id: string;
@@ -83,6 +79,7 @@ export interface StrategyGroupResource {
   tolerance: number;
   strategy: "" | "round-robin" | "consistent-hashing" | "sticky-sessions";
   lazy: boolean;
+  autoSelect?: boolean;
   filter: StrategyGroupFilter;
   createdAt: string;
   updatedAt: string;
@@ -102,6 +99,8 @@ export interface RuleSetResource {
   url: string;
   interval: number;
   noResolve: boolean;
+  /** Platform built-in Edge/Firefox/Safari; independent of default app settings. */
+  defaultBrowser?: boolean;
   payloadYaml: string;
   payload: string[];
   createdAt: string;

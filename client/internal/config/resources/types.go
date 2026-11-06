@@ -48,34 +48,38 @@ type StrategyGroup struct {
 	Policy            PolicyTarget       `json:"policy"`
 
 	// Selector-only fields.
-	Type      string     `json:"type"`
-	Emoji     string     `json:"emoji"`
-	Icon      string     `json:"icon"`
-	URL       string     `json:"url"`
-	Interval  int        `json:"interval"`
-	Tolerance int        `json:"tolerance"`
-	Strategy  string     `json:"strategy"`
-	Lazy      bool       `json:"lazy"`
-	Filter    NodeFilter `json:"filter"`
+	Type       string     `json:"type"`
+	Emoji      string     `json:"emoji"`
+	Icon       string     `json:"icon"`
+	URL        string     `json:"url"`
+	Interval   int        `json:"interval"`
+	Tolerance  int        `json:"tolerance"`
+	Strategy   string     `json:"strategy"`
+	Lazy       bool       `json:"lazy"`
+	AutoSelect bool       `json:"autoSelect,omitempty"`
+	Filter     NodeFilter `json:"filter"`
 
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }
 
 type RuleSet struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	SourceType  string   `json:"sourceType"`
-	Behavior    string   `json:"behavior"`
-	Format      string   `json:"format"`
-	URL         string   `json:"url"`
-	Interval    int      `json:"interval"`
-	NoResolve   bool     `json:"noResolve,omitempty"`
-	PayloadYAML string   `json:"payloadYaml"`
-	Payload     []string `json:"payload"`
-	CreatedAt   string   `json:"createdAt"`
-	UpdatedAt   string   `json:"updatedAt"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	SourceType  string `json:"sourceType"`
+	Behavior    string `json:"behavior"`
+	Format      string `json:"format"`
+	URL         string `json:"url"`
+	Interval    int    `json:"interval"`
+	NoResolve   bool   `json:"noResolve,omitempty"`
+	// DefaultBrowser matches the platform's built-in Edge/Firefox/Safari browser,
+	// independently of the user's default browser setting. The JSON key is stable.
+	DefaultBrowser bool     `json:"defaultBrowser,omitempty"`
+	PayloadYAML    string   `json:"payloadYaml"`
+	Payload        []string `json:"payload"`
+	CreatedAt      string   `json:"createdAt"`
+	UpdatedAt      string   `json:"updatedAt"`
 }
 
 type State struct {

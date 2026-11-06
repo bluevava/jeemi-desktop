@@ -14,11 +14,13 @@ import {
   type MihomoProxyRuntimeState,
 } from "../../lib/mihomo/client";
 import { getSubscriptionState } from "../../services/appBridge";
+import { subscribeSubscriptionUpdates } from "../../services/subscriptionUpdateBridge";
 import type { SubscriptionState } from "../../types/subscription";
 import { useRuntimeStatus } from "./RuntimeStatusContext";
 import { useWindowActivity } from "./WindowActivityContext";
 
 interface ProxyOverviewValue {
+  subscriptionUpdateRevision: number;
   subscriptionState: SubscriptionState | null;
   proxyRuntime: MihomoProxyRuntimeState | null;
   syncSubscriptionState: (state: SubscriptionState) => void;
@@ -38,13 +40,22 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
   const { isWindowVisible } = useWindowActivity();
   const [subscriptionState, setSubscriptionState] =
     useState<SubscriptionState | null>(null);
+  const [subscriptionUpdateRevision, setSubscriptionUpdateRevision] =
+    useState(0);
+  useEffect(
+    () =>
+      subscribeSubscriptionUpdates(() =>
+        setSubscriptionUpdateRevision((value) => value + 1),
+      ),
+    [],
+  );
   const [proxyRuntime, setProxyRuntime] =
     useState<MihomoProxyRuntimeState | null>(null);
   const session = runtime?.mihomo.controllerSession ?? null;
   const runtimeReady = Boolean(
     runtime?.mihomo.state === "running" &&
-      runtime.mihomo.controllerReady &&
-      session,
+    runtime.mihomo.controllerReady &&
+    session,
   );
   const liveDataAllowed = Boolean(
     isWindowVisible && liveDataReady && runtimeReady && session,
@@ -68,6 +79,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
   ].join(":");
 
   useEffect(() => {
+    if (!isWindowVisible) return;
     let active = true;
     void getSubscriptionState()
       .then((state) => {
@@ -77,7 +89,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
     return () => {
       active = false;
     };
-  }, [subscriptionSourceKey]);
+  }, [subscriptionSourceKey, subscriptionUpdateRevision, isWindowVisible]);
 
   const refreshProxyRuntime = useCallback(async () => {
     if (!liveDataAllowed || !session) {
@@ -86,10 +98,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
     }
     const sessionID = session.id;
     const next = await getProxyRuntimeState(session);
-    if (
-      liveDataAllowedRef.current &&
-      sessionIDRef.current === sessionID
-    ) {
+    if (liveDataAllowedRef.current && sessionIDRef.current === sessionID) {
       setProxyRuntime(next);
     }
   }, [liveDataAllowed, session?.id]);
@@ -126,7 +135,12 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
   }, []);
 
   const commitProxySelection = useCallback(
-    (group: string, proxy: string, sessionId: string, subscriptionId: string) => {
+    (
+      group: string,
+      proxy: string,
+      sessionId: string,
+      subscriptionId: string,
+    ) => {
       if (
         !liveDataAllowedRef.current ||
         sessionIDRef.current !== sessionId ||
@@ -148,6 +162,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<ProxyOverviewValue>(
     () => ({
+      subscriptionUpdateRevision,
       subscriptionState,
       proxyRuntime,
       syncSubscriptionState,
@@ -155,6 +170,7 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
       refreshProxyRuntime,
     }),
     [
+      subscriptionUpdateRevision,
       commitProxySelection,
       proxyRuntime,
       refreshProxyRuntime,
@@ -173,7 +189,9 @@ export function ProxyOverviewProvider({ children }: PropsWithChildren) {
 export function useProxyOverview(): ProxyOverviewValue {
   const value = useContext(ProxyOverviewContext);
   if (!value) {
-    throw new Error("useProxyOverview must be used within ProxyOverviewProvider");
+    throw new Error(
+      "useProxyOverview must be used within ProxyOverviewProvider",
+    );
   }
   return value;
 }

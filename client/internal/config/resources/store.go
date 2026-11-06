@@ -379,6 +379,15 @@ func validateState(groups []StrategyGroup, ruleSets []RuleSet) error {
 		}
 		groups[index] = normalized
 	}
+	for _, item := range groups {
+		if item.AutoSelect {
+			name := strategyGroupDisplayName(item) + " Auto"
+			if _, duplicate := seen["group-name:"+name]; duplicate {
+				return fmt.Errorf("generated Auto selector name conflicts with a strategy group")
+			}
+			seen["group-name:"+name] = struct{}{}
+		}
+	}
 	for index := range ruleSets {
 		item := ruleSets[index]
 		if !resourceIDPattern.MatchString(item.ID) {

@@ -1,3 +1,4 @@
+import { FlagText } from "../../components/common/FlagText";
 import {
   ArrowDownOutlined,
   CheckOutlined,
@@ -458,22 +459,22 @@ function formatReceivedAt(timestamp: number, locale: string): string {
 
 function highlightText(text: string, input: string): ReactNode {
   const query = input.trim();
-  if (!query) return text;
+  if (!query) return <FlagText>{text}</FlagText>;
   const normalizedText = text.toLocaleLowerCase();
   const normalizedQuery = query.toLocaleLowerCase();
   const parts: ReactNode[] = [];
   let cursor = 0;
   let match = normalizedText.indexOf(normalizedQuery);
   while (match >= 0) {
-    if (match > cursor) parts.push(text.slice(cursor, match));
+    if (match > cursor) parts.push(<FlagText key={`text-${cursor}`}>{text.slice(cursor, match)}</FlagText>);
     parts.push(
       <mark key={`${match}-${parts.length}`}>
-        {text.slice(match, match + query.length)}
+        <FlagText>{text.slice(match, match + query.length)}</FlagText>
       </mark>,
     );
     cursor = match + query.length;
     match = normalizedText.indexOf(normalizedQuery, cursor);
   }
-  if (cursor < text.length) parts.push(text.slice(cursor));
-  return parts.length > 0 ? parts : text;
+  if (cursor < text.length) parts.push(<FlagText key={`text-${cursor}`}>{text.slice(cursor)}</FlagText>);
+  return parts.length > 0 ? parts : <FlagText>{text}</FlagText>;
 }

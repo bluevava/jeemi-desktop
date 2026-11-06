@@ -95,6 +95,7 @@ func (s *Service) reconcileSelectedWithTimeoutLocked(trigger string, previousPre
 }
 
 func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, previousPreferences *runtimeconfig.Preferences, mode reconciliationMode) error {
+	s.setDesiredGeoRequirements(runtimeGeoRequirements{})
 	s.updateConfigurationStatus(func(status *RuntimeConfigurationStatus) {
 		status.State = RuntimeConfigurationBuilding
 		status.Trigger = trigger
@@ -139,6 +140,11 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		}
 		return s.failRuntimeConfiguration(trigger, "compose", "configuration_build_failed", err, nil)
 	}
+	geoKinds, err := geodata.RequiredKinds(candidate.resolved.Configuration, candidate.geoDataPreferences)
+	if err != nil {
+		return s.failRuntimeConfiguration(trigger, "compose", "configuration_build_failed", err, nil)
+	}
+	s.setDesiredGeoRequirements(runtimeGeoRequirements{preferences: candidate.geoDataPreferences, kinds: geoKinds})
 	s.updateConfigurationStatus(func(status *RuntimeConfigurationStatus) {
 		status.DesiredFingerprint = candidate.fingerprint
 		status.SubscriptionID = candidate.resolved.SubscriptionID
@@ -268,6 +274,7 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 	if !geoPending && mode == reconcileAutomatic && current.AppliedFingerprint == snapshot.Manifest.Fingerprint &&
 		live.State == mihomoruntime.StateRunning && sameRuntimeSource(live.Source, candidate.request.Source) &&
 		live.CoreVersion == candidate.installation.Version {
+		s.applyGeoRequirements()
 		s.updateConfigurationStatus(func(status *RuntimeConfigurationStatus) {
 			status.State = RuntimeConfigurationApplied
 			status.LastError = nil
@@ -343,6 +350,9 @@ func (s *Service) reconcileSelectedLocked(ctx context.Context, trigger string, p
 		failure := s.runtimeManager.Status().LastError
 		return s.failRuntimeConfiguration(trigger, "apply", "configuration_apply_failed", err, failure)
 	}
+	// The core already accepted this configuration even if publishing a later
+	// manifest/snapshot fails. Diagnostics must describe that active request.
+	s.applyGeoRequirements()
 	if geoActivation != nil {
 		if err := geoActivation.Commit(); err != nil {
 			geoActivation = nil

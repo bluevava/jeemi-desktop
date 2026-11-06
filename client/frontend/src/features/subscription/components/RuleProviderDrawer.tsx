@@ -1,3 +1,4 @@
+import { FlagText } from "../../../components/common/FlagText";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { Button, Drawer, Empty, Switch, Tooltip } from "antd";
 import { useTranslation } from "react-i18next";
@@ -17,9 +18,7 @@ interface RuleProviderDrawerProps {
   open: boolean;
   providers: SubscriptionRuleProvider[];
   runtimeLoading: boolean;
-  runtimeProviders: Readonly<
-    Record<string, MihomoRuleProviderRuntimeState>
-  >;
+  runtimeProviders: Readonly<Record<string, MihomoRuleProviderRuntimeState>>;
   runtimeReady: boolean;
 }
 
@@ -67,20 +66,23 @@ export function RuleProviderDrawer({
         <div className="rule-provider-grid">
           {providers.map((provider) => {
             const runtimeProvider = runtimeProviders[provider.name];
+            const canUpdate = provider.type === "http";
             const updatedLabel = !provider.enabled
               ? t("subscription.ruleProvider.disabledDescription")
-              : runtimeProvider?.updatedAt
-                ? t("subscription.ruleProvider.updated", {
-                    time: formatSubscriptionUpdateAge(
-                      runtimeProvider.updatedAt,
-                      locale,
-                    ),
-                  })
-                : runtimeReady && runtimeLoading
-                  ? t("subscription.ruleProvider.loadingStatus")
-                  : runtimeReady
-                    ? t("subscription.ruleProvider.updateUnknown")
-                    : t("subscription.ruleProvider.updateRequiresCore");
+              : !canUpdate
+                ? t("offlineConfig.localRules")
+                : runtimeProvider?.updatedAt
+                  ? t("subscription.ruleProvider.updated", {
+                      time: formatSubscriptionUpdateAge(
+                        runtimeProvider.updatedAt,
+                        locale,
+                      ),
+                    })
+                  : runtimeReady && runtimeLoading
+                    ? t("subscription.ruleProvider.loadingStatus")
+                    : runtimeReady
+                      ? t("subscription.ruleProvider.updateUnknown")
+                      : t("subscription.ruleProvider.updateRequiresCore");
             return (
               <div
                 className={`rule-provider-item${
@@ -89,7 +91,9 @@ export function RuleProviderDrawer({
                 key={provider.name}
               >
                 <span className="rule-provider-copy">
-                  <strong>{provider.name}</strong>
+                  <strong>
+                    <FlagText>{provider.name}</FlagText>
+                  </strong>
                   <small>
                     {[provider.behavior, provider.type, provider.format]
                       .filter(Boolean)
@@ -129,34 +133,36 @@ export function RuleProviderDrawer({
                       size="small"
                     />
                   </Tooltip>
-                  <Tooltip
-                    title={
-                      !provider.enabled
-                        ? t("subscription.ruleProvider.disabledRefresh")
-                        : runtimeReady
-                          ? t("subscription.ruleProvider.refresh", {
-                              name: provider.name,
-                            })
-                          : t("subscription.ruleProvider.requiresCore")
-                    }
-                  >
-                    <span>
-                      <Button
-                        aria-label={t("subscription.ruleProvider.refresh", {
-                          name: provider.name,
-                        })}
-                        disabled={
-                          !provider.enabled ||
-                          !runtimeReady ||
-                          busyToggle !== ""
-                        }
-                        icon={<CloudDownloadOutlined />}
-                        loading={busyProvider === provider.name}
-                        onClick={() => void onRefresh(provider.name)}
-                        size="small"
-                      />
-                    </span>
-                  </Tooltip>
+                  {canUpdate ? (
+                    <Tooltip
+                      title={
+                        !provider.enabled
+                          ? t("subscription.ruleProvider.disabledRefresh")
+                          : runtimeReady
+                            ? t("subscription.ruleProvider.refresh", {
+                                name: provider.name,
+                              })
+                            : t("subscription.ruleProvider.requiresCore")
+                      }
+                    >
+                      <span>
+                        <Button
+                          aria-label={t("subscription.ruleProvider.refresh", {
+                            name: provider.name,
+                          })}
+                          disabled={
+                            !provider.enabled ||
+                            !runtimeReady ||
+                            busyToggle !== ""
+                          }
+                          icon={<CloudDownloadOutlined />}
+                          loading={busyProvider === provider.name}
+                          onClick={() => void onRefresh(provider.name)}
+                          size="small"
+                        />
+                      </span>
+                    </Tooltip>
+                  ) : null}
                 </span>
               </div>
             );

@@ -14,6 +14,10 @@ func (a *App) GetLocalConfigState() (profile.LocalConfigState, error) {
 	return a.service.LocalConfigState()
 }
 
+func (a *App) CreateLocalConfigPreset(kind string) (profile.LocalConfig, error) {
+	return a.service.CreateLocalConfigPreset(kind)
+}
+
 func (a *App) GetLocalConfig(id string) (profile.LocalConfig, error) {
 	return a.service.LocalConfig(id)
 }

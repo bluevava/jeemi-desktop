@@ -78,6 +78,7 @@ func TestServiceKeepsSubscriptionAssociationReferentiallySafe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	local, err := service.SaveLocalConfig(profile.SaveLocalConfigInput{Name: "Reusable local configuration"})
 	if err != nil {
 		t.Fatal(err)
@@ -114,6 +115,7 @@ func TestServiceValidatesLocalScriptBeforeAssociationAndReferencedSave(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	source := filepath.Join(t.TempDir(), "subscription.yaml")
 	if err := os.WriteFile(source, []byte("mode: rule\nproxies: []\nproxy-groups: []\nrules:\n  - MATCH,DIRECT\n"), 0o600); err != nil {
 		t.Fatal(err)
@@ -167,6 +169,7 @@ func TestServiceFormatsLocalScriptTestUnicodeForDisplay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	source := filepath.Join(t.TempDir(), "subscription.yaml")
 	if err := os.WriteFile(source, []byte("mode: rule\nproxies: []\nproxy-groups: []\nrules:\n  - MATCH,DIRECT\n"), 0o600); err != nil {
 		t.Fatal(err)
@@ -325,6 +328,7 @@ func TestServiceBuildsStaticSelectorProjectionFromAssociatedLocalConfiguration(t
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	resourceState, err := service.SaveRuleSet(configresources.RuleSet{
 		Name: "local", SourceType: "http", Behavior: "domain", Format: "yaml", URL: "https://example.invalid/rules.yaml",
 	})
@@ -375,6 +379,7 @@ func TestServiceResolvesReusableGroupsAndRuleSetsIntoSubscriptionProjection(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	resourceState, err := service.SaveRuleSet(configresources.RuleSet{
 		Name: "本地域名", SourceType: "inline", Behavior: "domain", PayloadYAML: "payload:\n  - +.example.com\n",
 	})
@@ -460,6 +465,7 @@ func TestServiceAppliesPerSubscriptionRuleProviderSwitchesToProjectionAndResolve
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	source := filepath.Join(t.TempDir(), "providers.yaml")
 	contents := []byte(`rule-providers:
   ads:
@@ -575,6 +581,7 @@ func TestServiceAutomaticallyMaintainsSafeResolvedRuntimeSnapshot(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, service)
 	source := filepath.Join(t.TempDir(), "subscription.yaml")
 	contents := []byte("external-controller: 0.0.0.0:9090\nsecret: source-secret\nmode: rule\nport: 8080\nproxies: []\n")
 	if err := os.WriteFile(source, contents, 0o600); err != nil {
@@ -596,7 +603,10 @@ func TestServiceAutomaticallyMaintainsSafeResolvedRuntimeSnapshot(t *testing.T) 
 		t.Fatalf("default runtime listener was not injected:\n%s", resolvedContents)
 	}
 
-	preferences := runtimeconfig.DefaultPreferences()
+	preferences, err := service.RuntimePreferences()
+	if err != nil {
+		t.Fatal(err)
+	}
 	preferences.OutboundMode = runtimeconfig.OutboundModeDirect
 	preferences.ListenPort = 7897
 	if _, err := service.SaveRuntimePreferences(preferences); err != nil {

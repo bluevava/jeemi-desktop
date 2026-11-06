@@ -66,13 +66,17 @@ func RuleProviderCount(input Plan, state State) (int, error) {
 // Apply resolves reusable strategy groups against a composed subscription.
 // Selectors become mihomo proxy-groups; rule and selector groups both emit
 // ordered rules through RULE-SET or direct inline expansion.
-func Apply(contents []byte, state State, input Plan) ([]byte, error) {
+func Apply(contents []byte, state State, input Plan, options ...ApplyOptions) ([]byte, error) {
 	plan, err := ValidatePlan(input, state)
 	if err != nil {
 		return nil, err
 	}
 	if plan.RulesDisabled {
 		return contents, nil
+	}
+	state, err = resolveBuiltInBrowser(state, plan, options)
+	if err != nil {
+		return nil, err
 	}
 	if len(plan.StrategyGroupIDs) == 0 && plan.DefaultProxySelectorID == "" && plan.RuleStrategy != compose.StrategyReplace && plan.Match.Mode == "none" {
 		return contents, nil
@@ -268,6 +272,23 @@ func proxiesFromRoot(root *yaml.Node) ([]proxyRecord, error) {
 
 func materializeSelectors(ids []string, available map[string]StrategyGroup, proxies []proxyRecord) (*yaml.Node, error) {
 	sequence := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
+	names := make(map[string]bool, len(proxies)+len(ids)*2)
+	for _, proxy := range proxies {
+		names[proxy.Name] = true
+	}
+	for _, id := range ids {
+		group := available[id]
+		generated := []string{strategyGroupDisplayName(group)}
+		if group.AutoSelect {
+			generated = append(generated, strategyGroupDisplayName(group)+" Auto")
+		}
+		for _, name := range generated {
+			if names[name] {
+				return nil, fmt.Errorf("local selector name %q conflicts with a node or selector", name)
+			}
+			names[name] = true
+		}
+	}
 	for _, id := range ids {
 		group, found := available[id]
 		if !found || group.Kind != StrategyGroupKindSelector {
@@ -287,7 +308,26 @@ func materializeSelectors(ids []string, available map[string]StrategyGroup, prox
 		if group.Icon != "" {
 			setScalar(mapping, "icon", group.Icon)
 		}
-		setStringSequence(mapping, "proxies", members)
+		if group.AutoSelect {
+			autoName := strategyGroupDisplayName(group) + " Auto"
+			auto := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+			setScalar(auto, "name", autoName)
+			setScalar(auto, "type", "url-test")
+			setBool(auto, "hidden", true)
+			setScalar(auto, "url", group.URL)
+			setInt(auto, "interval", group.Interval)
+			setInt(auto, "tolerance", group.Tolerance)
+			setBool(auto, "lazy", group.Lazy)
+			autoMembers := members
+			if len(autoMembers) == 0 {
+				autoMembers = []string{"REJECT"}
+			}
+			setStringSequence(auto, "proxies", autoMembers)
+			setStringSequence(mapping, "proxies", append([]string{autoName}, members...))
+			sequence.Content = append(sequence.Content, auto)
+		} else {
+			setStringSequence(mapping, "proxies", members)
+		}
 		if group.Type != "select" {
 			setScalar(mapping, "url", group.URL)
 			setInt(mapping, "interval", group.Interval)

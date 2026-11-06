@@ -43,6 +43,13 @@ describe("selectorPresentation", () => {
     });
   });
 
+  it("moves a complete subdivision flag into the icon slot", () => {
+    const england = "\u{1f3f4}\u{e0067}\u{e0062}\u{e0065}\u{e006e}\u{e0067}\u{e007f}";
+    expect(selectorPresentation(`${england} England`, "")).toEqual({
+      displayName: "England", emoji: england, iconUrl: null,
+    });
+  });
+
   it("does not load local paths or executable URL schemes", () => {
     expect(selectorPresentation("Primary", "file:///tmp/icon.png")).toEqual({
       displayName: "Primary",

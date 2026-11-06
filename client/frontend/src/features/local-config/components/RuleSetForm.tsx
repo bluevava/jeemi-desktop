@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { RuleSetResource } from "../../../types/localConfig";
 import { ResourceFieldLabel } from "./StrategyRuleSetReferencesEditor";
 import { RuleDocumentationButton } from "../../../components/help/RuleDocumentationButton";
+import { RulePayloadEditor } from "./RulePayloadEditor";
 
 export function RuleSetForm({
   draft,
@@ -40,7 +41,14 @@ export function RuleSetForm({
             <span>{t("localConfig.resources.ruleSets.sourceType")}</span>
             <Select
               value={draft.sourceType}
-              onChange={(sourceType) => setDraft({ ...draft, sourceType })}
+              onChange={(sourceType) =>
+                setDraft({
+                  ...draft,
+                  sourceType,
+                  defaultBrowser:
+                    sourceType === "inline" && draft.defaultBrowser,
+                })
+              }
               options={["inline", "http"].map((value) => ({
                 value,
                 label: t(`localConfig.resources.ruleSets.sourceTypes.${value}`),
@@ -55,6 +63,8 @@ export function RuleSetForm({
                 setDraft({
                   ...draft,
                   behavior,
+                  defaultBrowser:
+                    behavior === "classical" && draft.defaultBrowser,
                   noResolve: behavior === "ipcidr" ? draft.noResolve : false,
                   format:
                     behavior === "classical" && draft.format === "mrs"
@@ -106,6 +116,27 @@ export function RuleSetForm({
               />
             </div>
           ) : null}
+          {draft.sourceType === "inline" && draft.behavior === "classical" ? (
+            <div className="config-resource-field">
+              <ResourceFieldLabel
+                helpBase="offlineConfig.help.browser"
+                label={t("offlineConfig.defaultBrowser")}
+              />
+              <div className="config-resource-switch-control">
+                <Switch
+                  aria-label={t("offlineConfig.defaultBrowser")}
+                  checked={Boolean(draft.defaultBrowser)}
+                  onChange={(defaultBrowser) =>
+                    setDraft({
+                      ...draft,
+                      defaultBrowser,
+                      payloadYaml: draft.payloadYaml || "payload: []\n",
+                    })
+                  }
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       </Card>
       <Card className="feature-card rule-set-content-card" variant="borderless">
@@ -121,31 +152,41 @@ export function RuleSetForm({
             />
             <RuleDocumentationButton />
           </div>
-          <Input.TextArea
-            className="config-yaml-input"
-            aria-label={t(
-              draft.sourceType === "http"
-                ? "localConfig.resources.ruleSets.url"
-                : "localConfig.resources.ruleSets.payload",
-            )}
-            autoSize={{ minRows: 18, maxRows: 32 }}
-            spellCheck={false}
-            value={draft.sourceType === "http" ? draft.url : draft.payloadYaml}
-            placeholder={
-              draft.sourceType === "http"
-                ? "https://…"
-                : t(
-                    `localConfig.resources.ruleSets.payloadPlaceholders.${draft.behavior}`,
-                  )
-            }
-            onChange={(event) =>
-              setDraft(
+          {draft.sourceType === "inline" ? (
+            <RulePayloadEditor
+              value={draft.payloadYaml}
+              behavior={draft.behavior}
+              onChange={(payloadYaml) => setDraft({ ...draft, payloadYaml })}
+            />
+          ) : (
+            <Input.TextArea
+              className="config-yaml-input"
+              aria-label={t(
                 draft.sourceType === "http"
-                  ? { ...draft, url: event.target.value }
-                  : { ...draft, payloadYaml: event.target.value },
-              )
-            }
-          />
+                  ? "localConfig.resources.ruleSets.url"
+                  : "localConfig.resources.ruleSets.payload",
+              )}
+              autoSize={{ minRows: 18, maxRows: 32 }}
+              spellCheck={false}
+              value={
+                draft.sourceType === "http" ? draft.url : draft.payloadYaml
+              }
+              placeholder={
+                draft.sourceType === "http"
+                  ? "https://…"
+                  : t(
+                      `localConfig.resources.ruleSets.payloadPlaceholders.${draft.behavior}`,
+                    )
+              }
+              onChange={(event) =>
+                setDraft(
+                  draft.sourceType === "http"
+                    ? { ...draft, url: event.target.value }
+                    : { ...draft, payloadYaml: event.target.value },
+                )
+              }
+            />
+          )}
         </div>
       </Card>
     </div>

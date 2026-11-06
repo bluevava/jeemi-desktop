@@ -14,10 +14,7 @@ export interface FallbackState {
 
 export type SubscriptionSourceKind = "url" | "file";
 export type SubscriptionImportMethod =
-  | "url"
-  | "file"
-  | "qr_image"
-  | "qr_screen";
+  "url" | "file" | "qr_image" | "qr_screen";
 export type SubscriptionFormat = "yaml" | "json" | "txt";
 export type SubscriptionIconKind = "" | "emoji" | "url";
 
@@ -58,6 +55,8 @@ export interface SubscriptionNormalizationReport {
 }
 
 export interface SubscriptionSummary {
+  autoUpdateIntervalMinutes: number;
+  autoUpdateError?: "refresh_failed" | "validation_failed";
   chainProxyGroupIds: string[];
   chainProxyRevision: number;
   fallback: FallbackSelection;
@@ -178,6 +177,7 @@ export interface SubscriptionProjection {
 }
 
 export interface ImportSubscriptionURLInput {
+  autoUpdateIntervalMinutes: number;
   name: string;
   description: string;
   sourceUrl: string;
@@ -187,6 +187,7 @@ export interface ImportSubscriptionURLInput {
 }
 
 export interface UpdateSubscriptionInput {
+  autoUpdateIntervalMinutes: number;
   id: string;
   name: string;
   description: string;

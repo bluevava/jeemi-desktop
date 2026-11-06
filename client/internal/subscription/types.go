@@ -61,6 +61,8 @@ type CompositionSummary struct {
 }
 
 type Summary struct {
+	AutoUpdateIntervalMinutes    int                        `json:"autoUpdateIntervalMinutes"`
+	AutoUpdateError              string                     `json:"autoUpdateError,omitempty"`
 	ChainProxyGroupIDs           []string                   `json:"chainProxyGroupIds"`
 	ChainProxyRevision           int                        `json:"chainProxyRevision"`
 	Fallback                     fallbackoverride.Selection `json:"fallback"`
@@ -174,21 +176,23 @@ type Projection struct {
 }
 
 type ImportURLInput struct {
-	Name         string       `json:"name"`
-	Description  string       `json:"description"`
-	SourceURL    string       `json:"sourceUrl"`
-	ImportMethod ImportMethod `json:"importMethod"`
-	IconKind     IconKind     `json:"iconKind"`
-	Icon         string       `json:"icon"`
+	AutoUpdateIntervalMinutes int          `json:"autoUpdateIntervalMinutes"`
+	Name                      string       `json:"name"`
+	Description               string       `json:"description"`
+	SourceURL                 string       `json:"sourceUrl"`
+	ImportMethod              ImportMethod `json:"importMethod"`
+	IconKind                  IconKind     `json:"iconKind"`
+	Icon                      string       `json:"icon"`
 }
 
 type UpdateInput struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	SourceURL   string   `json:"sourceUrl"`
-	IconKind    IconKind `json:"iconKind"`
-	Icon        string   `json:"icon"`
+	AutoUpdateIntervalMinutes int      `json:"autoUpdateIntervalMinutes"`
+	ID                        string   `json:"id"`
+	Name                      string   `json:"name"`
+	Description               string   `json:"description"`
+	SourceURL                 string   `json:"sourceUrl"`
+	IconKind                  IconKind `json:"iconKind"`
+	Icon                      string   `json:"icon"`
 }
 
 type IconDetectionResult struct {
@@ -233,6 +237,7 @@ type revisionDocument struct {
 }
 
 type metadataDocument struct {
+	AutoUpdateIntervalMinutes    int                        `json:"autoUpdateIntervalMinutes,omitempty"`
 	ChainProxyGroupIDs           []string                   `json:"chainProxyGroupIds"`
 	ChainProxyRevision           int                        `json:"chainProxyRevision"`
 	Fallback                     fallbackoverride.Selection `json:"fallback"`

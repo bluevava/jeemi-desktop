@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { COUNTRY_REGION_CODES, countryFlag } from "./countries";
+import { COUNTRY_REGION_CODES, countryFlag } from "./countryFlags";
 
 describe("local selector country options", () => {
   it("provides unique searchable country and region codes", () => {

@@ -4,7 +4,8 @@ import type { TextAreaRef } from "antd/es/input/TextArea";
 import { GlobalOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import type { StrategyGroupFilter } from "../../../types/localConfig";
-import { COUNTRY_REGION_CODES, countryFlag } from "../countries";
+import { COUNTRY_REGION_CODES, countryFlag } from "../../../lib/countryFlags";
+import { FlagText } from "../../../components/common/FlagText";
 import { lines } from "../resourceModel";
 import { insertAtSelection } from "../textInsertion";
 import { ResourceFieldLabel } from "./StrategyRuleSetReferencesEditor";
@@ -84,7 +85,7 @@ export function NodeNameFilter({
                     onClick={() => insert(code)}
                     aria-label={`${countryFlag(code)} ${code}`}
                   >
-                    {countryFlag(code)} {code}
+                    <FlagText>{countryFlag(code)}</FlagText> {code}
                   </Button>
                 ))}
               </div>

@@ -41,6 +41,18 @@
   padding: 12px;
 }
 
+.local-config-preset-card .ant-card-body {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.local-config-preset-card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: 1.5;
+}
+
 .local-config-card-heading {
   display: flex;
   align-items: flex-start;

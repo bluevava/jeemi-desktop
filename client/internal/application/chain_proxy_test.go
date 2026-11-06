@@ -32,6 +32,7 @@ func chainService(t *testing.T) (*Service, string, subscription.State) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	useDomainOnlyFakeIPFilter(t, s)
 	file := filepath.Join(t.TempDir(), "subscription.yaml")
 	if err := os.WriteFile(file, []byte(chainSource), 0600); err != nil {
 		t.Fatal(err)

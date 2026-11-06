@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { FlagText } from "../../../components/common/FlagText";
 
 import type { SubscriptionSelector } from "../../../types/subscription";
 import { selectorTypeKey } from "../selectorNavigation";
@@ -32,7 +33,7 @@ export function SelectorGroupMember({
       >
         <strong className="selector-group-member-heading" title={name}>
           {selector ? <SelectorIcon selector={selector} configuredOnly /> : null}
-          <span className="selector-group-member-name">{name}</span>
+          <span className="selector-group-member-name"><FlagText>{name}</FlagText></span>
         </strong>
         <span className="selector-group-member-type" title={t(selectorTypeKey(selector?.type ?? ""))}>
           {t(selectorTypeKey(selector?.type ?? ""))}

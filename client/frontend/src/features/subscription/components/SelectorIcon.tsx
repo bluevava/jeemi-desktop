@@ -1,5 +1,6 @@
 import { AimOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { FlagText } from "../../../components/common/FlagText";
 import type { SubscriptionSelector } from "../../../types/subscription";
 import { selectorPresentation } from "../selectorPresentation";
 import { useSelectorIcon } from "../useSelectorIcon";
@@ -14,7 +15,7 @@ export function SelectorIcon({ selector, configuredOnly = false }: {
   if (configuredOnly && (!presentation.iconUrl || !source || failedSource === source)) return null;
   return (
     <span aria-hidden="true" className="selector-group-icon">
-      {configuredOnly ? null : presentation.emoji || <AimOutlined />}
+      {configuredOnly ? null : presentation.emoji ? <FlagText>{presentation.emoji}</FlagText> : <AimOutlined />}
       {source ? (
         <img
           alt=""

@@ -400,29 +400,6 @@ export function SettingsPage({ page }: SettingsPageProps) {
 
       {page === "subscriptions" ? (
         <div className="feature-grid two-columns settings-grid">
-          <FeatureCard title={t("settings.subscriptions.fetchTitle")}>
-            <SettingsRow
-              helpTopic="subscriptionFetch"
-              title={t("settings.subscriptions.fetchMode")}
-            >
-              <Segmented
-                aria-label={t("settings.subscriptions.fetchMode")}
-                disabled
-                options={[
-                  {
-                    label: t("settings.subscriptions.manual"),
-                    value: "manual",
-                  },
-                  {
-                    label: t("settings.subscriptions.onLaunch"),
-                    value: "onLaunch",
-                  },
-                ]}
-                value="manual"
-              />
-            </SettingsRow>
-          </FeatureCard>
-
           <FeatureCard title={t("settings.subscriptions.displayTitle")}>
             <SettingsRow title={t("settings.subscriptions.displayMode")}>
               <Segmented

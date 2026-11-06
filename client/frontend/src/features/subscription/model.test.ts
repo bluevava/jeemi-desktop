@@ -12,6 +12,7 @@ import {
 } from "./model";
 
 const subscription: SubscriptionSummary = {
+  autoUpdateIntervalMinutes: 60,
   chainProxyGroupIds: [],
   chainProxyRevision: 0,
   id: "abcdef0123456789abcdef0123456789",
