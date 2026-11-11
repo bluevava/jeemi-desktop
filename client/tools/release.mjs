@@ -30,6 +30,45 @@ export function archiveName(version, target) {
   );
 }
 
+export function releaseDescription(changelog, version) {
+  const notes = releaseNotes(changelog, version);
+  const releases = "https://github.com/bluevava/jeemi-desktop/releases";
+  const downloads = `${releases}/download/v${version}`;
+  const rows = [
+    { platform: "windows", color: "0078D4", labels: ["x64", "ARM64"] },
+    { platform: "macos", color: "8E44AD", labels: ["Intel x64", "Apple Silicon"] },
+    { platform: "linux", color: "E95420", labels: ["x64", "ARM64"] },
+  ].map(({ platform, color, labels }) => {
+    const links = ["amd64", "arm64"].map((architecture, index) => {
+      const target = targetFor(platform, architecture);
+      const name = archiveName(version, target);
+      const format = platform === "linux" ? "tar.gz" : "ZIP";
+      const label = labels[index];
+      const badge = `https://img.shields.io/badge/${format}-${encodeURIComponent(label)}-${color}?style=flat-square`;
+      return `[![${target.label} ${format} ${label}](${badge})](${downloads}/${name})`;
+    });
+    return `| ${platforms[platform].label} | ${links.join(" | ")} |`;
+  });
+  return [
+    `### 下载 · v${version}`,
+    "",
+    "| 平台 | x64（amd64） | ARM64 |",
+    "| --- | --- | --- |",
+    ...rows,
+    "",
+    "x64（amd64）适用于 Intel / AMD 64 位电脑；Apple Silicon Mac 请选择 ARM64。Windows / Linux ARM 设备也请选择 ARM64。",
+    "",
+    `[SHA-256 校验和](${downloads}/SHA256SUMS) · [最新版本](${releases}/latest) · [历史版本](${releases})`,
+    "",
+    notes.trimEnd(),
+    "",
+    "### 下载说明",
+    "",
+    "Windows/Linux 压缩包内包含 Jeemi 与配套 jeemi-authorizer，请共同保留。macOS 使用 ad-hoc 签名与固定 CDHash 授权助手，未经 Apple 公证；首次安装或更新助手需要管理员授权。",
+    "",
+  ].join("\n");
+}
+
 export function archiveCommand(target, source, archive, env = process.env) {
   if (target.platform === "macos")
     return {
@@ -149,11 +188,10 @@ export function prepareRelease(directory, tag) {
   writeFileSync(join(directory, "SHA256SUMS"), result.checksums);
   writeFileSync(
     join(directory, "release-notes.md"),
-    releaseNotes(
+    releaseDescription(
       readFileSync(join(repositoryDirectory, "CHANGELOG.md"), "utf8"),
       info.version,
-    ) +
-      "\n### 下载说明\n\nWindows/Linux 压缩包内包含 Jeemi 与配套 jeemi-authorizer，请共同保留。macOS 使用 ad-hoc 签名与固定 CDHash 授权助手，未经 Apple 公证；首次安装或更新助手需要管理员授权。\n",
+    ),
   );
   return result;
 }

@@ -17,7 +17,7 @@ func (s *Service) CreateLocalConfigPreset(kind string) (result profile.LocalConf
 	}()
 	s.reconcileMu.Lock()
 	defer s.reconcileMu.Unlock()
-	p, err := presets.Load(kind)
+	p, err := presets.Load(kind, s.runtime.Platform.OS)
 	if err != nil {
 		return result, err
 	}

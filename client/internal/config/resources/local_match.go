@@ -48,7 +48,7 @@ func applyLocalMatch(contents []byte, plan Plan, groups map[string]StrategyGroup
 
 func hasProxyRules(groups []StrategyGroup) bool {
 	for _, group := range groups {
-		if group.Kind == StrategyGroupKindRule && group.Policy.Mode == PolicyProxy {
+		if group.Kind == StrategyGroupKindRule && group.Policy.Mode == PolicyProxy && len(group.RuleSetReferences) > 0 {
 			return true
 		}
 	}

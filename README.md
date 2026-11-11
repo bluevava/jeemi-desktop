@@ -4,6 +4,8 @@ Jeemi 是面向 Windows、macOS 和 Linux 的桌面代理管理客户端，使�
 
 Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络设置。项目不提供代理节点或订阅服务，不修改或内嵌 mihomo 源码；核心由客户端单独下载或导入。
 
+策略组与规则集支持搜索、关联筛选、启用开关和带引用保护的批量删除，卡片图标独立显示；订阅与资源编辑器共用 150 项可搜索、多列展开的 Emoji 图标。新建进程模板只创建和绑定当前平台的进程资源。
+
 ## 官方信息
 
 - [Jeemi官方交流群](https://t.me/Jeemi_group)：反馈问题 / 交流使用。
@@ -15,9 +17,10 @@ Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络�
 - 在配置页管理链式代理：手动组批量导入 URI/YAML，订阅组从 URL 筛选和刷新落地节点；关联分组后按选择器和中继名称生成链路。
 - 使用可视化本地配置或隔离 JavaScript 脚本重构订阅；每份订阅选择其中一种处理方式。
 - 管理可复用的本地策略组、选择器和规则集，支持排序、启用开关、节点名称与协议筛选。
-- 内置常规通用、进程规则两套本地可编辑配置。🚀 Jeemi、🤖 AI、✈️ Telegram、🎬 Video 各带 Auto，AI 主组和 Auto 均排除 HK；规则离线保存，支持可视化增删改与 YAML 编辑，无仓库更新。通用方案 inline 展开 CN 直连规则，使用已安装的本地 GeoSite/GeoIP；进程方案的路由规则不引用 GEO，国内常用应用与系统内置浏览器直连（Windows Edge、Ubuntu/Linux Firefox、macOS Safari），需要可用的进程查询。两套方案均让专用站点优先、漏网走 Jeemi。主页 Fake IP 过滤默认包含 96 项，其中 geosite:private 和 geosite:cn 仍需要 GeoSite 库，进程方案也一样；已有过滤列表不被新默认值覆盖。
+- 内置常规通用、进程规则两套本地可编辑配置。🚀 Jeemi、🤖 AI+Google、✈️ IM、🎬 Video 各带 Auto，AI+Google 主组和 Auto 均排除 HK；Instagram 独立归 Video，IM 包含 Telegram、Discord、WhatsApp、LINE；进程规则按平台生成，浏览器条目直接写入对应进程规则集。规则集与策略组卡片可整体开关。规则离线保存，支持可视化增删改与 YAML 编辑，无仓库更新。通用方案 inline 展开 CN 直连规则，使用已安装的本地 GeoSite/GeoIP；进程方案的路由规则不引用 GEO，国内常用应用与指定浏览器直连（Windows Edge、Ubuntu/Linux Firefox、macOS Chrome），需要可用的进程查询。macOS 匹配 Chrome 主进程及完整 `Google Chrome.app` 应用包目录，不为 Safari 或共享 WebKit 进程添加直连规则，不查询或修改默认浏览器设置。两套方案均让专用站点优先、漏网走 Jeemi。主页 Fake IP 过滤默认包含 96 项，其中 geosite:private 和 geosite:cn 仍需要 GeoSite 库，进程方案也一样；已有过滤列表不被新默认值覆盖。
 - 本地配置和脚本支持 JSON 导入导出；配置包包含关联策略组和规则集。
 - 保存或关联前验证候选配置，失败时保留旧配置并允许继续编辑；运行配置更新失败时保留上一份可用状态。
+- 启动时检查订阅记录和必要配置；可识别的订阅结构冲突经确认后备份并修复，保留来源和缓存原文；无法修复的文件可逐个确认重置。
 - 管理 mihomo 版本和 GEO 数据，配置系统代理、TUN、DNS、端口和局域网访问。主页只提醒当前配置实际引用的 GEO 库缺失或异常，未使用 GEO 时无需安装。
 - 查看实时流量、连接、日志和节点延迟；提供浅色/深色主题和中英文界面。
 - 按订阅记住手动选择器和全局模式的节点选择，代理或客户端重启后恢复仍有效的选择。
@@ -38,7 +41,7 @@ Jeemi 负责管理订阅、本地配置、脚本、核心版本与系统网络�
 
 ## 下载与使用
 
-从 [Releases](https://github.com/bluevava/jeemi-desktop/releases) 下载匹配系统与 CPU 的版本。发布目标为 Windows、Linux、macOS 各 amd64/arm64，共六种。
+打开 [最新版本](https://github.com/bluevava/jeemi-desktop/releases/latest)，在发布说明的下载表中按平台与 CPU 架构选择对应按钮；旧版本见 [历史版本](https://github.com/bluevava/jeemi-desktop/releases)。Windows/macOS 提供 ZIP，Linux 提供 tar.gz，各有 x64（amd64）和 ARM64 两种架构。Intel / AMD 64 位电脑选择 x64，Apple Silicon Mac 选择 ARM64。
 
 发布版本由本仓库的 [GitHub Actions 构建发布工作流](https://github.com/bluevava/jeemi-desktop/actions/workflows/release.yml)自动编译、打包并发布到 Releases。六个目标的测试、构建与产物校验全部通过后才公开发布；可在工作流页面查看对应版本的构建记录。
 
@@ -85,6 +88,8 @@ macOS 下载包使用 **ad-hoc 签名，未经 Apple 公证**，首次打开可�
 链式代理位于配置页面的独立标签。先创建手动组或订阅组并添加落地节点，再在订阅卡片“链式”行点击“绑定”选择分组。可同时绑定多个组，“解绑”移除全部关联。目标选择器筛选留空时只加入最终 MATCH 对应的选择器；中继和落地的名称条件支持 `|` 或、`&` 与、`!` 排除。当前只匹配选择器直接引用的顶层节点及 include-all 顶层节点，不展开嵌套组或远程提供者。生成节点追加到原选择器，使用时需选中对应链式节点；原节点仍保留。
 
 **优先推荐 mihomo 原生 YAML 订阅结构**，便于完整表达节点、DNS、策略组和规则。具体字段与写法请参考 [mihomo 官方配置文档](https://wiki.metacubex.one/config/)。Jeemi 也支持相同配置结构的 JSON；最终运行配置还会应用客户端中的本地配置或脚本及主页设置。
+
+生成运行配置时会静默过滤已知不受支持的节点协议与 Snell v6 等不兼容节点，清理其引用，订阅原文完整保留。过滤后为空的选择器使用 `REJECT`；其余配置错误仍需修正。远程节点提供者的内容继续由 mihomo 处理。
 
 需要使用通用 URI 订阅时，推荐按 [通用 URI 订阅结构解析说明文档](URI_SUBSCRIPTION.md) 将 **mihomo 节点协议作为 URI scheme、标准字段名作为查询参数名**，数组和对象使用 URL 编码后的 JSON。文档包含协议目录、字段、编码规则和完整示例，支持明文列表或整份列表的单层 Base64 编码。无法识别或字段错误的 URI 节点按行跳过，有效节点继续解析；没有可用节点或公共 DNS/证书元数据错误时保留旧订阅。
 

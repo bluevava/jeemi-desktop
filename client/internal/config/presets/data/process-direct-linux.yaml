@@ -1,0 +1,18 @@
+# 国内常用应用与远程协助直连；专用域名/IP 规则优先。
+# 完整进程名和目录边界匹配，可直接编辑；未列出的应用仍走 Jeemi。
+payload:
+  # Linux 原生进程，不包含 Windows 后缀或 macOS 应用路径。
+  - 'PROCESS-NAME-REGEX,(?i)^(WeChat|Weixin|WeChatAppEx)$'
+  - 'PROCESS-NAME-REGEX,(?i)^(QQ|QQNT|TIM)$'
+  - 'PROCESS-NAME-REGEX,(?i)^DingTalk$'
+  - 'PROCESS-NAME-REGEX,(?i)^(Feishu|Lark)$'
+  - 'PROCESS-NAME-REGEX,(?i)^(wps|wpp|et)$'
+  - 'PROCESS-NAME-REGEX,(?i)^BaiduNetdisk$'
+  - 'PROCESS-NAME-REGEX,(?i)^cloudmusic$'
+  - 'PROCESS-NAME-REGEX,(?i)^JianyingPro$'
+  - 'PROCESS-NAME-REGEX,(?i)^rustdesk$'
+  - 'PROCESS-NAME-REGEX,(?i)^(SunloginClient|SunloginClient_Desktop)$'
+  - 'PROCESS-NAME-REGEX,(?i)^Thunder$'
+  # Ubuntu/Linux 系统内置浏览器 Firefox。
+  - PROCESS-NAME,firefox
+  - PROCESS-NAME,firefox-bin

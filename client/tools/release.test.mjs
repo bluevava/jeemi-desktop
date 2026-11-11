@@ -20,7 +20,12 @@ import {
   targetFor,
   validateBinary,
 } from "./release-common.mjs";
-import { archiveCommand, archiveName, verifyArchives } from "./release.mjs";
+import {
+  archiveCommand,
+  archiveName,
+  releaseDescription,
+  verifyArchives,
+} from "./release.mjs";
 
 function temporary(t) {
   const root = mkdtempSync(join(tmpdir(), "jeemi-release-test-"));
@@ -124,6 +129,45 @@ test("release notes select an exact version and reject missing or empty notes", 
   assert.throws(() => releaseNotes("## 1.2.30\nwrong", "1.2.3"));
   assert.throws(() => releaseNotes("## 1.2.3\n\n## 1.2.2\nold", "1.2.3"));
   assert.throws(() => metadata(undefined, "v999.0.0"));
+});
+
+test("release download tables link all six archives to their own version", () => {
+  const changelog = "# 更新\n## 1.2.30\nnew changes\n## 1.2.3\nold changes\n";
+  for (const [version, changes] of [
+    ["1.2.3", "old changes"],
+    ["1.2.30", "new changes"],
+  ]) {
+    const description = releaseDescription(changelog, version);
+    const base = `https://github.com/bluevava/jeemi-desktop/releases/download/v${version}/`;
+    const links = [
+      ...description.matchAll(/\]\((https:\/\/github\.com\/[^)]+)\)/g),
+    ].map((match) => match[1]);
+    const archives = links.filter((link) => /\.(zip|tar\.gz)$/.test(link));
+    assert.equal(archives.length, 6);
+    assert.deepEqual(
+      new Set(archives),
+      new Set([
+        base + `Jeemi-v${version}-Windows-amd64.zip`,
+        base + `Jeemi-v${version}-Windows-arm64.zip`,
+        base + `Jeemi-v${version}-macOS-amd64.zip`,
+        base + `Jeemi-v${version}-macOS-arm64.zip`,
+        base + `Jeemi-v${version}-Linux-amd64.tar.gz`,
+        base + `Jeemi-v${version}-Linux-arm64.tar.gz`,
+      ]),
+    );
+    assert.ok(links.includes(base + "SHA256SUMS"));
+    assert.ok(description.startsWith(`### 下载 · v${version}\n`));
+    assert.ok(description.includes(`\n${changes}\n`));
+    assert.equal(
+      description.includes(version === "1.2.3" ? "new changes" : "old changes"),
+      false,
+    );
+    assert.match(description, /macOS ZIP Intel x64/);
+    assert.match(description, /macOS ZIP Apple Silicon/);
+    assert.match(description, /未经 Apple 公证/);
+    assert.doesNotMatch(description, /latest\/download|\.dmg|\.AppImage|\.deb|\.rpm/);
+  }
+  assert.throws(() => releaseDescription("## 1.2.30\nwrong", "1.2.3"));
 });
 
 test("Windows ZIP tools resolve outside Git Bash PATH for both architectures", () => {

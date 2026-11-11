@@ -21,6 +21,7 @@ import (
 	"time"
 
 	configresources "jeemi/internal/config/resources"
+	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
 	"jeemi/internal/subscriptionformat"
 )
@@ -446,12 +447,18 @@ func (s *Store) stateUnlocked() (State, error) {
 }
 
 func (s *Store) listUnlocked() ([]Summary, error) {
+	if err := ensureManagedDirectory(s.root); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return []Summary{}, nil
+		}
+		return nil, configfile.Unreadable(s.root, err)
+	}
 	entries, err := os.ReadDir(s.root)
 	if errors.Is(err, os.ErrNotExist) {
 		return []Summary{}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("read subscription directory: %w", err)
+		return nil, configfile.Unreadable(s.root, fmt.Errorf("read subscription directory: %w", err))
 	}
 	items := make([]Summary, 0, len(entries))
 	for _, entry := range entries {
@@ -459,6 +466,11 @@ func (s *Store) listUnlocked() ([]Summary, error) {
 			continue
 		}
 		metadata, err := s.loadMetadataUnlocked(entry.Name())
+		// A confirmed reset removes only metadata.json. Cached revisions are
+		// retained, but a directory without metadata is not a subscription.
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -495,16 +507,17 @@ func (s *Store) loadMetadataUnlocked(id string) (metadataDocument, error) {
 	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return metadataDocument{}, fmt.Errorf("subscription directory is not managed")
 	}
-	contents, err := readManagedFile(filepath.Join(directory, "metadata.json"), maxSubscriptionMetadataBytes)
+	metadataPath := filepath.Join(directory, "metadata.json")
+	contents, err := readManagedFile(metadataPath, maxSubscriptionMetadataBytes)
 	if err != nil {
-		return metadataDocument{}, fmt.Errorf("read subscription metadata: %w", err)
+		return metadataDocument{}, configfile.Unreadable(metadataPath, fmt.Errorf("read subscription metadata: %w", err))
 	}
 	var metadata metadataDocument
 	if err := decodeStrictJSON(contents, &metadata); err != nil {
-		return metadataDocument{}, fmt.Errorf("parse subscription metadata: %w", err)
+		return metadataDocument{}, invalidMetadata(metadataPath, contents, id, fmt.Errorf("parse subscription metadata: %w", err))
 	}
 	if err := validateStoredMetadata(metadata, id); err != nil {
-		return metadataDocument{}, err
+		return metadataDocument{}, invalidMetadata(metadataPath, contents, id, err)
 	}
 	return metadata, nil
 }

@@ -1,3 +1,5 @@
+import { EmojiPickerField } from "../../../components/common/EmojiPicker";
+import { resourcePresentation } from "../resourcePresentation";
 import {
   AutoComplete,
   Card,
@@ -16,7 +18,6 @@ import type {
 import {
   DEFAULT_SELECTOR_TEST_URL,
   SELECTOR_TEST_URLS,
-  STRATEGY_GROUP_EMOJIS,
 } from "../strategyGroupEmoji";
 import { isRemoteRuleSet } from "../resourceModel";
 import {
@@ -63,20 +64,16 @@ export function StrategyGroupForm({
         }
       >
         <div className="config-resource-form-row strategy-group-info-row">
-          <label>
-            <span>{t("localConfig.resources.groups.emoji")}</span>
-            <Select
-              allowClear
-              aria-label={t("localConfig.resources.groups.emoji")}
-              className="config-emoji-select"
-              value={draft.emoji || undefined}
-              onChange={(emoji) => setDraft({ ...draft, emoji: emoji ?? "" })}
-              options={STRATEGY_GROUP_EMOJIS.map((emoji) => ({
-                value: emoji,
-                label: emoji,
-              }))}
-            />
-          </label>
+          <EmojiPickerField
+            value={resourcePresentation(draft).emoji}
+            onChange={(emoji) =>
+              setDraft({
+                ...draft,
+                emoji,
+                name: resourcePresentation(draft).displayName,
+              })
+            }
+          />
           <label>
             <span>{t("localConfig.resources.name")}</span>
             <Input
@@ -84,16 +81,6 @@ export function StrategyGroupForm({
               value={draft.name}
               onChange={(event) =>
                 setDraft({ ...draft, name: event.target.value })
-              }
-            />
-          </label>
-          <label>
-            <span>{t("localConfig.resources.description")}</span>
-            <Input
-              maxLength={500}
-              value={draft.description}
-              onChange={(event) =>
-                setDraft({ ...draft, description: event.target.value })
               }
             />
           </label>

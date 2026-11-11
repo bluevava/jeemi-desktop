@@ -9,6 +9,7 @@ import (
 	"jeemi/internal/config/fallbackoverride"
 	"jeemi/internal/config/geodataoverride"
 	configinspect "jeemi/internal/config/inspect"
+	"jeemi/internal/config/proxycompat"
 	"jeemi/internal/config/proxyoverride"
 	configresources "jeemi/internal/config/resources"
 	"jeemi/internal/config/ruleprovideroverride"
@@ -249,10 +250,7 @@ func (s *Service) composeSubscriptionCandidate(summary subscription.Summary, run
 			}
 			resourceState = &loaded
 		}
-		resourceOptions, optionsErr := s.localResourceOptions(*resourceState, local.ResourcePlan)
-		if optionsErr != nil {
-			return composedSubscription{}, projectionCompositionFailed, optionsErr
-		}
+		resourceOptions := configresources.ApplyOptions{Platform: s.runtime.Platform.OS}
 		result.Contents, err = configresources.Apply(result.Contents, *resourceState, local.ResourcePlan, resourceOptions)
 		if err != nil {
 			return composedSubscription{}, projectionCompositionFailed, fmt.Errorf("compose local strategy groups and rule sets: %w", err)
@@ -313,6 +311,10 @@ func (s *Service) composeSubscriptionCandidate(summary subscription.Summary, run
 	result.Contents, err = geodataoverride.Apply(result.Contents, geoDataPreferences)
 	if err != nil {
 		return composedSubscription{}, projectionCompositionFailed, fmt.Errorf("inject Jeemi GEO data preferences: %w", err)
+	}
+	result.Contents, err = proxycompat.Apply(result.Contents)
+	if err != nil {
+		return composedSubscription{}, projectionCompositionFailed, fmt.Errorf("filter unsupported runtime proxies: %w", err)
 	}
 	return result, projectionReady, nil
 }

@@ -91,7 +91,7 @@ func TestSharedResourceChecksInactiveSubscriptionsAndPreservesLibrary(t *testing
 		t.Fatal("inactive subscription was not checked")
 	}
 	after, err := s.LocalConfigResources()
-	if err != nil || !reflect.DeepEqual(library, after) {
+	if err != nil || library.Revision != after.Revision || !reflect.DeepEqual(library.StrategyGroups, after.StrategyGroups) || !reflect.DeepEqual(library.RuleSets, after.RuleSets) {
 		t.Fatal("rejected resource changed the library", err)
 	}
 	if s.runtimeManager.Status().State != mihomoruntime.StateStopped {

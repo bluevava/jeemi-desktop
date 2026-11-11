@@ -1,5 +1,5 @@
 // Package configfile identifies startup configuration failures without exposing
-// document contents, and deletes only a file the user has just confirmed.
+// document contents, and repairs or deletes only a file the user has confirmed.
 package configfile
 
 import (
@@ -23,10 +23,21 @@ type Failure struct {
 	cause  error
 	digest [sha256.Size]byte
 	size   int64
+	repair []byte
 }
 
 func (f *Failure) Error() string { return f.cause.Error() }
 func (f *Failure) Unwrap() error { return f.cause }
+
+func (f *Failure) CanRepair() bool { return len(f.repair) > 0 }
+
+// InvalidWithRepair accepts a replacement already validated by the owning
+// store. Preparing this candidate does not write to the configuration file.
+func InvalidWithRepair(path string, contents, replacement []byte, cause error) error {
+	f := Invalid(path, contents, cause).(*Failure)
+	f.repair = append([]byte(nil), replacement...)
+	return f
+}
 
 func Invalid(path string, contents []byte, cause error) error {
 	f := &Failure{Path: path, Reason: "invalid", cause: cause, digest: sha256.Sum256(contents), size: int64(len(contents))}
@@ -72,7 +83,11 @@ func Recover(ctx context.Context, root string, check func() error, confirm func(
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if err := removeConfirmed(root, failure); err != nil {
+		if failure.CanRepair() {
+			if err := repairConfirmed(ctx, root, failure); err != nil {
+				return &Failure{Path: failure.Path, Reason: "repair", cause: err}
+			}
+		} else if err := removeConfirmed(root, failure); err != nil {
 			return &Failure{Path: failure.Path, Reason: "delete", cause: err}
 		}
 	}
@@ -101,7 +116,7 @@ func managedFile(root, path string) error {
 	return nil
 }
 
-func removeConfirmed(root string, failure *Failure) error {
+func recheckConfirmed(root string, failure *Failure) error {
 	if err := managedFile(root, failure.Path); err != nil {
 		return err
 	}
@@ -125,6 +140,13 @@ func removeConfirmed(root string, failure *Failure) error {
 	current, err := os.Lstat(failure.Path)
 	if err != nil || !os.SameFile(info, current) {
 		return fmt.Errorf("configuration file was replaced after confirmation")
+	}
+	return nil
+}
+
+func removeConfirmed(root string, failure *Failure) error {
+	if err := recheckConfirmed(root, failure); err != nil {
+		return err
 	}
 	return os.Remove(failure.Path)
 }

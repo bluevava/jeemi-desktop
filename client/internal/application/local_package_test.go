@@ -87,7 +87,7 @@ func TestConfigPackageRoundTripRemapsNamesAndPreservesAssociations(t *testing.T)
 	// The package replaces fields, metadata and resource content, not identity.
 	p.Config.Name, p.Config.Description = "Imported", "Restored backup"
 	p.Config.Fields[0].ValueYAML = "false"
-	p.Config.RuleSets[0].Description = "Imported rule description"
+	p.Config.RuleSets[0].Emoji = "🧩"
 	data = packageBytes(t, p)
 	preview, err := target.PreviewLocalPackage(configtransfer.ConfigKind, current.ID, data)
 	if err != nil {
@@ -118,6 +118,9 @@ func TestConfigPackageRoundTripRemapsNamesAndPreservesAssociations(t *testing.T)
 		if rule.ID != beforeLibrary.RuleSets[i].ID || !strings.Contains(rule.PayloadYAML, "# Keep this comment") {
 			t.Fatal("rule ID or comments lost")
 		}
+	}
+	if library.RuleSets[0].Emoji != "🧩" {
+		t.Fatal("import lost the rule set icon")
 	}
 	detail, _ := target.Subscription(subscriptions.SelectedSubscriptionID)
 	if detail.LocalConfigID != current.ID {

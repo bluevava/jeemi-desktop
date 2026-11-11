@@ -1,3 +1,4 @@
+import { enResourceLibrary } from "./resource-library";
 import {
   enAuthorization,
   enAuthorizationHelp,
@@ -19,6 +20,7 @@ import { enChainProxy, enChainProxyHelp, enChainProxyFilterHelp, enChainProxyImp
 
 export const enUS = {
   subscriptionAutoUpdate: enSubscriptionAutoUpdate,
+  resourceLibrary: enResourceLibrary,
   offlineConfig: enOfflineConfig,
   externalUI: enExternalUI,
   chainProxy: enChainProxy,
@@ -910,7 +912,6 @@ export const enUS = {
       },
       actions: "Resource actions for {{name}}",
       name: "Name",
-      description: "Description",
       groups: {
         create: "New local policy group",
         edit: "Edit local policy group",

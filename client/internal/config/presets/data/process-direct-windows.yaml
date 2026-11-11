@@ -1,0 +1,32 @@
+# 国内常用应用与远程协助直连；专用域名/IP 规则优先。
+# 完整进程名和目录边界匹配，可直接编辑；未列出的应用仍走 Jeemi。
+payload:
+  # Windows 安装目录与进程。
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Tencent[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/](WeChat|Weixin)[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Alibaba[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]DingTalk[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]LarkSuite[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Feishu[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Kingsoft[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Baidu[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]NetEase[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/](JianYing|JianyingPro)[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]RustDesk[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Sunlogin[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Thunder[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]360[\\/]'
+  - 'PROCESS-PATH-REGEX,(?i)[\\/]Huorong[\\/]'
+  - 'PROCESS-NAME-REGEX,(?i)^(WeChat|Weixin|WeChatAppEx)\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^(QQ|QQNT|TIM)\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^DingTalk\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^(Feishu|Lark)\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^(wps|wpp|et)\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^BaiduNetdisk\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^cloudmusic\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^JianyingPro\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^rustdesk\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^(SunloginClient|SunloginClient_Desktop)\.exe$'
+  - 'PROCESS-NAME-REGEX,(?i)^Thunder\.exe$'
+  # Windows 系统内置浏览器 Edge。
+  - PROCESS-NAME,msedge.exe

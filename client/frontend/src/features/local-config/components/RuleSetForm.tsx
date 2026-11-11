@@ -1,3 +1,5 @@
+import { EmojiPickerField } from "../../../components/common/EmojiPicker";
+import { resourcePresentation } from "../resourcePresentation";
 import { Card, Input, InputNumber, Select, Switch } from "antd";
 import { useTranslation } from "react-i18next";
 import type { RuleSetResource } from "../../../types/localConfig";
@@ -17,26 +19,28 @@ export function RuleSetForm({
     <div className="rule-set-page-grid config-resource-form">
       <Card className="feature-card" variant="borderless">
         <div className="config-resource-form">
-          <label>
-            <span>{t("localConfig.resources.name")}</span>
-            <Input
-              maxLength={80}
-              value={draft.name}
-              onChange={(event) =>
-                setDraft({ ...draft, name: event.target.value })
+          <div className="resource-name-icon-row">
+            <EmojiPickerField
+              value={resourcePresentation(draft).emoji}
+              onChange={(emoji) =>
+                setDraft({
+                  ...draft,
+                  emoji,
+                  name: resourcePresentation(draft).displayName,
+                })
               }
             />
-          </label>
-          <label>
-            <span>{t("localConfig.resources.description")}</span>
-            <Input
-              maxLength={500}
-              value={draft.description}
-              onChange={(event) =>
-                setDraft({ ...draft, description: event.target.value })
-              }
-            />
-          </label>
+            <label>
+              <span>{t("localConfig.resources.name")}</span>
+              <Input
+                maxLength={80}
+                value={draft.name}
+                onChange={(event) =>
+                  setDraft({ ...draft, name: event.target.value })
+                }
+              />
+            </label>
+          </div>
           <label>
             <span>{t("localConfig.resources.ruleSets.sourceType")}</span>
             <Select
@@ -45,8 +49,6 @@ export function RuleSetForm({
                 setDraft({
                   ...draft,
                   sourceType,
-                  defaultBrowser:
-                    sourceType === "inline" && draft.defaultBrowser,
                 })
               }
               options={["inline", "http"].map((value) => ({
@@ -63,8 +65,6 @@ export function RuleSetForm({
                 setDraft({
                   ...draft,
                   behavior,
-                  defaultBrowser:
-                    behavior === "classical" && draft.defaultBrowser,
                   noResolve: behavior === "ipcidr" ? draft.noResolve : false,
                   format:
                     behavior === "classical" && draft.format === "mrs"
@@ -116,27 +116,21 @@ export function RuleSetForm({
               />
             </div>
           ) : null}
-          {draft.sourceType === "inline" && draft.behavior === "classical" ? (
-            <div className="config-resource-field">
-              <ResourceFieldLabel
-                helpBase="offlineConfig.help.browser"
-                label={t("offlineConfig.defaultBrowser")}
-              />
-              <div className="config-resource-switch-control">
-                <Switch
-                  aria-label={t("offlineConfig.defaultBrowser")}
-                  checked={Boolean(draft.defaultBrowser)}
-                  onChange={(defaultBrowser) =>
-                    setDraft({
-                      ...draft,
-                      defaultBrowser,
-                      payloadYaml: draft.payloadYaml || "payload: []\n",
-                    })
-                  }
-                />
-              </div>
-            </div>
-          ) : null}
+          <div className="config-resource-field">
+            <ResourceFieldLabel
+              helpBase="offlineConfig.help.platform"
+              label={t("offlineConfig.platform")}
+            />
+            <Select<NonNullable<RuleSetResource["platform"]>>
+              aria-label={t("offlineConfig.platform")}
+              value={draft.platform || ""}
+              onChange={(platform) => setDraft({ ...draft, platform })}
+              options={["", "windows", "darwin", "linux"].map((value) => ({
+                value,
+                label: t(`offlineConfig.platforms.${value || "all"}`),
+              }))}
+            />
+          </div>
         </div>
       </Card>
       <Card className="feature-card rule-set-content-card" variant="borderless">

@@ -89,24 +89,27 @@ func (r *replacement) apply() error {
 	for _, name := range r.items {
 		filename := filepath.Join(r.root, name)
 		if _, err := os.Lstat(filename); err == nil {
-			if r.rename(filename, filepath.Join(r.stage, "old", name)) != nil {
-				return r.failed()
+			if err = r.rename(filename, filepath.Join(r.stage, "old", name)); err != nil {
+				return r.failed(err)
 			}
 			r.backedUp = append(r.backedUp, name)
 		} else if !os.IsNotExist(err) {
-			return r.failed()
+			return r.failed(err)
 		}
-		if r.rename(filepath.Join(r.stage, "new", name), filename) != nil {
-			return r.failed()
+		if err := r.rename(filepath.Join(r.stage, "new", name), filename); err != nil {
+			return r.failed(err)
 		}
 		r.installed = append(r.installed, name)
 	}
 	return nil
 }
 
-func (r *replacement) failed() error {
+func (r *replacement) failed(cause error) error {
 	if r.rollback() != nil {
 		return ErrRollback
+	}
+	if os.IsPermission(cause) {
+		return ErrLocation
 	}
 	return ErrReplace
 }
@@ -148,7 +151,9 @@ func copyTree(source, destination string) error {
 		return os.Symlink(target, destination)
 	}
 	if info.IsDir() {
-		if err = os.Mkdir(destination, info.Mode().Perm()); err != nil {
+		// Populate directories while writable, then restore their source mode.
+		// Applying a read-only source mode up front prevents copying children.
+		if err = os.Mkdir(destination, 0700); err != nil {
 			return err
 		}
 		entries, err := os.ReadDir(source)
@@ -160,7 +165,7 @@ func copyTree(source, destination string) error {
 				return err
 			}
 		}
-		return nil
+		return os.Chmod(destination, info.Mode().Perm())
 	}
 	if !info.Mode().IsRegular() {
 		return ErrPackage
@@ -170,7 +175,7 @@ func copyTree(source, destination string) error {
 		return err
 	}
 	defer input.Close()
-	output, err := os.OpenFile(destination, os.O_CREATE|os.O_EXCL|os.O_WRONLY, info.Mode().Perm())
+	output, err := os.OpenFile(destination, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -178,5 +183,13 @@ func copyTree(source, destination string) error {
 	if _, err = io.Copy(output, input); err != nil {
 		return err
 	}
-	return output.Sync()
+	// chmod after creation also preserves executable/read bits under a strict
+	// umask. Never chmod or overwrite the installed bundle in place.
+	if err = output.Chmod(info.Mode().Perm()); err != nil {
+		return err
+	}
+	if err = output.Sync(); err != nil {
+		return err
+	}
+	return output.Close()
 }

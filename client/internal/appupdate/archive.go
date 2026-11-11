@@ -76,6 +76,24 @@ func extract(ctx context.Context, archive, output string, t target) error {
 			}
 		}
 	}
+	// MkdirAll is affected by the launching user's umask too. Restore the
+	// extracted directory permissions before adding any symbolic links.
+	if err := filepath.WalkDir(output, func(filename string, entry os.DirEntry, err error) error {
+		if ctx.Err() != nil {
+			return ErrCancelled
+		}
+		if err != nil {
+			return ErrPackage
+		}
+		if filename != output && entry.IsDir() {
+			if os.Chmod(filename, 0755) != nil {
+				return ErrPackage
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
 	for _, link := range x.links {
 		if err := os.Symlink(link.target, link.name); err != nil {
 			return ErrPackage
@@ -177,11 +195,20 @@ func (x *extractor) entry(name string, mode os.FileMode, size int64, reader io.R
 	if !mode.IsRegular() {
 		return ErrPackage
 	}
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode.Perm()&0755|0600)
+	permissions := mode.Perm()&0755 | 0600
+	if x.target.platform != "windows" && (clean == x.target.directory+"/"+x.target.executable || clean == x.target.directory+"/"+x.target.helper) {
+		// ZIP creators do not always retain Unix mode bits. These two declared
+		// release executables must be runnable before the old client exits.
+		permissions = 0755
+	}
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return ErrPackage
 	}
 	n, err := io.Copy(file, io.LimitReader(reader, size+1))
+	if err == nil {
+		err = file.Chmod(permissions)
+	}
 	closeErr := file.Close()
 	if err != nil || closeErr != nil || n != size {
 		return ErrPackage

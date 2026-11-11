@@ -134,7 +134,7 @@ func TestRuleEntryAppendsAfterExistingYAMLAndPreservesComments(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		state, err := store.SaveRuleSet(RuleSet{Name: "Existing", Description: "Keep description", SourceType: "inline", Behavior: "classical", PayloadYAML: source})
+		state, err := store.SaveRuleSet(RuleSet{Name: "Existing", Emoji: "📄", SourceType: "inline", Behavior: "classical", PayloadYAML: source})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -151,7 +151,7 @@ func TestRuleEntryAppendsAfterExistingYAMLAndPreservesComments(t *testing.T) {
 		after := state.RuleSets[0]
 		if !reflect.DeepEqual(after.Payload, append(before.Payload, preview.Line)) ||
 			after.ID != before.ID || after.CreatedAt != before.CreatedAt ||
-			after.Name != before.Name || after.Description != before.Description {
+			after.Name != before.Name || after.Emoji != before.Emoji {
 			t.Fatalf("append altered the existing definition: %+v", after)
 		}
 		for _, comment := range []string{"# document", "# inline comment", "# footer"} {

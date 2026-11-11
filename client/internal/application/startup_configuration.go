@@ -6,6 +6,7 @@ import (
 	"jeemi/internal/geodata"
 	"jeemi/internal/platform/paths"
 	"jeemi/internal/settings"
+	"jeemi/internal/subscription"
 )
 
 // CheckStartupConfiguration reads the documents needed to construct the client.
@@ -36,5 +37,8 @@ func CheckStartupConfiguration(root string) error {
 	if _, err := chains.Load(); err != nil {
 		return err
 	}
-	return geodata.CheckStartupConfiguration(root)
+	if err := geodata.CheckStartupConfiguration(root); err != nil {
+		return err
+	}
+	return subscription.CheckStartupConfiguration(root)
 }

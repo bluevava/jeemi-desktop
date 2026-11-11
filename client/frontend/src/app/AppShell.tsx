@@ -24,6 +24,8 @@ export function AppShell() {
   const location = useLocation();
   const settingsMode = isNavigationSettingsPath(location.pathname);
   const localConfigEditorMode = isLocalConfigEditorPath(location.pathname);
+  const subscriptionsMode =
+    location.pathname.replace(/\/+$/, "") === "/subscriptions";
   const contentRef = useRef<HTMLElement | null>(null);
   const [overlayHost, setOverlayHost] = useState<HTMLDivElement | null>(null);
 
@@ -37,7 +39,10 @@ export function AppShell() {
     <div className="app-shell">
       <TopBar />
       <div className="app-overlay-layer" ref={setOverlayHost} />
-      <main className="app-content" ref={contentRef}>
+      <main
+        className={`app-content${subscriptionsMode ? " app-content-subscriptions" : ""}`}
+        ref={contentRef}
+      >
         <UIErrorBoundary key={location.pathname} scope="page">
           <Routes>
             <Route element={<Navigate replace to="/home" />} path="/" />

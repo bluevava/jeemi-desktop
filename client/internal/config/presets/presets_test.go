@@ -17,7 +17,7 @@ import (
 func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 	for _, kind := range []string{"general", "process"} {
 		t.Run(kind, func(t *testing.T) {
-			p, err := Load(kind)
+			p, err := Load(kind, "windows")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -42,7 +42,7 @@ func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			result, err := resources.Apply(input, state, p.Plan, resources.ApplyOptions{BuiltInBrowserRules: []string{"PROCESS-NAME,msedge.exe"}})
+			result, err := resources.Apply(input, state, p.Plan, resources.ApplyOptions{Platform: "windows"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -76,16 +76,16 @@ func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 					t.Fatal("Auto must be a hidden url-test group")
 				}
 			}
-			if !reflect.DeepEqual(visibleSelectors, []string{"🚀 Jeemi", "🤖 AI", "✈️ Telegram", "🎬 Video"}) {
+			if !reflect.DeepEqual(visibleSelectors, []string{"🚀 Jeemi", "✈️ IM", "🎬 Video", "🤖 AI+Google"}) {
 				t.Fatalf("preset selector order changed: %v", visibleSelectors)
 			}
-			for _, name := range []string{"🚀 Jeemi", "🤖 AI", "✈️ Telegram", "🎬 Video"} {
+			for _, name := range []string{"🚀 Jeemi", "✈️ IM", "🎬 Video", "🤖 AI+Google"} {
 				main, auto := byName[name], byName[name+" Auto"]
 				if len(main) < 1 || main[0] != name+" Auto" || !reflect.DeepEqual(main[1:], auto) {
 					t.Fatalf("%s candidates differ", name)
 				}
 				want := names
-				if name == "🤖 AI" {
+				if name == "🤖 AI+Google" {
 					want = names[:2]
 				}
 				if !reflect.DeepEqual(auto, want) {
@@ -101,7 +101,7 @@ func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 			if last != "MATCH,🚀 Jeemi" {
 				t.Fatal(last)
 			}
-			if !strings.HasSuffix(config.Rules[0], ",🤖 AI") || !strings.HasSuffix(config.Rules[1], ",✈️ Telegram") || !strings.HasSuffix(config.Rules[3], ",🎬 Video") {
+			if !strings.HasSuffix(config.Rules[0], ",🚀 Jeemi") || !strings.HasSuffix(config.Rules[2], ",✈️ IM") || !strings.HasSuffix(config.Rules[7], ",🎬 Video") || !strings.HasSuffix(config.Rules[12], ",🤖 AI+Google") {
 				t.Fatal("business rule precedence changed", config.Rules)
 			}
 			if kind == "process" {
@@ -109,23 +109,19 @@ func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 					t.Fatal("process default order changed")
 				}
 				if _, err = resources.Apply(input, state, p.Plan); err == nil {
-					t.Fatal("missing platform browser rules must block composition")
+					t.Fatal("missing target platform must block composition")
 				}
-				for _, rule := range state.RuleSets {
-					if rule.DefaultBrowser && len(rule.Payload) != 0 {
-						t.Fatal("composition mutated saved browser rules")
-					}
-				}
+
 			} else {
 				want := []string{"DOMAIN-SUFFIX,windowsupdate.com,DIRECT", "DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com,DIRECT", "GEOSITE,CN,DIRECT", "GEOIP,CN,DIRECT", "MATCH,🚀 Jeemi"}
-				if !reflect.DeepEqual(config.Rules[5:], want) {
+				if !reflect.DeepEqual(config.Rules[14:], want) {
 					t.Fatalf("general inline routing mismatch: %v", config.Rules)
 				}
 				if strings.Contains(string(result), "PROCESS-") {
 					t.Fatal("general preset contains process routing")
 				}
 			}
-			if len(config.Providers) != 5 {
+			if len(config.Providers) != 14 {
 				t.Fatal("direct rules were not expanded inline")
 			}
 			for _, group := range state.StrategyGroups {
@@ -134,7 +130,7 @@ func TestOfflinePresetsComposeSharedNodesAndPairedAuto(t *testing.T) {
 				}
 			}
 			for _, rule := range state.RuleSets {
-				if strings.HasPrefix(rule.Name, "Jeemi") {
+				if rule.Emoji == "" {
 					t.Fatal("preset rule set has no Emoji")
 				}
 			}
@@ -156,7 +152,7 @@ func TestBundledSnapshotIntegrityAndCoverage(t *testing.T) {
 	if err = json.Unmarshal(raw, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if len(manifest.Files) != 7 {
+	if len(manifest.Files) != 15 {
 		t.Fatalf("missing source records: %s", raw)
 	}
 	for _, f := range manifest.Files {
@@ -168,7 +164,7 @@ func TestBundledSnapshotIntegrityAndCoverage(t *testing.T) {
 			t.Fatalf("snapshot mismatch: %s", f.File)
 		}
 	}
-	p, err := Load("general")
+	p, err := Load("general", "windows")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,24 +172,24 @@ func TestBundledSnapshotIntegrityAndCoverage(t *testing.T) {
 	for _, r := range p.Rules {
 		all += r.PayloadYAML
 	}
-	for _, domain := range []string{"+.openai.com", "+.claude.ai", "+.gemini.google.com", "+.grok.com", "+.perplexity.ai", "+.cursor.com", "+.instagram.com", "+.youtube.com", "+.netflix.com"} {
+	for _, domain := range []string{"+.openai.com", "+.claude.ai", "+.gemini.google.com", "+.grok.com", "+.perplexity.ai", "+.cursor.com", "+.instagram.com", "+.youtube.com", "DOMAIN-SUFFIX,netflix.com", "+.google.com", "+.discord.com", "+.whatsapp.com", "+.line.me", "+.spotify.com", "+.twitter.com", "+.github.com", "+.apple.com"} {
 		if !strings.Contains(all, domain) {
 			t.Errorf("baseline misses %s", domain)
 		}
 	}
-	if _, err := Load("unknown"); err == nil {
+	if _, err := Load("unknown", "windows"); err == nil {
 		t.Fatal("unknown preset accepted")
 	}
 }
 
 func TestEmptyAICandidatesNeverFallBackToDirect(t *testing.T) {
-	p, _ := Load("process")
+	p, _ := Load("process", "windows")
 	s, _ := resources.NewStore(resources.StoreOptions{DataDirectory: t.TempDir()})
 	state, err := s.PreparePreset(p.Plan, p.Groups, p.Rules)
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := resources.Apply([]byte("proxies: [{name: HK, type: ss}]"), state, p.Plan, resources.ApplyOptions{BuiltInBrowserRules: []string{"PROCESS-NAME,msedge.exe"}})
+	result, err := resources.Apply([]byte("proxies: [{name: HK, type: ss}]"), state, p.Plan, resources.ApplyOptions{Platform: "windows"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,10 +204,10 @@ func TestEmptyAICandidatesNeverFallBackToDirect(t *testing.T) {
 	}
 	found := false
 	for _, g := range config.Groups {
-		if g.Name == "🤖 AI Auto" {
+		if g.Name == "🤖 AI+Google Auto" {
 			found = true
 		}
-		if g.Name == "🤖 AI Auto" && !reflect.DeepEqual(g.Proxies, []string{"REJECT"}) {
+		if g.Name == "🤖 AI+Google Auto" && !reflect.DeepEqual(g.Proxies, []string{"REJECT"}) {
 			t.Fatalf("empty AI permits traffic: %+v", g)
 		}
 	}
@@ -226,7 +222,7 @@ func TestURISubscriptionAcquiresOfflineRouting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, _ := Load("general")
+	p, _ := Load("general", "windows")
 	store, _ := resources.NewStore(resources.StoreOptions{DataDirectory: t.TempDir()})
 	state, err := store.PreparePreset(p.Plan, p.Groups, p.Rules)
 	if err != nil {
@@ -256,45 +252,65 @@ func TestURISubscriptionAcquiresOfflineRouting(t *testing.T) {
 }
 
 func TestDomesticProcessRulesMatchAppBoundaries(t *testing.T) {
-	p, _ := Load("process")
-	s, _ := resources.NewStore(resources.StoreOptions{DataDirectory: t.TempDir()})
-	state, err := s.PreparePreset(p.Plan, p.Groups, p.Rules)
-	if err != nil {
-		t.Fatal(err)
-	}
-	patterns := map[string][]*regexp.Regexp{}
-	for _, rule := range state.RuleSets {
-		if !strings.Contains(rule.Name, "国内应用进程") {
-			continue
+	patterns := map[string]map[string][]*regexp.Regexp{}
+	for _, platform := range []string{"windows", "darwin", "linux"} {
+		p, _ := Load("process", platform)
+		s, _ := resources.NewStore(resources.StoreOptions{DataDirectory: t.TempDir()})
+		state, err := s.PreparePreset(p.Plan, p.Groups, p.Rules)
+		if err != nil {
+			t.Fatal(err)
 		}
-		for _, line := range rule.Payload {
-			kind, expr, _ := strings.Cut(line, ",")
-			re, err := regexp.Compile(expr)
-			if err != nil {
-				t.Fatal(err)
+		for _, rule := range state.RuleSets {
+			if rule.Platform == "" {
+				continue
 			}
-			patterns[kind] = append(patterns[kind], re)
+			patterns[rule.Platform] = map[string][]*regexp.Regexp{}
+			for _, line := range rule.Payload {
+				kind, expr, _ := strings.Cut(line, ",")
+				if !strings.HasSuffix(kind, "-REGEX") {
+					continue
+				}
+				re, err := regexp.Compile(expr)
+				if err != nil {
+					t.Fatal(err)
+				}
+				patterns[rule.Platform][kind] = append(patterns[rule.Platform][kind], re)
+			}
 		}
 	}
 	for _, tt := range []struct {
-		kind, input string
-		want        bool
+		platform, kind, input string
+		want                  bool
 	}{
-		{"PROCESS-PATH-REGEX", `C:\Program Files\Tencent\WeChat\WeChatAppEx.exe`, true},
-		{"PROCESS-PATH-REGEX", `C:\apps\Feishu\1.0\helper.exe`, true},
-		{"PROCESS-PATH-REGEX", `C:\apps\Huorong\bin\helper.exe`, true},
-		{"PROCESS-PATH-REGEX", `/Applications/WeChat.app/Contents/Frameworks/Helper.app/Contents/MacOS/Helper`, true},
-		{"PROCESS-NAME-REGEX", "Weixin.exe", true},
-		{"PROCESS-NAME-REGEX", "cloudmusic", true},
-		{"PROCESS-NAME-REGEX", "SunloginClient.exe", true},
-		{"PROCESS-NAME-REGEX", "Telegram.exe", false},
-		{"PROCESS-NAME-REGEX", "cursor.exe", false},
-		{"PROCESS-NAME-REGEX", "mywechattool.exe", false},
-		{"PROCESS-PATH-REGEX", `C:\apps\NotTencent\other.exe`, false},
-		{"PROCESS-PATH-REGEX", `C:\apps\Microsoft\Edge\msedge.exe`, false},
+		{"windows", "PROCESS-PATH-REGEX", `C:\Program Files\Tencent\WeChat\WeChatAppEx.exe`, true},
+		{"windows", "PROCESS-PATH-REGEX", `C:\apps\Feishu\1.0\helper.exe`, true},
+		{"windows", "PROCESS-PATH-REGEX", `C:\apps\Huorong\bin\helper.exe`, true},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/WeChat.app/Contents/Frameworks/Helper.app/Contents/MacOS/Helper`, true},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/1.0/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper`, true},
+		{"darwin", "PROCESS-PATH-REGEX", `/Users/example/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/2.0/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)`, true},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Safari.app/Contents/MacOS/Safari`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`, true},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Google ChromeXapp/Contents/MacOS/Helper`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Other Google Chrome.app/Contents/MacOS/Helper`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Google Chrome.app.backup/Contents/MacOS/Helper`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Example.app/Contents/Frameworks/Google Chrome FrameworkXframework/Helper`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Example.app/Contents/Frameworks/Other Google Chrome Framework.framework/Helper`, false},
+		{"darwin", "PROCESS-PATH-REGEX", `/Applications/Example.app/Contents/Frameworks/Google Chrome Framework.framework.backup/Helper`, false},
+		{"windows", "PROCESS-NAME-REGEX", "Weixin.exe", true},
+		{"linux", "PROCESS-NAME-REGEX", "Weixin.exe", false},
+		{"windows", "PROCESS-NAME-REGEX", "Weixin", false},
+		{"darwin", "PROCESS-PATH-REGEX", `C:\apps\Tencent\app.exe`, false},
+		{"linux", "PROCESS-NAME-REGEX", "cloudmusic", true},
+		{"windows", "PROCESS-NAME-REGEX", "SunloginClient.exe", true},
+		{"windows", "PROCESS-NAME-REGEX", "Telegram.exe", false},
+		{"windows", "PROCESS-NAME-REGEX", "cursor.exe", false},
+		{"windows", "PROCESS-NAME-REGEX", "mywechattool.exe", false},
+		{"windows", "PROCESS-PATH-REGEX", `C:\apps\NotTencent\other.exe`, false},
+		{"windows", "PROCESS-PATH-REGEX", `C:\apps\Microsoft\Edge\msedge.exe`, false},
 	} {
 		matched := false
-		for _, pattern := range patterns[tt.kind] {
+		for _, pattern := range patterns[tt.platform][tt.kind] {
 			matched = matched || pattern.MatchString(tt.input)
 		}
 		if matched != tt.want {
@@ -305,16 +321,16 @@ func TestDomesticProcessRulesMatchAppBoundaries(t *testing.T) {
 
 func TestPresetCreationRenamesEmojiAndAutoCollisions(t *testing.T) {
 	s, _ := resources.NewStore(resources.StoreOptions{DataDirectory: t.TempDir()})
-	if _, err := s.SaveStrategyGroup(resources.StrategyGroup{Name: "AI Auto", Emoji: "🤖", Kind: "selector", Type: "select"}); err != nil {
+	if _, err := s.SaveStrategyGroup(resources.StrategyGroup{Name: "AI+Google Auto", Emoji: "🤖", Kind: "selector", Type: "select"}); err != nil {
 		t.Fatal(err)
 	}
-	p, _ := Load("general")
+	p, _ := Load("general", "windows")
 	state, err := s.PreparePreset(p.Plan, p.Groups, p.Rules)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, g := range state.StrategyGroups {
-		if g.ID == id("group:AI") && resources.SelectorDisplayName(g) != "🤖 AI (2)" {
+		if g.ID == id("group:AI+Google") && resources.SelectorDisplayName(g) != "🤖 AI+Google (2)" {
 			t.Fatal("generated Auto name collision was not resolved")
 		}
 	}

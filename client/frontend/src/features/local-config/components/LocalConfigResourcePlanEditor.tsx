@@ -2,6 +2,7 @@ import { flagSelectRenderers } from "../../../components/common/flagSelectRender
 import { FlagText } from "../../../components/common/FlagText";
 import { emptyStrategyGroup } from "../resourceModel";
 import { LocalMatchControl } from "./LocalMatchControl";
+import { requiresProxySelector, strategyGroupEnabled } from "../resourceActivation";
 import { useState } from "react";
 import {
   DeleteOutlined,
@@ -111,7 +112,7 @@ export function LocalConfigRulesEditor({
       {rulesEnabled &&
         value.ruleStrategy === "replace" &&
         !selectedGroups.some(
-          (group) => group.kind === "selector" && !disabledGroups.has(group.id),
+          (group) => group.kind === "selector" && strategyGroupEnabled(value, group),
         ) && (
           <Alert
             showIcon
@@ -158,7 +159,7 @@ export function LocalConfigRulesEditor({
           <div className="local-config-ordered-group-list">
             {selectedGroups.map((group, index) => (
               <div
-                className={`local-config-ordered-group-row${!rulesEnabled || disabledGroups.has(group.id) ? " is-disabled" : ""}`}
+                className={`local-config-ordered-group-row${!strategyGroupEnabled(value, group) ? " is-disabled" : ""}`}
                 draggable={rulesEnabled}
                 key={group.id}
                 onDragEnd={() => setDraggedIndex(null)}
@@ -187,6 +188,7 @@ export function LocalConfigRulesEditor({
                     {t("localConfig.resources.groups.ruleSetCount", {
                       count: group.ruleSetReferences.length,
                     })}
+                    {group.disabled ? ` · ${t("offlineConfig.sharedDisabled")}` : ""}
                   </small>
                 </div>
                 <Tag>{index + 1}</Tag>
@@ -199,8 +201,8 @@ export function LocalConfigRulesEditor({
                     aria-label={t("localConfig.editorResources.groupEnabled", {
                       name: strategyGroupDisplayName(group),
                     })}
-                    checked={!disabledGroups.has(group.id)}
-                    disabled={!rulesEnabled}
+                    checked={!group.disabled && !disabledGroups.has(group.id)}
+                    disabled={!rulesEnabled || group.disabled}
                     size="small"
                     onChange={(enabled) =>
                       onChange({
@@ -277,19 +279,11 @@ function DefaultProxySelector({
   const selectors = resources.strategyGroups.filter(
     (group) => group.kind === "selector",
   );
-  const required = value.strategyGroupIds.some((id) => {
-    const group = resources.strategyGroups.find((item) => item.id === id);
-    return (
-      !value.disabledStrategyGroupIds.includes(id) &&
-      group?.kind === "rule" &&
-      group.policy.mode === "proxy"
-    );
-  });
+  const required = requiresProxySelector(value, resources);
   const unavailable =
     !value.rulesDisabled &&
     required &&
-    (!selectors.some((group) => group.id === value.defaultProxySelectorId) ||
-      value.disabledStrategyGroupIds.includes(value.defaultProxySelectorId));
+    !selectors.some((group) => group.id === value.defaultProxySelectorId && strategyGroupEnabled(value, group));
   if (!required) return null;
   return (
     <div className="config-resource-field">
@@ -311,7 +305,7 @@ function DefaultProxySelector({
         options={selectors.map((selector) => ({
           value: selector.id,
           label: strategyGroupDisplayName(selector),
-          disabled: value.disabledStrategyGroupIds.includes(selector.id),
+          disabled: !strategyGroupEnabled(value, selector),
         }))}
         placeholder={t("localConfig.editorResources.proxySelectorPlaceholder")}
         status={unavailable ? "error" : undefined}

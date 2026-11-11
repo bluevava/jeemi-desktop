@@ -86,7 +86,7 @@ func TestDisabledSelectorCannotServeActiveProxyRulesOrAuthorizeReplacement(t *te
 	selectorID, ruleID := strings.Repeat("a", 32), strings.Repeat("b", 32)
 	state := State{StrategyGroups: []StrategyGroup{
 		{ID: selectorID, Name: "Local", Kind: StrategyGroupKindSelector, Type: "select"},
-		{ID: ruleID, Name: "Proxy rules", Kind: StrategyGroupKindRule, Policy: PolicyTarget{Mode: PolicyProxy}},
+		{ID: ruleID, Name: "Proxy rules", Kind: StrategyGroupKindRule, Policy: PolicyTarget{Mode: PolicyProxy}, RuleSetReferences: []RuleSetReference{{RuleSetID: strings.Repeat("c", 32)}}},
 	}}
 	plan := DefaultPlan()
 	plan.StrategyGroupIDs = []string{selectorID, ruleID}

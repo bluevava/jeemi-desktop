@@ -15,6 +15,7 @@ import type {
   StrategyGroupResource,
 } from "../../../types/localConfig";
 import { strategyGroupDisplayName } from "../resourceModel";
+import { resourceDisplayName } from "../resourcePresentation";
 
 export function StrategyRuleSetReferencesEditor({
   draft,
@@ -124,12 +125,12 @@ export function StrategyRuleSetReferencesEditor({
                   value: item.id,
                   label: ownerByRuleSet.has(item.id)
                     ? t("localConfig.resources.groups.ruleSetOwned", {
-                        name: item.name,
+                        name: resourceDisplayName(item),
                         owner: strategyGroupDisplayName(
                           ownerByRuleSet.get(item.id)!,
                         ),
                       })
-                    : `${item.name} · ${item.behavior}`,
+                    : `${resourceDisplayName(item)} · ${item.behavior}`,
                   disabled:
                     (item.id !== reference.ruleSetId && used.has(item.id)) ||
                     !canReference(item),

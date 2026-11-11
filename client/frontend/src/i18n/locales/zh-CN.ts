@@ -1,3 +1,4 @@
+import { zhResourceLibrary } from "./resource-library";
 import {
   zhAuthorization,
   zhAuthorizationHelp,
@@ -19,6 +20,7 @@ import { zhChainProxy, zhChainProxyHelp, zhChainProxyFilterHelp, zhChainProxyImp
 
 export const zhCN = {
   subscriptionAutoUpdate: zhSubscriptionAutoUpdate,
+  resourceLibrary: zhResourceLibrary,
   offlineConfig: zhOfflineConfig,
   externalUI: zhExternalUI,
   chainProxy: zhChainProxy,
@@ -855,7 +857,6 @@ export const zhCN = {
       },
       actions: "{{name}} 的资源操作",
       name: "名称",
-      description: "说明",
       groups: {
         create: "新增本地策略组",
         edit: "编辑本地策略组",

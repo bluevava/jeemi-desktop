@@ -149,6 +149,7 @@ export function LocalConfigListPage() {
         setError(false);
         try {
           setState(await deleteLocalConfig(config.id));
+          setResources(await getLocalConfigResources());
         } catch {
           setError(true);
           throw new Error("delete local configuration failed");

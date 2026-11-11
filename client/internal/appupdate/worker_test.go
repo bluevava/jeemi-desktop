@@ -64,11 +64,10 @@ func TestWorkerSubprocessThroughDirectoryAliases(t *testing.T) {
 
 func testWorkerSubprocess(t *testing.T, configRoot, root string) {
 	t.Helper()
-	if runtime.GOOS == "darwin" {
-		t.Skip("macOS requires a signed application bundle; covered by bundle unit tests")
-	}
 	if runtime.GOOS == "windows" {
 		t.Setenv("APPDATA", configRoot)
+	} else if runtime.GOOS == "darwin" {
+		t.Setenv("HOME", configRoot)
 	} else {
 		t.Setenv("XDG_CONFIG_HOME", configRoot)
 	}
@@ -90,18 +89,39 @@ func testWorkerSubprocess(t *testing.T, configRoot, root string) {
 		t.Fatal(err)
 	}
 	executable := filepath.Join(root, target.executable)
-	if err = os.WriteFile(executable, binary, 0755); err != nil {
-		t.Fatal(err)
-	}
-	if err = os.WriteFile(filepath.Join(root, target.helper), []byte("old helper"), 0755); err != nil {
-		t.Fatal(err)
+	markerPath := filepath.Join(root, target.helper)
+	oldMarker, newMarker := "old helper", "new helper"
+	if runtime.GOOS == "darwin" {
+		previous := macPackageFixture(t, target, "1.2.2", "old")
+		if err = copyTree(filepath.Join(previous, "Jeemi.app"), filepath.Join(root, "Jeemi.app")); err != nil {
+			t.Fatal(err)
+		}
+		markerPath = filepath.Join(root, "Jeemi.app", "Contents", "Resources", "version.txt")
+		oldMarker, newMarker = "old", "new"
+	} else {
+		if err = os.WriteFile(executable, binary, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(markerPath, []byte(oldMarker), 0755); err != nil {
+			t.Fatal(err)
+		}
 	}
 	// Match the canonical executable recorded by Manager.Prepare, while keeping
 	// the data root aliased to exercise worker startup and restart acknowledgement.
 	executable = canonicalTestPath(t, executable)
 	id := strings.Repeat("c", 32)
 	jobRoot := filepath.Join(dataRoot, "updates", "jeemi", id)
-	packageFixture(t, filepath.Join(jobRoot, "extracted"), target, "1.2.3", binary)
+	if runtime.GOOS == "darwin" {
+		next := macPackageFixture(t, target, "1.2.3", "new")
+		if err = os.MkdirAll(filepath.Join(jobRoot, "extracted"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err = copyTree(next, filepath.Join(jobRoot, "extracted", target.directory)); err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		packageFixture(t, filepath.Join(jobRoot, "extracted"), target, "1.2.3", binary)
+	}
 	digest, _, err := hashFile(executable)
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +143,7 @@ func testWorkerSubprocess(t *testing.T, configRoot, root string) {
 		t.Fatal(err)
 	}
 	time.Sleep(40 * time.Millisecond)
-	if body, _ := os.ReadFile(filepath.Join(root, target.helper)); string(body) != "old helper" {
+	if body, _ := os.ReadFile(markerPath); string(body) != oldMarker {
 		t.Fatal("worker replaced before parent EOF")
 	}
 	// This controlled pipe close simulates the test GUI's process exit.
@@ -150,7 +170,7 @@ func testWorkerSubprocess(t *testing.T, configRoot, root string) {
 	if json.Unmarshal(data, &state) != nil || state.Phase != "succeeded" {
 		t.Fatalf("%s", data)
 	}
-	if body, _ := os.ReadFile(filepath.Join(root, target.helper)); string(body) != "new helper" {
+	if body, _ := os.ReadFile(markerPath); string(body) != newMarker {
 		t.Fatal("helper was not paired")
 	}
 	if _, err = os.Stat(filepath.Join(root, ".jeemi-update-"+id)); !os.IsNotExist(err) {

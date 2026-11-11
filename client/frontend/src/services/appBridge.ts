@@ -1,3 +1,4 @@
+import type { ResourceDeleteInput } from "../types/localConfig";
 import defaultFakeIPFilter from "../../../internal/runtimeconfig/fake_ip_filter.json";
 import type { MacNetworkAuthorizationStatus } from "../types/macNetwork";
 import type { ChainProxyAPI } from "./chainProxyBridge";
@@ -217,6 +218,7 @@ declare global {
             ) => Promise<LocalScript>;
             DeleteLocalScript: (id: string) => Promise<LocalScriptState>;
             RefreshLocalScript: (id: string) => Promise<LocalScriptState>;
+            DeleteLocalConfigResources: (input: ResourceDeleteInput) => Promise<LocalConfigResourceState>;
             GetLocalConfigResources: () => Promise<LocalConfigResourceState>;
             SaveStrategyGroup: (
               input: StrategyGroupResource,
@@ -1070,4 +1072,8 @@ export async function resolveSubscriptionRefresh(
   detach: boolean,
 ): Promise<SubscriptionState> {
   return requireAppBinding().ResolveSubscriptionRefresh(token, detach);
+}
+
+export async function deleteLocalConfigResources(input: ResourceDeleteInput): Promise<LocalConfigResourceState> {
+  return requireAppBinding().DeleteLocalConfigResources(input);
 }

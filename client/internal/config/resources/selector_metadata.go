@@ -1,20 +1,13 @@
 package resources
 
-import "strings"
+import (
+	"jeemi/internal/iconcatalog"
+	"strings"
+)
 
 const defaultSelectorTestURL = "http://www.google.com/generate_204"
 
-var selectorEmojiValues = []string{
-	"🐱", "🐶", "🐕", "🐩", "🐈", "🦊", "🐼", "🐯", "🐰", "🐇",
-	"🐻", "🦁", "🐸", "🐧", "🐣", "🐤", "🐥", "🐔", "🦆", "🦅",
-	"🦉", "🦜", "🦢", "🦩", "🦄", "🐳", "🐬", "🦭", "🐟", "🐠",
-	"🦈", "🐙", "🦑", "🦀", "🦞", "🐢", "🐨", "🐮", "🐷", "🐵",
-	"🐹", "🐭", "🐺", "🦝", "🐴", "🦓", "🦒", "🐘", "🦏", "🦛",
-	"🐑", "🐐", "🦌", "🐿️", "🦔", "🦦", "🦥", "🦋", "🐝", "🦖", "🐲",
-	"🚀", "⚡", "🌐", "🛡️", "🔒", "🎮", "🎬", "🎵", "💬", "💻",
-	"📱", "☁️", "🏠", "⭐", "🔥", "💎", "🌟", "🌈", "🍀", "🍉",
-	"🍎", "🍭", "🎯", "🎲", "🎧", "📺", "✈️", "🚢", "🏎️", "🛰️", "🤖",
-}
+var selectorEmojiValues = iconcatalog.Values()
 
 var selectorEmojiSet = func() map[string]struct{} {
 	result := make(map[string]struct{}, len(selectorEmojiValues))

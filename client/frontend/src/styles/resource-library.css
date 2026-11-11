@@ -1,0 +1,102 @@
+.resource-library-controls {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.resource-library-toolbar,
+.resource-library-status,
+.resource-library-bulk,
+.resource-library-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.resource-library-search {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+.resource-library-config-filter {
+  width: 180px;
+}
+.resource-library-group-filter {
+  width: 200px;
+}
+.resource-library-kind-filter {
+  width: 128px;
+}
+.resource-library-status {
+  justify-content: space-between;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  min-height: 28px;
+}
+.resource-library-card.is-selected {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.resource-library-card.ant-card {
+  height: 136px;
+}
+.resource-library-card .ant-card-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+.resource-library-card .config-resource-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resource-library-card .config-resource-tags {
+  flex-wrap: wrap;
+  overflow: visible;
+  gap: 4px;
+}
+.resource-library-card .config-resource-tags .ant-tag {
+  max-width: 100%;
+}
+.resource-library-card .resource-library-card-title {
+  flex: 1;
+  min-width: 0;
+}
+.resource-library-card .config-resource-card-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.resource-library-card .config-resource-card-footer > span:first-child {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+.resource-delete-preview {
+  max-height: 50vh;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+.resource-delete-preview ul {
+  padding-left: 22px;
+}
+.resource-delete-parent {
+  color: var(--color-text-secondary);
+}
+.resource-name-icon-row,
+.config-resource-form-row.strategy-group-info-row {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+.resource-name-icon-row > label {
+  min-width: 0;
+}
+@media (max-width: 620px) {
+  .resource-library-search {
+    flex-basis: 100%;
+  }
+  .resource-library-toolbar > .ant-select {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+  .config-resource-form-row.strategy-group-info-row > label:last-child {
+    grid-column: auto;
+  }
+}

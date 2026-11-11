@@ -11,7 +11,6 @@ export function emptyStrategyGroup(
   return {
     id: "",
     name: "",
-    description: "",
     kind,
     ruleOutput: "rule-set",
     ruleSetReferences: [],
@@ -33,16 +32,17 @@ export function emptyStrategyGroup(
 
 export function emptyRuleSet(): RuleSetResource {
   return {
+    emoji: "",
     id: "",
     name: "",
-    description: "",
     sourceType: "inline",
     behavior: "classical",
     format: "yaml",
     url: "",
     interval: 86400,
     noResolve: false,
-    defaultBrowser: false,
+    platform: "",
+    disabled: false,
     payloadYaml: "",
     payload: [],
     createdAt: "",

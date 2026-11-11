@@ -1,0 +1,79 @@
+# macOS 国内常用应用进程直连。专用域名/IP 规则优先，未命中流量走 Jeemi。
+# 使用实际可执行进程名；Bundle ID 不作为未经核实的进程名加入。
+payload:
+  # 1. 协同办公与通讯
+  - PROCESS-NAME,WeChat
+  - PROCESS-NAME,WeChatAppEx
+  - PROCESS-NAME,Weixin
+  - PROCESS-NAME,DingTalk
+  - PROCESS-NAME,Feishu
+  - PROCESS-NAME,Lark
+  - PROCESS-NAME,wemeetapp
+  - PROCESS-NAME,QQ
+  - PROCESS-NAME,AliIM
+  - PROCESS-NAME,UU
+  - PROCESS-NAME,YY
+  - PROCESS-NAME,KOOK
+  - PROCESS-NAME,ShengGuan
+
+  # 2. 办公、云盘与下载；限定应用包可覆盖其内部辅助进程。
+  - PROCESS-NAME,baidunetdisk
+  - PROCESS-NAME,BaiduNetdiskMac
+  - PROCESS-NAME,wpsoffice
+  - PROCESS-NAME,WPSOfficeHelper
+  - PROCESS-NAME,wpstcl
+  - PROCESS-NAME,Thunder
+  - 'PROCESS-PATH-REGEX,(?i)/(WeChat|微信|Weixin|QQ|DingTalk|钉钉|Feishu|飞书|Lark|WPS Office|wpsoffice|BaiduNetdisk|百度网盘|Thunder|迅雷)\.app/'
+
+  # 3. 远程控制与运维
+  - PROCESS-NAME,SunloginClient
+  - PROCESS-NAME,rustdesk
+  - 'PROCESS-PATH-REGEX,(?i)/(RustDesk|SunloginClient|向日葵远程控制)\.app/'
+
+  # 4. 国内浏览器
+  - PROCESS-NAME,360se
+  - PROCESS-NAME,SogouExplorer
+
+  # 5. 影视、直播与视频
+  - PROCESS-NAME,QQLive
+  - PROCESS-NAME,QQLiveHelper
+  - PROCESS-NAME,bilibili
+  - PROCESS-NAME,iQIYIMediaMac
+  - PROCESS-NAME,Youku
+  - PROCESS-NAME,MangoTV
+  - PROCESS-NAME,Douyu
+  - PROCESS-NAME,HuyaClient
+  - PROCESS-NAME,XiguaVideo
+
+  # 6. 音乐与音频
+  - PROCESS-NAME,QQMusic
+  - PROCESS-NAME,NetEaseMusic
+  - PROCESS-NAME,NeteaseMusic
+  - PROCESS-NAME,KugouMusic
+  - PROCESS-NAME,KuwoMusic
+  - PROCESS-NAME,XiamiMusic
+  - 'PROCESS-PATH-REGEX,(?i)/(网易云音乐|NeteaseMusic|QQMusic)\.app/'
+
+  # 7. 研发、制图与设计
+  - PROCESS-NAME,MasterGo
+  - PROCESS-NAME,Pixso
+  - PROCESS-NAME,Lanhu
+  - PROCESS-NAME,JianYingPro
+  - PROCESS-NAME,CapCut
+  - PROCESS-NAME,MeituMac
+  - PROCESS-NAME,KanCloud
+  - 'PROCESS-PATH-REGEX,(?i)/(JianyingPro|剪映专业版|CapCut)\.app/'
+
+  # 8. 国内 AI 应用；专用站点规则优先。
+  - PROCESS-NAME,Kimi
+  - PROCESS-NAME,DeepSeek
+  - PROCESS-NAME,Tongyi
+  - PROCESS-NAME,Doubao
+
+  # 9. 专业办公与商家工具
+  - PROCESS-NAME,FoxitPDF
+  - PROCESS-NAME,Qianfang
+
+  # 10. Google Chrome 及包内辅助进程；不匹配 Safari 或共享 WebKit。
+  - PROCESS-NAME,Google Chrome
+  - 'PROCESS-PATH-REGEX,/Google Chrome\.app/'

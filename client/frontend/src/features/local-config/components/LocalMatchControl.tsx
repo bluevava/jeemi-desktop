@@ -3,6 +3,7 @@ import { Alert, Select } from "antd";
 import { useTranslation } from "react-i18next";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
+import { localMatchStatus, strategyGroupEnabled } from "../resourceActivation";
 import type {
   LocalConfigResourcePlan,
   LocalConfigResourceState,
@@ -22,20 +23,7 @@ export function LocalMatchControl({
     (group) =>
       group.kind === "selector" && value.strategyGroupIds.includes(group.id),
   );
-  const selected =
-    value.match.mode === "selector"
-      ? selectors.find((group) => group.id === value.match.selectorId)
-      : undefined;
-  const missingSelector =
-    value.match.mode === "selector" &&
-    (!selected ||
-      value.disabledStrategyGroupIds.includes(value.match.selectorId));
-  const needsMatch =
-    value.ruleStrategy === "replace" && value.match.mode === "none";
-  const invalid =
-    !value.rulesDisabled &&
-    value.version >= 2 &&
-    (missingSelector || needsMatch);
+  const { selected, missingSelector, needsMatch, invalid } = localMatchStatus(value, resources);
   return (
     <div className="config-resource-field">
       <div className="config-resource-field-label">
@@ -68,7 +56,7 @@ export function LocalMatchControl({
           ...selectors.map((group) => ({
             value: `selector:${group.id}`,
             label: group.emoji ? `${group.emoji} ${group.name}` : group.name,
-            disabled: value.disabledStrategyGroupIds.includes(group.id),
+            disabled: !strategyGroupEnabled(value, group),
           })),
           ...(value.match.mode === "selector" && !selected
             ? [

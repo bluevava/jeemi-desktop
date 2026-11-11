@@ -18,6 +18,8 @@ import "./styles/authorization.css";
 import "./styles/connections.css";
 import "./styles/logs.css";
 import "./styles/local-config.css";
+import "./styles/emoji-picker.css";
+import "./styles/resource-library.css";
 import "./styles/subscription.css";
 import "./styles/recovery.css";
 import "./styles/tools.css";

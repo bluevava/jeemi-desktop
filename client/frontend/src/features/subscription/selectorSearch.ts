@@ -9,7 +9,7 @@ export function hasNodeNameSearch(query: string): boolean {
   return /[^|&!\s]/u.test(query);
 }
 
-function nameMatcher(query: string): (name: string) => boolean {
+export function nameMatcher(query: string): (name: string) => boolean {
   const conditions: Record<SearchCondition, string[]> = {
     any: [],
     all: [],

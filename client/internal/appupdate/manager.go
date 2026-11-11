@@ -139,6 +139,9 @@ func (m *Manager) Prepare(ctx context.Context, version string) (err error) {
 		return ErrDownload
 	}
 	id := hex.EncodeToString(idBytes)
+	if err = checkInstallLocation(executable, t, id); err != nil {
+		return err
+	}
 	jobRoot := filepath.Join(m.root, id)
 	if err = os.MkdirAll(jobRoot, 0700); err != nil {
 		return ErrDownload

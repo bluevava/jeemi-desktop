@@ -41,7 +41,8 @@ type PolicyTarget struct {
 type StrategyGroup struct {
 	ID                string             `json:"id"`
 	Name              string             `json:"name"`
-	Description       string             `json:"description"`
+	Emoji             string             `json:"emoji"`
+	Disabled          bool               `json:"disabled,omitempty"`
 	Kind              string             `json:"kind"`
 	RuleOutput        string             `json:"ruleOutput"`
 	RuleSetReferences []RuleSetReference `json:"ruleSetReferences"`
@@ -49,7 +50,6 @@ type StrategyGroup struct {
 
 	// Selector-only fields.
 	Type       string     `json:"type"`
-	Emoji      string     `json:"emoji"`
 	Icon       string     `json:"icon"`
 	URL        string     `json:"url"`
 	Interval   int        `json:"interval"`
@@ -64,30 +64,44 @@ type StrategyGroup struct {
 }
 
 type RuleSet struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	SourceType  string `json:"sourceType"`
-	Behavior    string `json:"behavior"`
-	Format      string `json:"format"`
-	URL         string `json:"url"`
-	Interval    int    `json:"interval"`
-	NoResolve   bool   `json:"noResolve,omitempty"`
-	// DefaultBrowser matches the platform's built-in Edge/Firefox/Safari browser,
-	// independently of the user's default browser setting. The JSON key is stable.
-	DefaultBrowser bool     `json:"defaultBrowser,omitempty"`
-	PayloadYAML    string   `json:"payloadYaml"`
-	Payload        []string `json:"payload"`
-	CreatedAt      string   `json:"createdAt"`
-	UpdatedAt      string   `json:"updatedAt"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Emoji       string   `json:"emoji,omitempty"`
+	Disabled    bool     `json:"disabled,omitempty"`
+	Platform    string   `json:"platform,omitempty"`
+	SourceType  string   `json:"sourceType"`
+	Behavior    string   `json:"behavior"`
+	Format      string   `json:"format"`
+	URL         string   `json:"url"`
+	Interval    int      `json:"interval"`
+	NoResolve   bool     `json:"noResolve,omitempty"`
+	PayloadYAML string   `json:"payloadYaml"`
+	Payload     []string `json:"payload"`
+	CreatedAt   string   `json:"createdAt"`
+	UpdatedAt   string   `json:"updatedAt"`
 }
 
 type State struct {
-	Directory      string          `json:"directory"`
-	Revision       int             `json:"revision"`
-	UpdatedAt      string          `json:"updatedAt"`
-	StrategyGroups []StrategyGroup `json:"strategyGroups"`
-	RuleSets       []RuleSet       `json:"ruleSets"`
+	// Read-only application projection; never persisted in libraryDocument.
+	Platform         string            `json:"platform,omitempty"`
+	ConfigReferences []ConfigReference `json:"configReferences,omitempty"`
+	Directory        string            `json:"directory"`
+	Revision         int               `json:"revision"`
+	UpdatedAt        string            `json:"updatedAt"`
+	StrategyGroups   []StrategyGroup   `json:"strategyGroups"`
+	RuleSets         []RuleSet         `json:"ruleSets"`
+}
+
+type ConfigReference struct {
+	ID               string   `json:"id"`
+	Name             string   `json:"name"`
+	StrategyGroupIDs []string `json:"strategyGroupIds"`
+}
+
+type DeleteInput struct {
+	Kind             string   `json:"kind"`
+	IDs              []string `json:"ids"`
+	ExpectedRevision int      `json:"expectedRevision"`
 }
 
 const CurrentPlanVersion = 1

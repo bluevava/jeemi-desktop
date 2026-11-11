@@ -153,7 +153,7 @@ func TestRuleSetCanOnlyBelongToOneStrategyGroup(t *testing.T) {
 
 func TestSelectorEmojiMustUseControlledCatalog(t *testing.T) {
 	now := time.Date(2026, 9, 3, 10, 0, 0, 0, time.UTC)
-	if len(selectorEmojiValues) != 92 || len(selectorEmojiSet) != len(selectorEmojiValues) {
+	if len(selectorEmojiValues) != 150 || len(selectorEmojiSet) != len(selectorEmojiValues) {
 		t.Fatalf("selector Emoji catalog is incomplete or duplicated: %d/%d", len(selectorEmojiValues), len(selectorEmojiSet))
 	}
 	group, err := normalizeStrategyGroup(StrategyGroup{

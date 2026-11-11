@@ -259,7 +259,7 @@
 
 .subscription-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 380px));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
   align-items: stretch;
   justify-content: start;
   gap: 14px;
@@ -1261,7 +1261,7 @@
 
 .subscription-icon-popover {
   display: grid;
-  width: 300px;
+  width: min(360px, calc(100vw - 64px));
   gap: 10px;
 }
 

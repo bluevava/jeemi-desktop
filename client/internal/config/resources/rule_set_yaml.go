@@ -28,7 +28,7 @@ var classicalRuleTypes = map[string]struct{}{
 // mihomo inline rule provider. Keeping the original YAML text preserves user
 // comments, while the returned payload is the normalized representation used
 // by the configuration composer.
-func normalizeRuleSetPayloadYAML(source string, allowEmpty ...bool) (string, []string, error) {
+func normalizeRuleSetPayloadYAML(source string) (string, []string, error) {
 	source = normalizeYAMLText(source)
 	if strings.TrimSpace(source) == "" {
 		return "", nil, fmt.Errorf("inline rule set YAML is required and must contain payload")
@@ -64,7 +64,7 @@ func normalizeRuleSetPayloadYAML(source string, allowEmpty ...bool) (string, []s
 	if payload.Kind != yaml.SequenceNode || payload.Tag != "!!seq" || payload.Anchor != "" || payload.Alias != nil {
 		return "", nil, fmt.Errorf("inline rule set payload must be a list without anchors or aliases")
 	}
-	if (len(payload.Content) == 0 && !(len(allowEmpty) > 0 && allowEmpty[0])) || len(payload.Content) > maxPayloadRules {
+	if len(payload.Content) == 0 || len(payload.Content) > maxPayloadRules {
 		return "", nil, fmt.Errorf("inline rule set payload must contain 1-%d rules", maxPayloadRules)
 	}
 

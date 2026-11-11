@@ -16,6 +16,7 @@ import (
 type startupDialogLabels struct {
 	Title, Invalid, InvalidOffset, ConfirmMessage, Confirm, Cancel string
 	ErrorTitle, ReadError, DeleteError, OtherError                 string
+	RepairMessage, RepairConfirm, RepairError                      string
 	Quit                                                           string
 }
 
@@ -55,9 +56,9 @@ func (a *App) InitializeClient(language string) error {
 			service, err = application.NewService(a.dataDirectory)
 			return err
 		}, func(failure *configfile.Failure) (bool, error) {
-			message := startupFailureMessage(labels, failure) + "\n\n" + labels.ConfirmMessage
+			message, confirmLabel := startupRecoveryConfirmation(labels, failure)
 			confirmed, err := dialogs.Confirm(ctx, dialogs.Confirmation{
-				Title: labels.Title, Message: message, Confirm: labels.Confirm, Cancel: labels.Cancel,
+				Title: labels.Title, Message: message, Confirm: confirmLabel, Cancel: labels.Cancel,
 			})
 			return confirmed && !a.quitRequested.Load(), err
 		})
@@ -112,8 +113,18 @@ func startupFailureMessage(labels startupDialogLabels, failure *configfile.Failu
 		template = labels.ReadError
 	} else if failure.Reason == "delete" {
 		template = labels.DeleteError
+	} else if failure.Reason == "repair" {
+		template = labels.RepairError
 	} else if failure.Offset > 0 {
 		template = labels.InvalidOffset
 	}
 	return strings.NewReplacer("{{file}}", failure.Path, "{{offset}}", strconv.FormatInt(failure.Offset, 10)).Replace(template)
+}
+
+func startupRecoveryConfirmation(labels startupDialogLabels, failure *configfile.Failure) (string, string) {
+	message, confirm := labels.ConfirmMessage, labels.Confirm
+	if failure.CanRepair() {
+		message, confirm = labels.RepairMessage, labels.RepairConfirm
+	}
+	return startupFailureMessage(labels, failure) + "\n\n" + message, confirm
 }

@@ -10,12 +10,11 @@ import (
 )
 
 const (
-	maxResourceNameLength        = 80
-	maxResourceDescriptionLength = 500
-	maxFilterValues              = 64
-	maxNamePatterns              = 32
-	maxNamePatternLength         = 64
-	maxPayloadRules              = 20000
+	maxResourceNameLength = 80
+	maxFilterValues       = 64
+	maxNamePatterns       = 32
+	maxNamePatternLength  = 64
+	maxPayloadRules       = 20000
 )
 
 var (
@@ -25,7 +24,6 @@ var (
 
 func normalizeStrategyGroup(input StrategyGroup, now time.Time) (StrategyGroup, error) {
 	input.Name = strings.TrimSpace(input.Name)
-	input.Description = strings.TrimSpace(input.Description)
 	input.Kind = strings.ToLower(strings.TrimSpace(input.Kind))
 	input.RuleOutput = strings.ToLower(strings.TrimSpace(input.RuleOutput))
 	input.Type = strings.ToLower(strings.TrimSpace(input.Type))
@@ -35,9 +33,6 @@ func normalizeStrategyGroup(input StrategyGroup, now time.Time) (StrategyGroup, 
 	input.Strategy = strings.ToLower(strings.TrimSpace(input.Strategy))
 	if input.Name == "" || len([]rune(input.Name)) > maxResourceNameLength {
 		return StrategyGroup{}, fmt.Errorf("strategy group name is required and must be at most %d characters", maxResourceNameLength)
-	}
-	if len([]rune(input.Description)) > maxResourceDescriptionLength {
-		return StrategyGroup{}, fmt.Errorf("strategy group description is too long")
 	}
 	if !contains([]string{StrategyGroupKindRule, StrategyGroupKindSelector}, input.Kind) {
 		return StrategyGroup{}, fmt.Errorf("strategy group kind is unsupported")
@@ -180,25 +175,25 @@ func normalizeFilter(input NodeFilter) (NodeFilter, error) {
 
 func normalizeRuleSet(input RuleSet, now time.Time) (RuleSet, error) {
 	input.Name = strings.TrimSpace(input.Name)
-	input.Description = strings.TrimSpace(input.Description)
+	input.Emoji = strings.TrimSpace(input.Emoji)
+	if input.Emoji != "" && !IsSupportedSelectorEmoji(input.Emoji) {
+		return RuleSet{}, fmt.Errorf("rule set emoji must use a supported option")
+	}
 	input.SourceType = strings.ToLower(strings.TrimSpace(input.SourceType))
 	input.Behavior = strings.ToLower(strings.TrimSpace(input.Behavior))
 	input.Format = strings.ToLower(strings.TrimSpace(input.Format))
 	input.URL = strings.TrimSpace(input.URL)
+	if !contains([]string{"", "windows", "darwin", "linux"}, input.Platform) {
+		return RuleSet{}, fmt.Errorf("rule set platform is unsupported")
+	}
 	if input.Name == "" || len([]rune(input.Name)) > maxResourceNameLength {
 		return RuleSet{}, fmt.Errorf("rule set name is required and must be at most %d characters", maxResourceNameLength)
-	}
-	if len([]rune(input.Description)) > maxResourceDescriptionLength {
-		return RuleSet{}, fmt.Errorf("rule set description is too long")
 	}
 	if !contains([]string{"inline", "http"}, input.SourceType) {
 		return RuleSet{}, fmt.Errorf("rule set source type is unsupported")
 	}
 	if !contains([]string{"domain", "ipcidr", "classical"}, input.Behavior) {
 		return RuleSet{}, fmt.Errorf("rule set behavior is unsupported")
-	}
-	if input.DefaultBrowser && (input.SourceType != "inline" || input.Behavior != "classical") {
-		return RuleSet{}, fmt.Errorf("built-in browser matching requires a local classical rule set")
 	}
 	if input.Behavior != "ipcidr" {
 		input.NoResolve = false
@@ -222,7 +217,7 @@ func normalizeRuleSet(input RuleSet, now time.Time) (RuleSet, error) {
 		input.Format = "yaml"
 		input.URL = ""
 		input.Interval = 0
-		payloadYAML, payload, err := normalizeRuleSetPayloadYAML(input.PayloadYAML, input.DefaultBrowser)
+		payloadYAML, payload, err := normalizeRuleSetPayloadYAML(input.PayloadYAML)
 		if err != nil {
 			return RuleSet{}, err
 		}
@@ -316,10 +311,13 @@ func validatePlanReferences(plan Plan, state State) error {
 		if !found {
 			return fmt.Errorf("referenced strategy group no longer exists")
 		}
+		if group.Disabled {
+			continue
+		}
 		if group.Kind == StrategyGroupKindSelector {
 			hasSelector = true
 		}
-		if group.Kind == StrategyGroupKindRule && group.Policy.Mode == PolicyProxy {
+		if group.Kind == StrategyGroupKindRule && group.Policy.Mode == PolicyProxy && len(group.RuleSetReferences) > 0 {
 			needsProxySelector = true
 		}
 	}
@@ -331,7 +329,7 @@ func validatePlanReferences(plan Plan, state State) error {
 	}
 	if plan.Match.Mode == "selector" {
 		selector, found := groups[plan.Match.SelectorID]
-		if !found || selector.Kind != StrategyGroupKindSelector || !contains(plan.StrategyGroupIDs, selector.ID) || !plan.GroupEnabled(selector.ID) {
+		if !found || selector.Disabled || selector.Kind != StrategyGroupKindSelector || !contains(plan.StrategyGroupIDs, selector.ID) || !plan.GroupEnabled(selector.ID) {
 			return fmt.Errorf("local MATCH must reference an included, enabled local selector")
 		}
 	}
@@ -343,7 +341,7 @@ func validatePlanReferences(plan Plan, state State) error {
 	}
 	if needsProxySelector && plan.DefaultProxySelectorID != "" && plan.GroupEnabled(plan.DefaultProxySelectorID) {
 		selector, found := groups[plan.DefaultProxySelectorID]
-		if !found || selector.Kind != StrategyGroupKindSelector {
+		if !found || selector.Disabled || selector.Kind != StrategyGroupKindSelector {
 			return fmt.Errorf("default proxy selector is unavailable")
 		}
 	}

@@ -16,6 +16,7 @@ import { RuleDocumentationButton } from "../../components/help/RuleDocumentation
 import { ruleMatchTypes } from "../../types/ruleSetEntry";
 import { canAppendRule, type ConnectionRuleSeed } from "./ruleEntryModel";
 import { useRuleSetEntryDraft } from "./useRuleSetEntryDraft";
+import { resourceDisplayName } from "../local-config/resourcePresentation";
 
 export function ConnectionRuleSetDialog({
   seed,
@@ -103,7 +104,7 @@ export function ConnectionRuleSetDialog({
                 { value: "", label: t("ruleSetEntry.newRuleSet") },
                 ...(draft.resources?.ruleSets ?? []).map((item) => ({
                   value: item.id,
-                  label: `${item.name} (${item.behavior})${item.sourceType === "http" ? " · " + t("ruleSetEntry.remote") : ""}`,
+                  label: `${resourceDisplayName(item)} (${item.behavior})${item.sourceType === "http" ? " · " + t("ruleSetEntry.remote") : ""}`,
                   disabled: item.sourceType !== "inline",
                 })),
               ]}

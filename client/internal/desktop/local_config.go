@@ -38,6 +38,10 @@ func (a *App) GetLocalConfigResources() (configresources.State, error) {
 	return a.service.LocalConfigResources()
 }
 
+func (a *App) DeleteLocalConfigResources(input configresources.DeleteInput) (configresources.State, error) {
+	return a.service.DeleteLocalConfigResources(input)
+}
+
 func (a *App) SaveStrategyGroup(input configresources.StrategyGroup) (configresources.State, error) {
 	return a.service.SaveStrategyGroup(input)
 }

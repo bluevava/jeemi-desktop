@@ -1,8 +1,5 @@
-import {
-  DeleteOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Button, Input, Popover, Segmented, Select, Tooltip } from "antd";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input, Popover, Segmented, Tooltip } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +9,7 @@ import type {
   SubscriptionIconKind,
   SubscriptionSourceKind,
 } from "../../../types/subscription";
-import { STRATEGY_GROUP_EMOJIS } from "../../local-config/strategyGroupEmoji";
+import { EmojiPicker } from "../../../components/common/EmojiPicker";
 import { SubscriptionIcon } from "./SubscriptionIcon";
 
 interface SubscriptionIconEditorProps {
@@ -100,17 +97,9 @@ export function SubscriptionIconEditor({
         value={mode}
       />
       {mode === "emoji" ? (
-        <Select
-          allowClear
-          aria-label={t("subscription.form.iconEmoji")}
-          onChange={(value) => onChange(value ? "emoji" : "", value ?? "")}
-          options={STRATEGY_GROUP_EMOJIS.map((emoji) => ({
-            label: emoji,
-            value: emoji,
-          }))}
-          placeholder={t("subscription.form.iconEmojiPlaceholder")}
-          showSearch
-          value={iconKind === "emoji" && icon ? icon : undefined}
+        <EmojiPicker
+          value={iconKind === "emoji" ? icon : ""}
+          onChange={(value) => onChange(value ? "emoji" : "", value)}
         />
       ) : (
         <Input
@@ -134,15 +123,17 @@ export function SubscriptionIconEditor({
             {t("subscription.form.iconDetect")}
           </Button>
         ) : null}
-        <Button
-          disabled={!icon}
-          icon={<DeleteOutlined />}
-          onClick={() => onChange("", "")}
-          size="small"
-          type="text"
-        >
-          {t("subscription.form.iconClear")}
-        </Button>
+        {mode === "url" ? (
+          <Button
+            disabled={!icon}
+            icon={<DeleteOutlined />}
+            onClick={() => onChange("", "")}
+            size="small"
+            type="text"
+          >
+            {t("subscription.form.iconClear")}
+          </Button>
+        ) : null}
       </div>
     </div>
   );

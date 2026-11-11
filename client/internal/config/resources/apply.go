@@ -20,7 +20,7 @@ func ValidatePlan(plan Plan, state State) (Plan, error) {
 	if err != nil {
 		return Plan{}, err
 	}
-	if err := validatePlanReferences(normalized, state); err != nil {
+	if err := validatePlanReferences(normalized, activeResourceState(state, "")); err != nil {
 		return Plan{}, err
 	}
 	return normalized, nil
@@ -35,7 +35,12 @@ func NormalizePlan(plan Plan) (Plan, error) {
 
 // RuleProviderCount returns the number of unique providers emitted by the
 // explicitly ordered groups. Inline-expanded groups do not create providers.
-func RuleProviderCount(input Plan, state State) (int, error) {
+func RuleProviderCount(input Plan, state State, platforms ...string) (int, error) {
+	platform := ""
+	if len(platforms) > 0 {
+		platform = platforms[0]
+	}
+	state = activeResourceState(state, platform)
 	plan, err := ValidatePlan(input, state)
 	if err != nil {
 		return 0, err
@@ -53,7 +58,7 @@ func RuleProviderCount(input Plan, state State) (int, error) {
 			continue
 		}
 		group := groups[id]
-		if group.RuleOutput != RuleOutputRuleSet {
+		if group.Disabled || group.RuleOutput != RuleOutputRuleSet {
 			continue
 		}
 		for _, reference := range group.RuleSetReferences {
@@ -67,16 +72,20 @@ func RuleProviderCount(input Plan, state State) (int, error) {
 // Selectors become mihomo proxy-groups; rule and selector groups both emit
 // ordered rules through RULE-SET or direct inline expansion.
 func Apply(contents []byte, state State, input Plan, options ...ApplyOptions) ([]byte, error) {
+	platform := ""
+	if len(options) > 0 {
+		platform = options[0].Platform
+	}
+	if requiresPlatform(state, input) && !contains([]string{"windows", "darwin", "linux"}, platform) {
+		return nil, fmt.Errorf("target platform is required for platform-specific rule sets")
+	}
+	state = activeResourceState(state, platform)
 	plan, err := ValidatePlan(input, state)
 	if err != nil {
 		return nil, err
 	}
 	if plan.RulesDisabled {
 		return contents, nil
-	}
-	state, err = resolveBuiltInBrowser(state, plan, options)
-	if err != nil {
-		return nil, err
 	}
 	if len(plan.StrategyGroupIDs) == 0 && plan.DefaultProxySelectorID == "" && plan.RuleStrategy != compose.StrategyReplace && plan.Match.Mode == "none" {
 		return contents, nil
@@ -102,7 +111,7 @@ func Apply(contents []byte, state State, input Plan, options ...ApplyOptions) ([
 	selectorIDs := make([]string, 0, len(plan.StrategyGroupIDs)+1)
 	seenSelectors := make(map[string]struct{})
 	addSelector := func(id string) {
-		if id == "" || !plan.GroupEnabled(id) {
+		if id == "" || !plan.GroupEnabled(id) || groupsByID[id].Disabled {
 			return
 		}
 		if _, exists := seenSelectors[id]; exists {
@@ -116,6 +125,9 @@ func Apply(contents []byte, state State, input Plan, options ...ApplyOptions) ([
 			continue
 		}
 		group := groupsByID[id]
+		if group.Disabled {
+			continue
+		}
 		explicitGroups = append(explicitGroups, group)
 		if group.Kind == StrategyGroupKindSelector {
 			addSelector(group.ID)
@@ -355,6 +367,9 @@ func materializeStrategyRules(
 	providerNames := make(map[string]struct{})
 	rules := make([]string, 0)
 	for _, group := range groups {
+		if len(group.RuleSetReferences) == 0 {
+			continue
+		}
 		target := "DIRECT"
 		if emitRules {
 			var err error

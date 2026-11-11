@@ -64,7 +64,7 @@ export interface StrategyGroupFilter {
 export interface StrategyGroupResource {
   id: string;
   name: string;
-  description: string;
+  disabled?: boolean;
   kind: "rule" | "selector";
   ruleOutput: "rule-set" | "inline";
   ruleSetReferences: RuleSetReference[];
@@ -92,22 +92,34 @@ export interface RuleSetReference {
 export interface RuleSetResource {
   id: string;
   name: string;
-  description: string;
+  emoji?: string;
+  disabled?: boolean;
+  platform?: "" | "windows" | "darwin" | "linux";
   sourceType: "inline" | "http";
   behavior: "domain" | "ipcidr" | "classical";
   format: "yaml" | "text" | "mrs";
   url: string;
   interval: number;
   noResolve: boolean;
-  /** Platform built-in Edge/Firefox/Safari; independent of default app settings. */
-  defaultBrowser?: boolean;
   payloadYaml: string;
   payload: string[];
   createdAt: string;
   updatedAt: string;
 }
 
+export interface ResourceDeleteInput {
+  kind: "groups" | "rules";
+  ids: string[];
+  expectedRevision: number;
+}
+
+export interface ResourceConfigReference {
+  id: string; name: string; strategyGroupIds: string[];
+}
+
 export interface LocalConfigResourceState {
+  platform?: string;
+  configReferences?: ResourceConfigReference[];
   directory: string;
   revision: number;
   updatedAt: string;

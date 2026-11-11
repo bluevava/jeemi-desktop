@@ -231,7 +231,7 @@ func (s *Service) LocalConfigState() (profile.LocalConfigState, error) {
 		if loadErr != nil {
 			continue
 		}
-		count, countErr := configresources.RuleProviderCount(config.ResourcePlan, resources)
+		count, countErr := configresources.RuleProviderCount(config.ResourcePlan, resources, s.runtime.Platform.OS)
 		if countErr != nil {
 			state.Configs[index].StaticValidationStatus = "references_invalid"
 			continue
@@ -250,7 +250,7 @@ func (s *Service) LocalConfig(id string) (profile.LocalConfig, error) {
 	if err != nil {
 		return profile.LocalConfig{}, err
 	}
-	count, err := configresources.RuleProviderCount(config.ResourcePlan, resources)
+	count, err := configresources.RuleProviderCount(config.ResourcePlan, resources, s.runtime.Platform.OS)
 	if err != nil {
 		config.StaticValidationStatus = "references_invalid"
 		return config, nil
@@ -313,7 +313,13 @@ func (s *Service) SaveLocalConfig(input profile.SaveLocalConfigInput) (result pr
 }
 
 func (s *Service) LocalConfigResources() (configresources.State, error) {
-	return s.configResources.State()
+	s.reconcileMu.Lock()
+	defer s.reconcileMu.Unlock()
+	state, err := s.configResources.State()
+	if err != nil {
+		return configresources.State{}, err
+	}
+	return s.resourceLibraryView(state)
 }
 
 func (s *Service) SaveStrategyGroup(input configresources.StrategyGroup) (result configresources.State, resultErr error) {

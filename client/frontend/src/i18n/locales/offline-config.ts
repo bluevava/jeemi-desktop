@@ -12,7 +12,12 @@ export const zhOfflineConfig = {
   createProcess: "💻 新建进程规则配置并绑定",
   createFailed: "创建内置配置失败，请检查本地资源库。",
   auto: "配套 Auto（共用节点筛选）",
-  defaultBrowser: "包含系统内置浏览器进程",
+  platform: "适用平台",
+  platforms: { all: "全部平台", windows: "Windows", darwin: "macOS", linux: "Linux" },
+  enabled: "启用",
+  disabled: "关闭",
+  sharedDisabled: "共享开关已关闭",
+  toggleResource: "启用 {{name}}",
   visual: "可视化编辑",
   source: "YAML 源码",
   search: "搜索规则",
@@ -38,9 +43,9 @@ export const zhOfflineConfig = {
     presets: {
       title: "内置离线配置",
       purpose:
-        "创建普通可编辑本地配置，绑定订阅后复用其节点。Jeemi、AI、Telegram、Video 各带 Auto，AI 主组与 Auto 共用 HK 排除条件。",
+        "创建普通可编辑本地配置，绑定订阅后复用其节点。Jeemi、AI+Google、IM、Video 各带 Auto，AI+Google 主组与 Auto 共用 HK 排除条件。Instagram 独立归 Video；IM 包含 Telegram、Discord、WhatsApp、LINE。",
       scenarios:
-        "两套方案都先匹配专用站点，再让系统更新直连。通用方案使用 CN 地域直连；进程方案改用国内应用进程与系统内置浏览器直连，其余走 Jeemi。",
+        "两套方案都先匹配专用站点，IM、Video 优先于 Google 宽泛域名，再让系统更新直连。通用方案使用 CN 地域直连；进程方案让国内应用及指定浏览器直连：Windows Edge、Linux Firefox、macOS Chrome，其余走 Jeemi。",
       cautions:
         "本地规则可编辑且不提供仓库更新。通用方案引用本地 GeoSite/GeoIP；进程方案的路由规则不引用 GEO，未列出的应用走 Jeemi。主页默认 Fake IP 过滤仍含 geosite 条目，两套方案都需要 GeoSite。缺库时先离线导入或下载。两套配置共享业务组与系统更新规则，重复创建保留现有编辑。创建后需绑定订阅。",
     },
@@ -52,14 +57,17 @@ export const zhOfflineConfig = {
       cautions:
         "Auto 隐藏独立卡片，但可在主组内选择。测速不代表站点解锁；没有符合条件的节点时拒绝连接。当前筛选范围是订阅顶层节点。",
     },
-    browser: {
-      title: "系统内置浏览器",
-      purpose:
-        "固定匹配当前平台的系统内置浏览器：Windows Edge、Ubuntu/Linux Firefox、macOS Safari，不读取系统默认浏览器设置。",
-      scenarios:
-        "进程方案把本规则放在 AI、Telegram 和 Video 之后，系统内置浏览器的其余流量直连；其它浏览器按现有规则分流。可关闭此开关后手动填写进程规则。",
-      cautions:
-        "需要 mihomo 能识别进程，通常使用 TUN 并开启主页进程查询。规则按进程名匹配，浏览器未安装不影响配置组合；修改系统默认浏览器不会改变这些规则。仅支持本地 classical 规则集。",
+    platform: {
+      title: "规则集适用平台",
+      purpose: "只在所选平台生成该规则集及其规则；全部平台表示不限制。资源内容和引用保持保存。",
+      scenarios: "进程模板按 Windows、macOS、Linux 分开；浏览器分别为 Edge、Chrome、Firefox。macOS 匹配 Chrome 主进程及其 Framework 路径，不匹配 Safari 或共享 WebKit 进程。均可逐条编辑或删除。",
+      cautions: "导出保留所有平台的定义，导入后按目标客户端平台生成。进程匹配仍需要核心识别进程，通常使用 TUN 并开启主页进程查询。其它平台的规则不会生成空提供者。",
+    },
+    activation: {
+      title: "共享资源开关",
+      purpose: "关闭规则集后不生成其提供者和规则；关闭策略组后同时移除该组规则、选择器及配套 Auto。内容和引用仍保留。",
+      scenarios: "临时停用某类分流后，流量继续匹配后续规则；重新开启即可恢复原有内容。开关影响所有引用它的本地配置。",
+      cautions: "保存前验证全部关联订阅，失败保留原状态。仍用作本地 MATCH 或默认代理目标的选择器须先更换目标才能关闭。规则集还需所属组、本地配置开关及平台条件同时允许才会生成。",
     },
   },
 };
@@ -80,7 +88,12 @@ export const enOfflineConfig = {
   createFailed:
     "Could not create the built-in configuration. Check the local resource library.",
   auto: "Include Auto (shared node filter)",
-  defaultBrowser: "Include the system built-in browser processes",
+  platform: "Target platform",
+  platforms: { all: "All platforms", windows: "Windows", darwin: "macOS", linux: "Linux" },
+  enabled: "On",
+  disabled: "Off",
+  sharedDisabled: "Disabled in shared library",
+  toggleResource: "Enable {{name}}",
   visual: "Visual editor",
   source: "YAML source",
   search: "Search rules",
@@ -106,9 +119,9 @@ export const enOfflineConfig = {
     presets: {
       title: "Built-in offline configurations",
       purpose:
-        "Create an editable local configuration that uses nodes from the bound subscription. Jeemi, AI, Telegram and Video each include Auto. AI and its Auto share the HK exclusion filter.",
+        "Create an editable local configuration that uses nodes from the bound subscription. Jeemi, AI+Google, IM and Video each include Auto. AI+Google and its Auto exclude HK. Instagram belongs to Video; IM covers Telegram, Discord, WhatsApp and LINE.",
       scenarios:
-        "Both presets prioritize dedicated sites and send system updates directly. General routing uses CN GEO rules; process routing instead sends common Chinese apps and the system built-in browser directly. Remaining traffic uses Jeemi.",
+        "Both presets prioritize dedicated sites, with IM and Video before broad Google domains, and send system updates directly. General routing uses CN GEO rules; process routing sends common Chinese apps and designated browsers directly: Edge on Windows, Firefox on Linux and Chrome on macOS. Remaining traffic uses Jeemi.",
       cautions:
         "Local rules are editable with no repository updater. General routing uses local GeoSite/GeoIP; process routing rules use no GEO and unlisted apps use Jeemi. Home's default Fake IP filter contains geosite entries, so both presets still require GeoSite. Import or download missing databases first. Both presets share business groups and system update rules; creating again preserves edits. Bind a preset to apply it.",
     },
@@ -121,14 +134,17 @@ export const enOfflineConfig = {
       cautions:
         "Auto has no separate card but remains selectable inside its parent. Latency does not guarantee site access. An empty candidate set rejects traffic. Filters currently cover top-level subscription nodes.",
     },
-    browser: {
-      title: "System built-in browser",
-      purpose:
-        "Use fixed process matchers for Windows Edge, Ubuntu/Linux Firefox, or macOS Safari. System default-browser preferences are not read.",
-      scenarios:
-        "The process preset places this rule after AI, Telegram, and Video; remaining built-in browser traffic goes direct. Other browsers follow existing routing rules. Disable it to enter process rules manually.",
-      cautions:
-        "Mihomo must identify processes, usually with TUN and process lookup enabled on Home. Rules match process names; an uninstalled browser does not block composition, and changing the default browser does not change these rules. Only local classical rule sets support this option.",
+    platform: {
+      title: "Rule-set target platform",
+      purpose: "Emit this rule set and its rules only on the selected platform. All platforms removes the restriction. Contents and references remain saved.",
+      scenarios: "The process preset has separate Windows, macOS and Linux sets for Edge, Chrome and Firefox respectively. macOS matches Chrome's main process and Framework paths, excluding Safari and shared WebKit processes. Each entry is editable.",
+      cautions: "Exports retain every platform definition; the target client selects its own platform. Process matching requires core process lookup, usually with TUN. Other platforms do not emit empty providers.",
+    },
+    activation: {
+      title: "Shared resource switch",
+      purpose: "Disabling a rule set omits its provider and rules. Disabling a policy group also omits its selector and paired Auto. Contents and references remain saved.",
+      scenarios: "Pause a routing category so traffic reaches later rules, then enable it to restore its contents. The switch affects all local configurations using this resource.",
+      cautions: "All associated subscriptions are validated before saving; failures keep the previous state. Choose another local MATCH or default proxy target before disabling its selector. Group, configuration and platform conditions must also allow a rule set to be emitted.",
     },
   },
 };
