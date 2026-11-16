@@ -55,7 +55,7 @@ func TestApplyPreservesSupportedAndMalformedInputForNormalValidation(t *testing.
 			t.Fatal("unrelated configuration was rewritten")
 		}
 	}
-	for version := 0; version <= 5; version++ {
+	for version := 0; version <= 6; version++ {
 		source := fmt.Sprintf("proxies: [{name: Supported, type: snell, version: %d}]\n", version)
 		_, got := apply(t, source)
 		if string(got) != source {
@@ -67,19 +67,17 @@ func TestApplyPreservesSupportedAndMalformedInputForNormalValidation(t *testing.
 func TestApplyFiltersOnlyUnsupportedCapabilitiesAndDependentNodes(t *testing.T) {
 	config, result := apply(t, `# keep source comments
 proxies:
-  - {name: Snell6, type: snell, version: 6}
+  - {name: Snell7, type: snell, version: 7}
   - {name: Future, type: unsupported-fixture}
-  - {name: UserKey, type: snell, version: 5, userkey: fixture}
-  - {name: Mode, type: snell, version: 5, mode: unsafe-raw}
-  - {name: Chained, type: anytls, dialer-proxy: Snell6}
+  - {name: Chained, type: anytls, dialer-proxy: Snell7}
   - {name: TwiceChained, type: anytls, dialer-proxy: Chained}
   - {name: AnyTLS, type: anytls, extension: {future: true}}
   - {name: Snell5, type: snell, version: 5}
 proxy-groups:
-  - {name: Jeemi, type: select, proxies: [Snell6, AnyTLS, Snell5, Future], default-selected: Snell6}
-  - {name: Auto, type: url-test, proxies: [Snell6, Chained, TwiceChained], url: 'https://example.invalid/test'}
+  - {name: Jeemi, type: select, proxies: [Snell7, AnyTLS, Snell5, Future], default-selected: Snell7}
+  - {name: Auto, type: url-test, proxies: [Snell7, Chained, TwiceChained], url: 'https://example.invalid/test'}
   - {name: Nested, type: select, proxies: [Auto, Jeemi]}
-  - {name: Dynamic, type: select, include-all: true, filter: '^Snell6$'}
+  - {name: Dynamic, type: select, include-all: true, filter: '^Snell7$'}
   - {name: ExplicitFallback, type: select, include-all: true, empty-fallback: DIRECT}
   - {name: InvalidUnrelated, type: select, proxies: []}
 rules: ['MATCH,Jeemi']
@@ -109,9 +107,66 @@ rules: ['MATCH,Jeemi']
 	}
 }
 
+func TestApplyPreservesSnell6FieldsAndReferences(t *testing.T) {
+	const source = `proxies:
+  - {name: Snell6, type: snell, version: 6, psk: fixture-long-psk, userkey: fixture-userkey, mode: unshaped, udp: true}
+  - {name: Chained, type: anytls, dialer-proxy: Snell6}
+  - {name: Future, type: unsupported-fixture}
+proxy-providers:
+  local:
+    type: inline
+    payload:
+      - {name: Inline6, type: snell, version: 6, mode: default, userkey: fixture-userkey}
+      - {name: Future, type: unsupported-fixture}
+proxy-groups:
+  - {name: Proxy, type: select, proxies: [Snell6, Chained, Future], use: [local], default-selected: Snell6}
+rules: ['DOMAIN,example.invalid,Snell6', 'MATCH,Proxy']
+`
+	var before map[string]any
+	if err := yaml.Unmarshal([]byte(source), &before); err != nil {
+		t.Fatal(err)
+	}
+	config, result := apply(t, source)
+	if got := names(config["proxies"]); !reflect.DeepEqual(got, []string{"Snell6", "Chained"}) {
+		t.Fatal("Snell v6 or its dependant was removed", got)
+	}
+	if !reflect.DeepEqual(config["proxies"].([]any)[0], before["proxies"].([]any)[0]) {
+		t.Fatal("Snell v6 fields were rewritten")
+	}
+	group := config["proxy-groups"].([]any)[0].(map[string]any)
+	if !reflect.DeepEqual(group["proxies"], []any{"Snell6", "Chained"}) || group["default-selected"] != "Snell6" || !reflect.DeepEqual(config["rules"], before["rules"]) {
+		t.Fatal("supported Snell references were changed")
+	}
+	provider := config["proxy-providers"].(map[string]any)["local"].(map[string]any)
+	want := before["proxy-providers"].(map[string]any)["local"].(map[string]any)["payload"].([]any)[0]
+	if !reflect.DeepEqual(provider["payload"], []any{want}) {
+		t.Fatal("inline Snell v6 was changed or removed")
+	}
+	if err := configinspect.ValidateReferences(result); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestApplyLeavesSnellFieldValidationToCore(t *testing.T) {
+	for _, fields := range []string{
+		"version: 6, mode: unshaped, userkey: fixture-userkey",
+		"version: 6, mode: invalid-mode",
+		"version: 6, psk: short",
+		"version: 5, mode: unshaped",
+		"version: 5, userkey: fixture-userkey",
+		"version: 6, userkey: {future: true}",
+	} {
+		source := "proxies: [{name: Snell, type: snell, " + fields + "}]\n"
+		_, got := apply(t, source)
+		if string(got) != source {
+			t.Fatal("protocol filtering swallowed or altered a field-level configuration", fields)
+		}
+	}
+}
+
 func TestApplyRejectsDanglingReferencesWithoutChangingRuleOrder(t *testing.T) {
 	config, result := apply(t, `proxies:
-  - {name: Bad Node, type: snell, version: 6}
+  - {name: Bad Node, type: snell, version: 7}
   - {name: Good, type: anytls}
 proxy-groups:
   - {name: Proxy, type: select, proxies: [Bad Node, Good], empty-fallback: Bad Node}
@@ -183,14 +238,14 @@ dns:
 func TestApplyFiltersInlineProvidersAndKeepsNameScopesSeparate(t *testing.T) {
 	config, result := apply(t, `proxies:
   - {name: Same, type: anytls}
-  - {name: Bad, type: snell, version: 6}
+  - {name: Bad, type: snell, version: 7}
 proxy-providers:
   mixed:
     type: inline
-    payload: [{name: Same, type: snell, version: 6}, {name: Good, type: ss}]
+    payload: [{name: Same, type: snell, version: 7}, {name: Good, type: ss}]
   empty:
     type: inline
-    payload: [{name: Bad, type: snell, version: 6}, {name: Dependent, type: anytls, dialer-proxy: Bad}]
+    payload: [{name: Bad, type: snell, version: 7}, {name: Dependent, type: anytls, dialer-proxy: Bad}]
   untouched: {type: http, url: 'https://example.invalid/nodes'}
 proxy-groups:
   - {name: Mixed, type: select, proxies: [Same], use: [mixed, empty]}
@@ -216,7 +271,7 @@ rules: ['MATCH,Mixed']
 
 func TestApplyHandlesAliasesWithoutChangingUnrelatedCopies(t *testing.T) {
 	config, result := apply(t, `proxies:
-  - &removed {name: Bad, type: snell, version: 6}
+  - &removed {name: Bad, type: snell, version: 7}
   - {name: Good, type: anytls}
 proxy-groups:
   - {name: One, type: select, proxies: &members [Bad, Good]}
@@ -239,7 +294,7 @@ rules: ['MATCH,One']
 }
 
 func TestApplyAllUnsupportedFailsClosedAndPreservesExplicitFallback(t *testing.T) {
-	for _, version := range []string{"6", "'6'", "0x6", "-1"} {
+	for _, version := range []string{"7", "'7'", "0x7", "-1"} {
 		config, result := apply(t, "proxies: [{name: Bad, type: snell, version: "+version+"}]\n")
 		if len(names(config["proxies"])) != 0 || !reflect.DeepEqual(config["rules"], []any{"MATCH,REJECT"}) {
 			t.Fatal("all unsupported nodes did not fail closed", version)
@@ -249,7 +304,7 @@ func TestApplyAllUnsupportedFailsClosedAndPreservesExplicitFallback(t *testing.T
 		}
 	}
 	for _, target := range []string{"DIRECT", "REJECT"} {
-		config, _ := apply(t, "proxies: [{name: Bad, type: snell, version: 6}]\nrules: ['MATCH,"+target+"']\n")
+		config, _ := apply(t, "proxies: [{name: Bad, type: snell, version: 7}]\nrules: ['MATCH,"+target+"']\n")
 		if !reflect.DeepEqual(config["rules"], []any{"MATCH," + target}) {
 			t.Fatal("explicit source fallback was overwritten")
 		}
@@ -258,9 +313,9 @@ func TestApplyAllUnsupportedFailsClosedAndPreservesExplicitFallback(t *testing.T
 
 func TestApplyRejectsAmbiguousNamesAndInvalidDocuments(t *testing.T) {
 	for _, source := range []string{
-		"proxies: [{name: Same, type: snell, version: 6}, {name: Same, type: anytls}]",
-		"proxies: [{name: Same, type: snell, version: 6}]\nproxy-groups: [{name: Same, type: select, proxies: [DIRECT]}]",
-		"proxies: [{name: DIRECT, type: snell, version: 6}]",
+		"proxies: [{name: Same, type: snell, version: 7}, {name: Same, type: anytls}]",
+		"proxies: [{name: Same, type: snell, version: 7}]\nproxy-groups: [{name: Same, type: select, proxies: [DIRECT]}]",
+		"proxies: [{name: DIRECT, type: snell, version: 7}]",
 		"proxies: [\n",
 		"proxies: []\n---\nproxies: []\n",
 	} {

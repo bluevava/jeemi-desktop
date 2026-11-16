@@ -17,6 +17,7 @@ type startupDialogLabels struct {
 	Title, Invalid, InvalidOffset, ConfirmMessage, Confirm, Cancel string
 	ErrorTitle, ReadError, DeleteError, OtherError                 string
 	RepairMessage, RepairConfirm, RepairError                      string
+	Unsupported, MigrationError                                    string
 	Quit                                                           string
 }
 
@@ -45,23 +46,28 @@ func (a *App) InitializeClient(language string) error {
 			labels = labelsByLanguage[language]
 		}
 		var service *application.Service
-		err := configfile.Recover(ctx, a.dataDirectory, func() error {
-			if a.quitRequested.Load() {
-				return context.Canceled
-			}
-			if err := application.CheckStartupConfiguration(a.dataDirectory); err != nil {
+		preparationContext, cancelPreparation := a.preparationContext(ctx)
+		defer cancelPreparation()
+		configurationDirectory, err := application.PrepareConfigurationWorkspace(preparationContext, a.dataDirectory)
+		if err == nil {
+			err = configfile.Recover(preparationContext, configurationDirectory, func() error {
+				if a.quitRequested.Load() {
+					return context.Canceled
+				}
+				if err := application.CheckStartupConfiguration(configurationDirectory); err != nil {
+					return err
+				}
+				var err error
+				service, err = application.NewService(a.dataDirectory)
 				return err
-			}
-			var err error
-			service, err = application.NewService(a.dataDirectory)
-			return err
-		}, func(failure *configfile.Failure) (bool, error) {
-			message, confirmLabel := startupRecoveryConfirmation(labels, failure)
-			confirmed, err := dialogs.Confirm(ctx, dialogs.Confirmation{
-				Title: labels.Title, Message: message, Confirm: confirmLabel, Cancel: labels.Cancel,
+			}, func(failure *configfile.Failure) (bool, error) {
+				message, confirmLabel := startupRecoveryConfirmation(labels, failure)
+				confirmed, err := dialogs.Confirm(ctx, dialogs.Confirmation{
+					Title: labels.Title, Message: message, Confirm: confirmLabel, Cancel: labels.Cancel,
+				})
+				return confirmed && !a.quitRequested.Load(), err
 			})
-			return confirmed && !a.quitRequested.Load(), err
-		})
+		}
 		if err != nil {
 			a.initializeError = errors.New("client startup did not complete")
 			if !errors.Is(err, configfile.ErrDeclined) && !errors.Is(err, context.Canceled) && !a.quitRequested.Load() {
@@ -111,6 +117,10 @@ func startupFailureMessage(labels startupDialogLabels, failure *configfile.Failu
 	template := labels.Invalid
 	if failure.Reason == "read" {
 		template = labels.ReadError
+	} else if failure.Reason == "unsupported" {
+		template = labels.Unsupported
+	} else if failure.Reason == "migration" {
+		template = labels.MigrationError
 	} else if failure.Reason == "delete" {
 		template = labels.DeleteError
 	} else if failure.Reason == "repair" {

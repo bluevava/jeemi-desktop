@@ -17,22 +17,19 @@ import { ChainProxyCompositionNotice } from "../../chain-proxy/ChainProxyComposi
 import { getChainProxyState } from "../../../services/chainProxyBridge";
 import { useSubscriptionCardActions } from "../useSubscriptionCardActions";
 import { applySubscriptionOrder } from "../cardOrder";
-import { normalizationErrorKey } from "../normalization";
+import { subscriptionSourceErrorKey } from "../fileSource";
 import type { MenuProps } from "antd";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
+import { ConfigurationViewer } from "../../../components/configuration/ConfigurationViewer";
 import { errorText } from "../../../lib/errorText";
 import { useProxyOverview } from "../../../app/runtime/ProxyOverviewContext";
 import { useRuntimeStatus } from "../../../app/runtime/RuntimeStatusContext";
 import { useWindowActivity } from "../../../app/runtime/WindowActivityContext";
-import {
-  closeConnections,
-  getConnections,
-  getRuleProviderRuntimeState,
-} from "../../../lib/mihomo/client";
+import { getRuleProviderRuntimeState } from "../../../lib/mihomo/client";
 import type { MihomoRuleProviderRuntimeState } from "../../../lib/mihomo/client";
 import {
   deleteSubscription,
@@ -44,6 +41,7 @@ import {
   getSubscriptionState,
   getSubscriptionText,
   importSubscriptionFile,
+  chooseSubscriptionSourceFile,
   importSubscriptionQRCodeImage,
   importSubscriptionQRCodeScreen,
   importSubscriptionURL,
@@ -71,6 +69,7 @@ import type {
   SelectorSortMode,
   SelectorViewMode,
   SubscriptionDetail,
+  SubscriptionFileSelectionResult,
   SubscriptionIconKind,
   SubscriptionState,
   SubscriptionSelector,
@@ -86,11 +85,11 @@ import { ScriptAssociationModal } from "../components/ScriptAssociationModal";
 import { SubscriptionShelf } from "../components/SubscriptionShelf";
 import { SubscriptionIconEditor } from "../components/SubscriptionIconEditor";
 import { SubscriptionUpdateInterval } from "../components/SubscriptionUpdateInterval";
+import { SubscriptionFileSource } from "../components/SubscriptionFileSource";
 import { RuntimeConfigurationViewer } from "../../runtime/RuntimeConfigurationViewer";
-import { connectionIDsForNodeSwitch } from "../connectionReset";
 import { useProxyDelayQueue } from "../useProxyDelayQueue";
 import { screenImportErrorKey } from "../screenImport";
-import { selectAndRememberProxy } from "../proxySelection";
+import { switchProxySelection } from "../proxySelection";
 import {
   delayTargetsForSearch,
   filterSelectorsByNodeName,
@@ -165,6 +164,7 @@ export function SubscriptionListPage({
   const [urlDraft, setURLDraft] = useState<SubscriptionDraft>(emptyDraft);
   const [editing, setEditing] = useState<SubscriptionDetail | null>(null);
   const [editDraft, setEditDraft] = useState<SubscriptionDraft>(emptyDraft);
+  const [fileSelection, setFileSelection] = useState<SubscriptionFileSelectionResult | null>(null);
   const [iconFeedback, setIconFeedback] = useState<
     "" | "found" | "not_found" | "error"
   >("");
@@ -196,6 +196,7 @@ export function SubscriptionListPage({
   const [selectorDisplayPreferencesBusy, setSelectorDisplayPreferencesBusy] =
     useState(false);
   const [busySelection, setBusySelection] = useState("");
+  const selectionPending = useRef(false);
   const automaticDelaySignature = useRef("");
   const ruleProviderRuntimeRequest = useRef(0);
 
@@ -591,7 +592,7 @@ export function SubscriptionListPage({
       if (!result.cancelled) setState(result.state);
     } catch (cause) {
       setOperationError(
-        normalizationErrorKey(cause, "subscription.errors.fileImport"),
+        subscriptionSourceErrorKey(cause, "subscription.errors.fileImport"),
       );
     } finally {
       setBusyAction(null);
@@ -609,7 +610,7 @@ export function SubscriptionListPage({
       if (!result.cancelled) setState(result.state);
     } catch (cause) {
       setOperationError(
-        normalizationErrorKey(cause, "subscription.errors.qrImport"),
+        subscriptionSourceErrorKey(cause, "subscription.errors.qrImport"),
       );
     } finally {
       setBusyAction(null);
@@ -655,7 +656,7 @@ export function SubscriptionListPage({
       setIconFeedback("");
     } catch (cause) {
       setOperationError(
-        normalizationErrorKey(cause, "subscription.errors.urlImport"),
+        subscriptionSourceErrorKey(cause, "subscription.errors.urlImport"),
       );
     } finally {
       setBusyAction(null);
@@ -672,9 +673,10 @@ export function SubscriptionListPage({
       setRefreshConflict(result.conflict);
     } catch (cause) {
       setOperationError(
-        normalizationErrorKey(cause, "subscription.errors.refresh"),
+        subscriptionSourceErrorKey(cause, "subscription.errors.refresh"),
       );
-      setRefreshError(errorText(cause, t("subscription.errors.refresh")));
+      const key = subscriptionSourceErrorKey(cause, "subscription.errors.refresh");
+      setRefreshError(key === "subscription.errors.refresh" ? errorText(cause, t(key)) : t(key));
     } finally {
       setBusyAction(null);
     }
@@ -721,6 +723,7 @@ export function SubscriptionListPage({
     try {
       const detail = await getSubscription(subscription.id);
       setEditing(detail);
+      setFileSelection(null);
       setEditDraft({
         autoUpdateIntervalMinutes: detail.autoUpdateIntervalMinutes,
         name: detail.name,
@@ -738,6 +741,7 @@ export function SubscriptionListPage({
   };
 
   const submitEdit = async () => {
+    if (busyAction) return;
     if (!editing || !editDraft.name.trim()) {
       setOperationError("subscription.errors.required");
       return;
@@ -755,15 +759,34 @@ export function SubscriptionListPage({
           name: editDraft.name,
           description: editDraft.description,
           sourceUrl: editing.sourceKind === "url" ? editDraft.sourceUrl : "",
+          sourceFileToken: editing.sourceKind === "file" ? fileSelection?.token : undefined,
           iconKind: editDraft.iconKind,
           icon: editDraft.icon,
         }),
       );
       setEditing(null);
+      setFileSelection(null);
     } catch (cause) {
       setOperationError(
-        normalizationErrorKey(cause, "subscription.errors.edit"),
+        subscriptionSourceErrorKey(cause, "subscription.errors.edit"),
       );
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const chooseSourceFile = async () => {
+    if (!editing || editing.sourceKind !== "file" || busyAction) return;
+    setBusyAction("choose-file");
+    setErrorKey(null);
+    try {
+      const result = await chooseSubscriptionSourceFile(editing.id, {
+        title: t("subscription.form.chooseSourceFile"),
+        filterName: t("subscription.import.fileFilter"),
+      });
+      if (!result.cancelled) setFileSelection(result);
+    } catch (cause) {
+      setOperationError(subscriptionSourceErrorKey(cause, "subscription.errors.fileImport"));
     } finally {
       setBusyAction(null);
     }
@@ -938,15 +961,18 @@ export function SubscriptionListPage({
 
   const switchProxy = async (group: string, proxy: string) => {
     const subscriptionId = runtime?.mihomo.subscriptionId;
-    if (!runtimeInteractive || !controllerSession || !subscriptionId) return;
+    if (!runtimeInteractive || !controllerSession || !subscriptionId || selectionPending.current) return;
+    // React state alone does not prevent a second click before the next render.
+    selectionPending.current = true;
     setBusySelection(group);
     setErrorKey(null);
     try {
-      const remembered = await selectAndRememberProxy(
+      const result = await switchProxySelection(
         controllerSession,
         subscriptionId,
         group,
         proxy,
+        state?.preferences.connectionResetMode ?? "selector",
         () => {
           commitProxySelection(
             group,
@@ -957,25 +983,15 @@ export function SubscriptionListPage({
           void refreshProxyRuntime().catch(() => undefined);
         },
       );
-      if (!remembered)
+      if (!result.changed) return;
+      if (!result.remembered)
         setOperationError("subscription.errors.proxySelectionSave");
-      const resetMode = state?.preferences.connectionResetMode ?? "selector";
-      if (resetMode !== "off") {
-        try {
-          const snapshot = await getConnections(controllerSession);
-          const targetIDs = connectionIDsForNodeSwitch(
-            snapshot.connections,
-            resetMode,
-            group,
-          );
-          await closeConnections(controllerSession, targetIDs);
-        } catch {
-          setOperationError("subscription.errors.connectionReset");
-        }
-      }
+      if (!result.connectionsReset)
+        setOperationError("subscription.errors.connectionReset");
     } catch {
       setOperationError("subscription.errors.proxySelection");
     } finally {
+      selectionPending.current = false;
       setBusySelection("");
     }
   };
@@ -1452,9 +1468,16 @@ export function SubscriptionListPage({
         <Modal
           cancelText={t("common.cancel")}
           confirmLoading={busyAction === "edit"}
+          closable={busyAction === null}
+          maskClosable={busyAction === null}
+          keyboard={busyAction === null}
+          cancelButtonProps={{ disabled: busyAction !== null }}
+          okButtonProps={{ disabled: busyAction !== null }}
           okText={t("subscription.edit.save")}
           onCancel={() => {
+            if (busyAction) return;
             setEditing(null);
+            setFileSelection(null);
             setIconFeedback("");
           }}
           onOk={() => void submitEdit()}
@@ -1536,10 +1559,12 @@ export function SubscriptionListPage({
                 />
               </label>
             ) : (
-              <div className="subscription-readonly-source">
-                <span>{t("subscription.form.file")}</span>
-                <strong>{editing?.sourceLabel}</strong>
-              </div>
+              <SubscriptionFileSource
+                fileName={fileSelection?.fileName ?? editing?.sourceLabel ?? ""}
+                changed={fileSelection !== null}
+                busy={busyAction !== null}
+                onChoose={() => void chooseSourceFile()}
+              />
             )}
             {editing?.sourceKind === "url" ? (
               <SubscriptionUpdateInterval
@@ -1570,26 +1595,22 @@ export function SubscriptionListPage({
           </div>
         </Modal>
 
-        <Modal
-          footer={null}
-          onCancel={() => setRawText(null)}
+        <ConfigurationViewer
+          contents={rawText?.contents ?? ""}
+          documentKey={rawText?.revisionId}
+          onClose={() => setRawText(null)}
           open={rawText !== null}
           title={
             <span className="subscription-modal-title">
-              {t("subscription.raw.title", { name: rawText?.name ?? "" })}
+              <FlagText>{t("subscription.raw.title", { name: rawText?.name ?? "" })}</FlagText>
               <FeatureHelp compact topic="subscriptionRawText" />
             </span>
           }
-          width={900}
-        >
-          <div className="subscription-raw-view">
-            <div className="subscription-raw-meta">
-              <Tag>{rawText?.format.toUpperCase()}</Tag>
-              <code>{rawText?.revisionId}</code>
-            </div>
-            <pre>{rawText?.contents}</pre>
-          </div>
-        </Modal>
+          metadata={<>
+            <Tag>{rawText?.format.toUpperCase()}</Tag>
+            <code>{rawText?.revisionId}</code>
+          </>}
+        />
 
         <Modal
           cancelText={t("common.cancel")}

@@ -54,6 +54,31 @@ func (a *App) ImportSubscriptionFile(labels subscription.DialogLabels) (subscrip
 	return subscription.DialogImportResult{State: state}, err
 }
 
+func (a *App) ChooseSubscriptionSourceFile(id string, labels subscription.DialogLabels) (subscription.FileSelectionResult, error) {
+	ctx := a.context()
+	if ctx == nil {
+		return subscription.FileSelectionResult{}, fmt.Errorf("application window is unavailable")
+	}
+	detail, err := a.service.Subscription(id)
+	if err != nil {
+		return subscription.FileSelectionResult{}, err
+	}
+	if detail.SourceKind != subscription.SourceFile {
+		return subscription.FileSelectionResult{}, fmt.Errorf("subscription file selection requires a file source")
+	}
+	path, err := wailsRuntime.OpenFileDialog(ctx, wailsRuntime.OpenDialogOptions{
+		Title:   labels.Title,
+		Filters: []wailsRuntime.FileFilter{{DisplayName: labels.FilterName, Pattern: "*.yaml;*.json;*.txt;*.conf"}},
+	})
+	if err != nil {
+		return subscription.FileSelectionResult{}, fmt.Errorf("open subscription source file dialog")
+	}
+	if path == "" {
+		return subscription.FileSelectionResult{Cancelled: true}, nil
+	}
+	return a.service.StageSubscriptionFile(id, path)
+}
+
 func (a *App) ImportSubscriptionQRCodeImage(labels subscription.DialogLabels) (subscription.DialogImportResult, error) {
 	ctx := a.context()
 	if ctx == nil {

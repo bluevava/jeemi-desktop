@@ -164,6 +164,13 @@ type Preferences struct {
 }
 
 func DefaultPreferences() Preferences {
+	return StoredDefaultsV1()
+}
+
+// StoredDefaultsV1 is the meaning of omitted fields in the persisted v1 schema.
+// New-install defaults may evolve in DefaultPreferences without changing this
+// contract. Changes to these values require an explicit schema decision.
+func StoredDefaultsV1() Preferences {
 	return Preferences{
 		OutboundMode: OutboundModeRule,
 		ProxyMode:    ProxyModeTUN,
@@ -214,7 +221,7 @@ func DefaultPreferences() Preferences {
 // injection switch implicitly.
 func (preferences *Preferences) UnmarshalJSON(contents []byte) error {
 	type plainPreferences Preferences
-	decoded := plainPreferences(DefaultPreferences())
+	decoded := plainPreferences(StoredDefaultsV1())
 	if err := json.Unmarshal(contents, &decoded); err != nil {
 		return err
 	}
@@ -223,7 +230,7 @@ func (preferences *Preferences) UnmarshalJSON(contents []byte) error {
 }
 
 func Normalize(preferences Preferences) Preferences {
-	defaults := DefaultPreferences()
+	defaults := StoredDefaultsV1()
 	if reflect.DeepEqual(preferences, Preferences{}) {
 		return defaults
 	}

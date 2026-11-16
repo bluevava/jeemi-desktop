@@ -187,6 +187,7 @@ export interface ImportSubscriptionURLInput {
 }
 
 export interface UpdateSubscriptionInput {
+  sourceFileToken?: string;
   autoUpdateIntervalMinutes: number;
   id: string;
   name: string;
@@ -218,6 +219,12 @@ export interface NativeDialogLabels {
 export interface SubscriptionDialogImportResult {
   cancelled: boolean;
   state: SubscriptionState;
+}
+
+export interface SubscriptionFileSelectionResult {
+  cancelled: boolean;
+  token: string;
+  fileName: string;
 }
 
 export interface SubscriptionScreenImportResult {

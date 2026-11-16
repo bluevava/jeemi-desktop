@@ -17,5 +17,5 @@ func (s *Store) SetDNSQueryPreferences(input dnsquery.Preferences) error {
 		return nil
 	}
 	document.DNSQuery = &preferences
-	return s.saveUnlocked(document)
+	return s.saveUnlocked(document, "dnsQuery")
 }

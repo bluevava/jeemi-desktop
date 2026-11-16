@@ -132,13 +132,13 @@ export function SubscriptionShelf({
                 title={
                   selected.sourceKind === "url"
                     ? t("subscription.shelf.refreshCurrent")
-                    : t("subscription.shelf.refreshUnavailable")
+                    : t("subscription.menu.refreshFile")
                 }
               >
                 <span>
                   <Button
                     aria-label={t("subscription.shelf.refreshCurrent")}
-                    disabled={busyAction !== null || selected.sourceKind !== "url"}
+                    disabled={busyAction !== null}
                     icon={<ReloadOutlined spin={busyAction === selected.id} />}
                     onClick={() => onRefreshSelected(selected)}
                     type="text"

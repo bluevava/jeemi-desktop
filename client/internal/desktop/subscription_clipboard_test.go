@@ -1,6 +1,7 @@
 package desktop
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,11 @@ import (
 )
 
 func TestCopySubscriptionSourceKeepsAddressesInsideGo(t *testing.T) {
-	service, err := application.NewService(t.TempDir())
+	root := t.TempDir()
+	if _, err := application.PrepareConfigurationWorkspace(context.Background(), root); err != nil {
+		t.Fatal(err)
+	}
+	service, err := application.NewService(root)
 	if err != nil {
 		t.Fatal(err)
 	}

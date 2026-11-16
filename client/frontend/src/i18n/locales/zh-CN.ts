@@ -19,6 +19,16 @@ import { zhExternalUI, zhExternalUIHelp } from "./external-ui";
 import { zhChainProxy, zhChainProxyHelp, zhChainProxyFilterHelp, zhChainProxyImportHelp } from "./chain-proxy";
 
 export const zhCN = {
+  configurationViewer: {
+    search: "搜索配置内容",
+    placeholder: "查找… (Ctrl/⌘+F)",
+    previous: "上一个匹配项 (Shift+Enter)",
+    next: "下一个匹配项 (Enter)",
+    matches: "第 {{current}} 项，共 {{total}} 项",
+    noMatches: "没有匹配项",
+    content: "配置内容",
+    loading: "正在读取配置…",
+  },
   subscriptionAutoUpdate: zhSubscriptionAutoUpdate,
   resourceLibrary: zhResourceLibrary,
   offlineConfig: zhOfflineConfig,
@@ -498,8 +508,7 @@ export const zhCN = {
       collapse: "收起订阅配置面板",
       collapseHint: "点击收起订阅面板",
       expand: "展开订阅配置面板",
-      refreshCurrent: "重新拉取当前订阅",
-      refreshUnavailable: "文件订阅没有可重新拉取的远程地址",
+      refreshCurrent: "刷新当前订阅",
       openRuleProviders: "查看规则提供者",
       subscriptionTools: "当前订阅快捷工具",
       selectorTools: "代理选择器快捷工具",
@@ -628,7 +637,8 @@ export const zhCN = {
     },
     menu: {
       label: "{{name}} 的订阅操作菜单",
-      refresh: "重新拉取",
+      refresh: "刷新订阅",
+      refreshFile: "重新读取来源文件",
       edit: "编辑订阅",
       rawText: "查看原文配置",
       associate: "关联本地配置",
@@ -641,7 +651,10 @@ export const zhCN = {
       nameOptional: "订阅名称（可选）",
       nameAutoPlaceholder: "留空时从响应头或域名补全",
       url: "订阅 URL",
-      file: "原始导入文件",
+      file: "来源文件",
+      chooseSourceFile: "重新选择文件",
+      filePending: "保存后读取新文件，校验通过才更新来源和原文。",
+      fileRefreshHint: "手动刷新会重新读取此文件；文件移动或删除后可重新选择。",
       description: "说明",
       descriptionPlaceholder: "说明订阅来源或适用场景。",
       icon: "图标",
@@ -705,6 +718,10 @@ export const zhCN = {
         "URL 拉取失败；请检查地址、网络、文件大小和配置格式。未保存任何不完整内容。",
       fileImport:
         "文件导入失败；支持 .yaml、.json、.txt 和 .conf，内容可以是 mihomo、Surge 或受支持的 URI 订阅。",
+      fileSourceMissing: "此订阅尚未记录来源文件路径，请在编辑订阅时重新选择文件。当前修订保持不变。",
+      fileSourceUnavailable: "来源文件无法读取、为空或超过 4 MiB。请检查文件和读取权限，或在编辑订阅时重新选择。当前修订保持不变。",
+      fileSourceChanged: "读取过程中来源文件发生了变化，请等待文件保存完成后重新刷新。当前修订保持不变。",
+      fileSelectionExpired: "文件选择已过期或订阅已变化，请重新选择文件后保存。",
       qrImport:
         "二维码图片导入失败；请确认图片清晰，并且二维码内容是 http/https 订阅 URL。",
       screenImport: "二维码订阅导入失败；请检查二维码中的订阅地址及网络连接。",
@@ -721,9 +738,9 @@ export const zhCN = {
       screenBusy: "上一次屏幕二维码识别仍在处理中，请稍后再试。",
       screenNoQR:
         "画面中未找到包含有效 http/https 订阅地址的二维码，请完整显示并适当放大二维码后重试。",
-      refresh: "重新拉取失败；当前 URL 和当前可用修订保持不变。",
+      refresh: "刷新失败；当前来源和当前可用修订保持不变。",
       detail: "无法读取订阅详情，请检查订阅是否仍存在。",
-      edit: "保存订阅失败；名称、来源 URL 和当前修订保持不变。",
+      edit: "保存订阅失败；名称、来源和当前修订保持不变。",
       rawText: "无法读取当前订阅原文，请检查受管修订文件完整性。",
       association: "保存本地配置关联失败，请确认订阅和本地配置仍然存在。",
       copySource: "复制来源地址失败，请确认订阅文件可用且剪贴板可访问。",
@@ -1714,8 +1731,8 @@ export const zhCN = {
       subscriptionImport: {
         title: "订阅导入",
         purpose: "通过 HTTP(S) URL、配置文件或二维码导入 mihomo、Surge 或通用 URI 订阅，并保存可追踪的原文修订。",
-        scenarios: "首次添加订阅、导入 YAML/JSON/TXT/CONF 文件，或扫描服务商提供的订阅二维码时使用。",
-        cautions: "Surge/URI 会先转换节点和 DNS，再经过本地配置或脚本及运行参数。来源规则不转换；不支持的节点会显示原因。原文不可变，转换或校验失败不会覆盖当前修订。",
+        scenarios: "首次添加订阅、导入 YAML/JSON/TXT/CONF 文件，或扫描服务商提供的订阅二维码时使用。文件订阅保存来源路径，手动刷新重新读取；编辑时可重新选择文件。",
+        cautions: "重新选择的文件只在保存并校验通过后生效。文件丢失、读取或配置校验失败时保留旧来源和原文；以前未记录路径的文件订阅需重新选择一次。不自动轮询文件，也不改写或删除来源文件。Surge/URI 先转换节点和 DNS，原文修订完整保留。",
       },
       subscriptionQRCode: {
         title: "二维码订阅导入",

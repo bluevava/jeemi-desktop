@@ -13,7 +13,7 @@ import (
 )
 
 // Protocol names and Snell options are checked against the official
-// mihomo v1.19.33 adapter/parser.go and adapter/outbound/snell.go.
+// mihomo v1.19.34 adapter/parser.go and adapter/outbound/snell.go.
 // Keep this separate from the narrower URI conversion field catalogue.
 var supportedProtocols = strings.Fields("ss ssr socks5 http vmess vless snell trojan hysteria hysteria2 wireguard tuic shadowquic gost-relay direct dns reject rematch ssh mieru anytls sudoku masque trusttunnel openvpn tailscale zerotier easytier")
 
@@ -36,11 +36,12 @@ func unsupported(node *yaml.Node) bool {
 			if version.Kind == yaml.ScalarNode && version.Tag == "!!int" {
 				err = version.Decode(&n)
 			}
-			if err == nil && (n < 0 || n > 5) {
+			if err == nil && (n < 0 || n > 6) {
 				return true
 			}
 		}
-		return scalar(value(node, "userkey")) != "" || scalar(value(node, "mode")) != ""
+		// Options (including mode and unknown extension fields) are preserved;
+		// their interpretation and validation belong to the selected core.
 	}
 	return false
 }

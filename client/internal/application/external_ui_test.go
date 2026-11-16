@@ -187,7 +187,7 @@ func TestExternalUIEmptySubscriptionAndClientRestartReuseLocalCache(t *testing.T
 		t.Fatal(err)
 	}
 	// No subscription is required to cache UI after toggling the Home switch.
-	empty, err := NewService(t.TempDir())
+	empty, err := newTestService(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}

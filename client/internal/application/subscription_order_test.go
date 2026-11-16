@@ -11,7 +11,7 @@ import (
 
 func TestSubscriptionOrderSurvivesReopenAddDeleteAndKeepsSelection(t *testing.T) {
 	root := t.TempDir()
-	s, err := NewService(root)
+	s, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestSubscriptionOrderSurvivesReopenAddDeleteAndKeepsSelection(t *testing.T)
 			t.Fatalf("order/selection = %v/%s, want %v/%s", got, state.SelectedSubscriptionID, ids, first)
 		}
 	}
-	reopened, err := NewService(root)
+	reopened, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}

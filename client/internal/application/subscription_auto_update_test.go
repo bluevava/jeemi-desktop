@@ -39,7 +39,7 @@ func (f *scheduledFetcher) Fetch(ctx context.Context, _ string) (subscription.Fe
 func scheduledService(t *testing.T) (*Service, *scheduledFetcher, *time.Time, string) {
 	t.Helper()
 	directory := t.TempDir()
-	s, err := NewService(directory)
+	s, err := newTestService(directory)
 	if err != nil {
 		t.Fatal(err)
 	}

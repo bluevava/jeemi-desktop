@@ -94,6 +94,8 @@ type Summary struct {
 type Detail struct {
 	Summary
 	SourceURL string `json:"sourceUrl"`
+	// The external file is read only by Go; the UI receives an opaque picker token.
+	SourceFilePath string `json:"-"`
 }
 
 type State struct {
@@ -186,6 +188,7 @@ type ImportURLInput struct {
 }
 
 type UpdateInput struct {
+	SourceFileToken           string   `json:"sourceFileToken,omitempty"`
 	AutoUpdateIntervalMinutes int      `json:"autoUpdateIntervalMinutes"`
 	ID                        string   `json:"id"`
 	Name                      string   `json:"name"`
@@ -219,6 +222,12 @@ type DialogImportResult struct {
 	State     State `json:"state"`
 }
 
+type FileSelectionResult struct {
+	Cancelled bool   `json:"cancelled"`
+	Token     string `json:"token"`
+	FileName  string `json:"fileName"`
+}
+
 // Cancelled/failed capture leaves the existing subscription state untouched.
 // Screenshot data, local paths and decoded URLs never cross this boundary.
 type ScreenImportResult struct {
@@ -250,6 +259,7 @@ type metadataDocument struct {
 	ImportMethod                 ImportMethod               `json:"importMethod"`
 	SourceURL                    string                     `json:"sourceUrl"`
 	OriginalFileName             string                     `json:"originalFileName"`
+	SourceFilePath               string                     `json:"sourceFilePath,omitempty"`
 	IconKind                     IconKind                   `json:"iconKind"`
 	Icon                         string                     `json:"icon"`
 	LocalConfigID                string                     `json:"localConfigId"`

@@ -68,6 +68,7 @@ import type {
   SubscriptionDetail,
   SubscriptionFallbackResult,
   SubscriptionDialogImportResult,
+  SubscriptionFileSelectionResult,
   SubscriptionScreenImportResult,
   SubscriptionIconDetectionResult,
   SubscriptionPreferences,
@@ -241,6 +242,10 @@ declare global {
             ImportSubscriptionFile: (
               labels: NativeDialogLabels,
             ) => Promise<SubscriptionDialogImportResult>;
+            ChooseSubscriptionSourceFile: (
+              id: string,
+              labels: NativeDialogLabels,
+            ) => Promise<SubscriptionFileSelectionResult>;
             ImportSubscriptionQRCodeImage: (
               labels: NativeDialogLabels,
             ) => Promise<SubscriptionDialogImportResult>;
@@ -892,6 +897,13 @@ export async function importSubscriptionFile(
   labels: NativeDialogLabels,
 ): Promise<SubscriptionDialogImportResult> {
   return requireAppBinding().ImportSubscriptionFile(labels);
+}
+
+export async function chooseSubscriptionSourceFile(
+  id: string,
+  labels: NativeDialogLabels,
+): Promise<SubscriptionFileSelectionResult> {
+  return requireAppBinding().ChooseSubscriptionSourceFile(id, labels);
 }
 
 export async function importSubscriptionQRCodeImage(

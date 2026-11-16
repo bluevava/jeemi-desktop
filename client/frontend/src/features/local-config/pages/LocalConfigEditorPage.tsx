@@ -18,7 +18,6 @@ import {
   Empty,
   Input,
   InputNumber,
-  Modal,
   Select,
   Spin,
   Switch,
@@ -31,6 +30,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUnsavedChangesGuard } from "../../../app/navigationGuard/NavigationGuardContext";
 import { errorText } from "../../../lib/errorText";
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
+import { ConfigurationViewer } from "../../../components/configuration/ConfigurationViewer";
 import {
   getConfigCatalog,
   getLocalConfig,
@@ -570,9 +570,9 @@ export function LocalConfigEditorPage() {
         </div>
       </nav>
 
-      <Modal
-        footer={null}
-        onCancel={() => {
+      <ConfigurationViewer
+        contents={(previewRevealed ? preview?.overlayYaml : preview?.redactedOverlayYaml) ?? ""}
+        onClose={() => {
           setPreview(null);
           setPreviewRevealed(false);
         }}
@@ -583,59 +583,46 @@ export function LocalConfigEditorPage() {
             <FeatureHelp compact topic="localConfigPreview" />
           </span>
         }
-        width={760}
-      >
-        {preview ? (
-          <div className="local-config-preview">
-            <div className="local-config-preview-meta">
-              <Tag>{preview.schemaVersion}</Tag>
-              <span>
-                {t("localConfig.preview.fieldCount", {
-                  count: preview.enabledFieldCount,
-                })}
-              </span>
-              {preview.proxyOverrideCount > 0 ? (
-                <Tag>
-                  {t("localConfig.preview.proxyOverrideCount", {
-                    count: preview.proxyOverrideCount,
-                  })}
-                </Tag>
-              ) : null}
-              <Button
-                icon={
-                  previewRevealed ? <EyeInvisibleOutlined /> : <EyeOutlined />
-                }
-                onClick={() => setPreviewRevealed((current) => !current)}
-                size="small"
-                type="text"
-              >
-                {t(
-                  previewRevealed
-                    ? "localConfig.editor.hideSensitive"
-                    : "localConfig.editor.revealSensitive",
-                )}
-              </Button>
-            </div>
-            {preview.proxyOverrideCount > 0 ? (
-              <div className="local-config-transform-preview">
-                <strong>{t("localConfig.preview.proxyOverrides")}</strong>
-                {preview.fields
-                  .filter((field) => field.path.includes("/*/"))
-                  .map((field) => (
-                    <code key={field.path}>
-                      {configFieldDisplayName(field.path)}: {field.valueYaml}
-                    </code>
-                  ))}
-              </div>
-            ) : null}
-            <pre>
-              {previewRevealed
-                ? preview.overlayYaml
-                : preview.redactedOverlayYaml}
-            </pre>
+        metadata={preview ? <>
+          <Tag>{preview.schemaVersion}</Tag>
+          <span>
+            {t("localConfig.preview.fieldCount", {
+              count: preview.enabledFieldCount,
+            })}
+          </span>
+          {preview.proxyOverrideCount > 0 ? (
+            <Tag>
+              {t("localConfig.preview.proxyOverrideCount", {
+                count: preview.proxyOverrideCount,
+              })}
+            </Tag>
+          ) : null}
+          <Button
+            icon={previewRevealed ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+            onClick={() => setPreviewRevealed((current) => !current)}
+            size="small"
+            type="text"
+          >
+            {t(
+              previewRevealed
+                ? "localConfig.editor.hideSensitive"
+                : "localConfig.editor.revealSensitive",
+            )}
+          </Button>
+        </> : null}
+        details={preview && preview.proxyOverrideCount > 0 ? (
+          <div className="local-config-transform-preview">
+            <strong>{t("localConfig.preview.proxyOverrides")}</strong>
+            {preview.fields
+              .filter((field) => field.path.includes("/*/"))
+              .map((field) => (
+                <code key={field.path}>
+                  {configFieldDisplayName(field.path)}: {field.valueYaml}
+                </code>
+              ))}
           </div>
         ) : null}
-      </Modal>
+      />
     </div>
   );
 }

@@ -229,6 +229,11 @@ func rewriteRuntimePaths(data []byte, source, target string) ([]byte, error) {
 	if err := yaml.Unmarshal(data, &document); err != nil {
 		return nil, failure("invalid_request")
 	}
+	if len(document.Content) != 1 || document.Content[0].Kind != yaml.MappingNode {
+		return nil, failure("invalid_request")
+	}
+	root := document.Content[0]
+	requestPaths := transportRequestPaths(root)
 	var walk func(*yaml.Node, int) error
 	count := 0
 	walk = func(node *yaml.Node, depth int) error {
@@ -250,13 +255,18 @@ func rewriteRuntimePaths(data []byte, source, target string) ([]byte, error) {
 			return failure("invalid_request")
 		}
 		if node.Kind == yaml.ScalarNode && node.Tag == "!!str" {
-			value := filepath.ToSlash(node.Value)
-			if strings.HasPrefix(value, filepath.ToSlash(source)+"/") {
-				node.Value = filepath.ToSlash(target) + strings.TrimPrefix(value, filepath.ToSlash(source))
+			if runtime.GOOS == "windows" && strings.Contains(node.Value, "\x00") {
+				return failure("unsafe_path")
 			}
-			if runtime.GOOS == "windows" {
-				if err := safeWindowsPath(node.Value, target); err != nil {
-					return err
+			if !requestPaths[node] {
+				value := filepath.ToSlash(node.Value)
+				if strings.HasPrefix(value, filepath.ToSlash(source)+"/") {
+					node.Value = filepath.ToSlash(target) + strings.TrimPrefix(value, filepath.ToSlash(source))
+				}
+				if runtime.GOOS == "windows" {
+					if err := safeWindowsPath(node.Value, target); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -267,10 +277,6 @@ func rewriteRuntimePaths(data []byte, source, target string) ([]byte, error) {
 		}
 		return nil
 	}
-	if len(document.Content) != 1 || document.Content[0].Kind != yaml.MappingNode {
-		return nil, failure("invalid_request")
-	}
-	root := document.Content[0]
 	if runtime.GOOS == "windows" {
 		if ntp := mappingValue(root, "ntp"); ntp != nil {
 			if field := mappingValue(ntp, "write-to-system"); field != nil && field.Value != "false" {
@@ -294,7 +300,8 @@ func rewriteRuntimePaths(data []byte, source, target string) ([]byte, error) {
 	return result, nil
 }
 
-// A privileged Windows core has no sandbox-exec. All file-looking scalars
+// A privileged Windows core has no sandbox-exec. File-looking scalars other
+// than the contextual HTTP request paths identified by transportRequestPaths
 // must remain in the independent session tree, including drive/UNC paths and
 // traversal. URLs and inline PEM values are data rather than file paths.
 func safeWindowsPath(value, root string) error {

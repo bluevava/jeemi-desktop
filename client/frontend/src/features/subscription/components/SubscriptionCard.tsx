@@ -129,13 +129,13 @@ export function SubscriptionCard({
             title={
               subscription.sourceKind === "url"
                 ? t("subscription.menu.refresh")
-                : t("subscription.shelf.refreshUnavailable")
+                : t("subscription.menu.refreshFile")
             }
           >
             <span>
               <Button
-                aria-label={t("subscription.menu.refresh")}
-                disabled={disabled || subscription.sourceKind !== "url"}
+                aria-label={t(subscription.sourceKind === "url" ? "subscription.menu.refresh" : "subscription.menu.refreshFile")}
+                disabled={disabled}
                 icon={<ReloadOutlined spin={busy} />}
                 onClick={(event) => {
                   event.stopPropagation();

@@ -16,7 +16,7 @@ import (
 )
 
 func TestDefaultFakeIPFilterRequiresGeoSiteWithoutGEORoutingRules(t *testing.T) {
-	s, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	s, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}

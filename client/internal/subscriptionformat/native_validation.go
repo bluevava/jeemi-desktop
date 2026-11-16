@@ -97,11 +97,23 @@ func validateNativeProxy(node map[string]any, kind string, definition nativeProt
 			node["version"] = 1
 		}
 		version := node["version"].(int)
-		if version < 1 || version > 5 {
+		if version < 1 || version > 6 {
 			return "unsupported_protocol_version", nil
 		}
 		if version < 3 && nativeFlag(node, "udp") {
 			return invalid()
+		}
+		mode := nativeText(node, "mode")
+		if (mode != "" && version != 6) || !oneOf(mode, "", "default", "unshaped", "unsafe-raw") {
+			return invalid()
+		}
+		if version == 6 {
+			if size := len(nativeText(node, "psk")); size < 12 || size > 255 {
+				return invalid()
+			}
+			if obfs, ok := node["obfs-opts"].(map[string]any); ok && oneOf(nativeText(obfs, "mode"), "http", "tls") {
+				return "unsupported_transport", nil
+			}
 		}
 	}
 	if kind == "openvpn" && !(nativeText(node, "username") != "" && nativeText(node, "password") != "") && !(nativeText(node, "cert") != "" && nativeText(node, "key") != "") {

@@ -16,6 +16,7 @@ import (
 	configresolved "jeemi/internal/config/resolved"
 	configresources "jeemi/internal/config/resources"
 	configschema "jeemi/internal/config/schema"
+	"jeemi/internal/configworkspace"
 	"jeemi/internal/core"
 	"jeemi/internal/externalui"
 	"jeemi/internal/geodata"
@@ -94,6 +95,7 @@ type Service struct {
 	authorizeCore        func(context.Context, coreauth.Target) error
 	coreOperationCancel  context.CancelFunc
 	pendingRefresh       *pendingSubscriptionRefresh
+	pendingFileSelection *pendingSubscriptionFileSelection
 	autoUpdateCancel     context.CancelFunc
 	autoUpdateDone       chan struct{}
 	autoUpdateAttempts   map[string]subscriptionUpdateAttempt
@@ -106,9 +108,22 @@ type Service struct {
 	activeGeoRequirements  runtimeGeoRequirements
 }
 
+// NewService uses the already prepared schema workspace. It never migrates or
+// falls back to writing the legacy configuration root.
 func NewService(dataDirectory string) (*Service, error) {
+	configurationDirectory, err := configworkspace.Directory(dataDirectory, configworkspace.CurrentVersion)
+	if err != nil {
+		return nil, err
+	}
+	if err := configworkspace.Check(dataDirectory, configworkspace.CurrentVersion); err != nil {
+		return nil, err
+	}
+	return newService(dataDirectory, configurationDirectory)
+}
+
+func newService(dataDirectory, configurationDirectory string) (*Service, error) {
 	clientStartedAt := time.Now().UTC().Format(time.RFC3339Nano)
-	settingsPath, err := paths.SettingsFileFromRoot(dataDirectory)
+	settingsPath, err := paths.SettingsFileFromRoot(configurationDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -123,21 +138,21 @@ func NewService(dataDirectory string) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	geoDataManager, err := geodata.NewManager(geodata.ManagerOptions{DataDirectory: dataDirectory})
+	geoDataManager, err := geodata.NewManager(geodata.ManagerOptions{DataDirectory: configurationDirectory, RuntimeDataDirectory: dataDirectory})
 	if err != nil {
 		return nil, err
 	}
 	localConfigs, err := profile.NewLocalConfigStore(profile.LocalConfigStoreOptions{
-		DataDirectory: dataDirectory,
+		DataDirectory: configurationDirectory,
 	})
 	if err != nil {
 		return nil, err
 	}
-	localScripts, err := localscript.NewStore(localscript.StoreOptions{DataDirectory: dataDirectory})
+	localScripts, err := localscript.NewStore(localscript.StoreOptions{DataDirectory: configurationDirectory})
 	if err != nil {
 		return nil, err
 	}
-	configResources, err := configresources.NewStore(configresources.StoreOptions{DataDirectory: dataDirectory})
+	configResources, err := configresources.NewStore(configresources.StoreOptions{DataDirectory: configurationDirectory})
 	if err != nil {
 		return nil, err
 	}
@@ -145,12 +160,12 @@ func NewService(dataDirectory string) (*Service, error) {
 		return nil, err
 	}
 	var service *Service
-	chainProxies, err := chainproxy.NewStore(dataDirectory)
+	chainProxies, err := chainproxy.NewStore(configurationDirectory)
 	if err != nil {
 		return nil, err
 	}
 	subscriptions, err := subscription.NewManager(subscription.ManagerOptions{
-		DataDirectory: dataDirectory,
+		DataDirectory: configurationDirectory,
 		RefreshFallback: func() subscription.Fetcher {
 			return service.subscriptionRefreshFallback()
 		},
@@ -166,17 +181,18 @@ func NewService(dataDirectory string) (*Service, error) {
 		return nil, err
 	}
 	runtimeManager, err := mihomoruntime.NewManager(mihomoruntime.Options{
-		DataDirectory: dataDirectory,
-		SystemProxy:   systemProxy,
+		DataDirectory:          dataDirectory,
+		ConfigurationDirectory: configurationDirectory,
+		SystemProxy:            systemProxy,
 	})
 	if err != nil {
 		return nil, err
 	}
-	resolvedConfigs, err := configresolved.NewStore(dataDirectory)
+	resolvedConfigs, err := configresolved.NewStore(configurationDirectory)
 	if err != nil {
 		return nil, err
 	}
-	delayCache, err := delaycache.NewStore(dataDirectory)
+	delayCache, err := delaycache.NewStore(configurationDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -500,10 +516,7 @@ func (s *Service) UpdateSubscription(input subscription.UpdateInput) (subscripti
 	defer s.reconcileMu.Unlock()
 	ctx, cancel := s.operationContext(45 * time.Second)
 	defer cancel()
-	_, err := s.subscriptions.UpdateValidated(ctx, input, func(summary subscription.Summary, source []byte) error {
-		_, err := s.validateSubscriptionCandidate(ctx, summary, compositionCandidate{source: source})
-		return err
-	})
+	err := s.updateSubscriptionSource(ctx, input)
 	if err != nil {
 		return subscription.State{}, err
 	}

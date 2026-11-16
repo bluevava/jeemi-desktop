@@ -23,13 +23,15 @@ type SystemProxyController interface {
 
 type Options struct {
 	DataDirectory string
-	Driver        Driver
-	SystemProxy   SystemProxyController
-	HTTPClient    *http.Client
-	Now           func() time.Time
-	GOOS          string
-	RestartDelays []time.Duration
-	ObserveTUN    func(context.Context, string) error
+	// ConfigurationDirectory owns durable choices, separate from recovery/session state.
+	ConfigurationDirectory string
+	Driver                 Driver
+	SystemProxy            SystemProxyController
+	HTTPClient             *http.Client
+	Now                    func() time.Time
+	GOOS                   string
+	RestartDelays          []time.Duration
+	ObserveTUN             func(context.Context, string) error
 }
 
 type Manager struct {
@@ -75,7 +77,11 @@ func NewManager(options Options) (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	selectionRoot, err := paths.ProxySelectionsDirectoryFromRoot(options.DataDirectory)
+	configurationRoot := options.ConfigurationDirectory
+	if configurationRoot == "" {
+		configurationRoot = options.DataDirectory
+	}
+	selectionRoot, err := paths.ProxySelectionsDirectoryFromRoot(configurationRoot)
 	if err != nil {
 		return nil, err
 	}

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"image"
-	"jeemi/internal/subscriptionformat"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -132,26 +130,17 @@ func (m *Manager) ImportURL(ctx context.Context, input ImportURLInput) (State, e
 }
 
 func (m *Manager) ImportFile(path string) (State, error) {
-	format, err := formatForImportedFile(path)
+	path, err := NormalizeFileSourcePath(path)
 	if err != nil {
 		return State{}, err
 	}
-	info, err := os.Lstat(path)
-	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() < 1 || info.Size() > maxSubscriptionBytes {
-		return State{}, fmt.Errorf("subscription file is unavailable or too large")
-	}
-	contents, err := os.ReadFile(path)
+	fetched, err := readFileSource(context.Background(), path)
 	if err != nil {
-		return State{}, fmt.Errorf("read subscription file")
-	}
-	if normalized, err := subscriptionformat.Normalize(contents); err != nil {
 		return State{}, err
-	} else if normalized.Report.Format != "mihomo" {
-		format = FormatText
 	}
 	base := filepath.Base(path)
 	if m.validateImport != nil {
-		if err := m.validateImport(context.Background(), contents); err != nil {
+		if err := m.validateImport(context.Background(), fetched.Contents); err != nil {
 			return State{}, err
 		}
 	}
@@ -164,8 +153,9 @@ func (m *Manager) ImportFile(path string) (State, error) {
 		SourceKind:       SourceFile,
 		ImportMethod:     ImportFile,
 		OriginalFileName: base,
-		Format:           format,
-		Contents:         contents,
+		SourceFilePath:   path,
+		Format:           fetched.Format,
+		Contents:         fetched.Contents,
 	})
 	if err != nil {
 		return State{}, err
@@ -214,9 +204,10 @@ func (m *Manager) ImportRecognizedURL(ctx context.Context, sourceURL string, met
 
 // RefreshCandidate contains sensitive bytes only in Go memory. It is never a UI DTO.
 type RefreshCandidate struct {
-	Before  Detail
-	Input   UpdateInput
-	Fetched FetchedContent
+	Before         Detail
+	Input          UpdateInput
+	Fetched        FetchedContent
+	SourceFilePath string
 }
 
 func (m *Manager) PrepareRefresh(ctx context.Context, id string) (RefreshCandidate, error) {
@@ -224,10 +215,12 @@ func (m *Manager) PrepareRefresh(ctx context.Context, id string) (RefreshCandida
 	if err != nil {
 		return RefreshCandidate{}, err
 	}
-	if detail.SourceKind != SourceURL {
-		return RefreshCandidate{}, fmt.Errorf("file subscriptions cannot be refreshed from a remote source")
+	var fetched FetchedContent
+	if detail.SourceKind == SourceFile {
+		fetched, err = readFileSource(ctx, detail.SourceFilePath)
+	} else {
+		fetched, err = m.fetchRefresh(ctx, detail.SourceURL)
 	}
-	fetched, err := m.fetchRefresh(ctx, detail.SourceURL)
 	if err != nil {
 		return RefreshCandidate{}, err
 	}
@@ -235,17 +228,20 @@ func (m *Manager) PrepareRefresh(ctx context.Context, id string) (RefreshCandida
 		return RefreshCandidate{}, err
 	}
 	iconKind, icon := detail.IconKind, detail.Icon
-	if icon == "" {
+	if icon == "" && detail.SourceKind == SourceURL {
 		iconKind, icon = m.detectIconBestEffort(ctx, detail.SourceURL)
 	}
-	return RefreshCandidate{Before: detail, Fetched: fetched, Input: UpdateInput{
+	if err := ctx.Err(); err != nil {
+		return RefreshCandidate{}, err
+	}
+	return RefreshCandidate{Before: detail, Fetched: fetched, SourceFilePath: detail.SourceFilePath, Input: UpdateInput{
 		AutoUpdateIntervalMinutes: detail.AutoUpdateIntervalMinutes,
 		ID:                        detail.ID, Name: detail.Name, Description: detail.Description, SourceURL: detail.SourceURL, IconKind: iconKind, Icon: icon,
 	}}, nil
 }
 
 func (m *Manager) CommitRefresh(candidate RefreshCandidate, detach bool) (State, error) {
-	if _, err := m.store.updateFromURLCandidate(candidate.Input, candidate.Fetched, &candidate.Before, detach); err != nil {
+	if _, err := m.store.updateFromSourceCandidate(candidate.Input, candidate.Fetched, candidate.SourceFilePath, &candidate.Before, detach); err != nil {
 		return State{}, err
 	}
 	return m.store.State()
@@ -264,15 +260,50 @@ func (m *Manager) Update(ctx context.Context, input UpdateInput) (State, error) 
 }
 
 func (m *Manager) UpdateValidated(ctx context.Context, input UpdateInput, validate func(Summary, []byte) error) (State, error) {
+	return m.updateValidated(ctx, input, "", validate)
+}
+
+// UpdateFileValidated is only called after the application resolves a native
+// picker token. An arbitrary path is never accepted from a Wails update DTO.
+func (m *Manager) UpdateFileValidated(ctx context.Context, input UpdateInput, path string, validate func(Summary, []byte) error) (State, error) {
+	path, err := NormalizeFileSourcePath(path)
+	if err != nil {
+		return State{}, err
+	}
+	return m.updateValidated(ctx, input, path, validate)
+}
+
+func (m *Manager) updateValidated(ctx context.Context, input UpdateInput, path string, validate func(Summary, []byte) error) (State, error) {
 	detail, err := m.store.Get(input.ID)
 	if err != nil {
 		return State{}, err
+	}
+	if input.SourceFileToken != "" || path != "" && detail.SourceKind != SourceFile {
+		return State{}, fmt.Errorf("subscription file selection is invalid")
 	}
 	input.AutoUpdateIntervalMinutes, err = normalizeAutoUpdateInterval(detail.SourceKind, input.AutoUpdateIntervalMinutes)
 	if err != nil {
 		return State{}, err
 	}
 	if detail.SourceKind == SourceFile {
+		if path != "" {
+			fetched, err := readFileSource(ctx, path)
+			if err != nil {
+				return State{}, err
+			}
+			if validate != nil {
+				if err := validate(detail.Summary, fetched.Contents); err != nil {
+					return State{}, err
+				}
+			}
+			if err := ctx.Err(); err != nil {
+				return State{}, err
+			}
+			if _, err := m.store.updateFromSourceCandidate(input, fetched, path, &detail, false); err != nil {
+				return State{}, err
+			}
+			return m.store.State()
+		}
 		if _, err := m.store.UpdateMetadata(input); err != nil {
 			return State{}, err
 		}

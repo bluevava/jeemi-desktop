@@ -84,7 +84,7 @@ export function SelectorNodeGrid({
             delay={delayNode ? delayResults[delayNode] : undefined}
             delayBusy={!!delayNode && busyDelayNodes.has(delayNode)}
             selected={currentSelection === member.name}
-            selectionDisabled={!runtimeReady || !selectionEnabled || busySelection === groupName}
+            selectionDisabled={!runtimeReady || !selectionEnabled || busySelection !== ""}
             onSelect={() => void onSelect(groupName, member.name)}
             onOpen={() => onOpenGroup(member.name)}
           />;
@@ -103,7 +103,7 @@ export function SelectorNodeGrid({
             <button
               aria-pressed={currentSelection === member.name}
               className="selector-node-select"
-              disabled={!runtimeReady || !selectionEnabled || busySelection === groupName}
+              disabled={!runtimeReady || !selectionEnabled || busySelection !== ""}
               onClick={() => void onSelect(groupName, member.name)}
               type="button"
             >

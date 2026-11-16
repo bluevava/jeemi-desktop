@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"jeemi/internal/config/fallbackoverride"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -20,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"jeemi/internal/config/fallbackoverride"
 	configresources "jeemi/internal/config/resources"
 	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
@@ -63,6 +62,7 @@ type createInput struct {
 	ImportMethod              ImportMethod
 	SourceURL                 string
 	OriginalFileName          string
+	SourceFilePath            string
 	IconKind                  IconKind
 	Icon                      string
 	Format                    Format
@@ -140,6 +140,7 @@ func (s *Store) Create(input createInput) (Detail, error) {
 		ImportMethod:              prepared.ImportMethod,
 		SourceURL:                 prepared.SourceURL,
 		OriginalFileName:          prepared.OriginalFileName,
+		SourceFilePath:            prepared.SourceFilePath,
 		IconKind:                  prepared.IconKind,
 		Icon:                      prepared.Icon,
 		DisabledRuleProviders:     []string{},
@@ -191,6 +192,10 @@ func (s *Store) UpdateFromURL(input UpdateInput, fetched FetchedContent) (Detail
 }
 
 func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent, before *Detail, detach bool) (Detail, error) {
+	return s.updateFromSourceCandidate(input, fetched, "", before, detach)
+}
+
+func (s *Store) updateFromSourceCandidate(input UpdateInput, fetched FetchedContent, sourcePath string, before *Detail, detach bool) (Detail, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	metadata, err := s.loadMetadataUnlocked(input.ID)
@@ -200,10 +205,7 @@ func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent
 	if before != nil && !reflect.DeepEqual(detailFromMetadata(metadata), *before) {
 		return Detail{}, fmt.Errorf("subscription changed while checking the candidate; refresh again")
 	}
-	if metadata.SourceKind != SourceURL {
-		return Detail{}, fmt.Errorf("file subscriptions do not have a remote source")
-	}
-	interval, err := normalizeAutoUpdateInterval(SourceURL, input.AutoUpdateIntervalMinutes)
+	interval, err := normalizeAutoUpdateInterval(metadata.SourceKind, input.AutoUpdateIntervalMinutes)
 	if err != nil {
 		return Detail{}, err
 	}
@@ -211,9 +213,18 @@ func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent
 	if err != nil {
 		return Detail{}, err
 	}
-	parsedURL, err := validateRemoteURL(input.SourceURL)
-	if err != nil {
-		return Detail{}, err
+	if metadata.SourceKind == SourceURL {
+		parsedURL, err := validateRemoteURL(input.SourceURL)
+		if err != nil || sourcePath != "" {
+			return Detail{}, fmt.Errorf("subscription URL source is invalid")
+		}
+		metadata.SourceURL = parsedURL.String()
+	} else {
+		if sourcePath == "" || !validStoredFileSource(sourcePath) || input.SourceURL != "" {
+			return Detail{}, fmt.Errorf("subscription file source is invalid")
+		}
+		metadata.SourceFilePath = sourcePath
+		metadata.OriginalFileName = filepath.Base(sourcePath)
 	}
 	if err := validateContents(fetched.Format, fetched.Contents); err != nil {
 		return Detail{}, err
@@ -245,7 +256,6 @@ func (s *Store) updateFromURLCandidate(input UpdateInput, fetched FetchedContent
 	}
 	metadata.Name = name
 	metadata.Description = description
-	metadata.SourceURL = parsedURL.String()
 	metadata.AutoUpdateIntervalMinutes = interval
 	metadata.IconKind = iconKind
 	metadata.Icon = icon
@@ -512,8 +522,8 @@ func (s *Store) loadMetadataUnlocked(id string) (metadataDocument, error) {
 	if err != nil {
 		return metadataDocument{}, configfile.Unreadable(metadataPath, fmt.Errorf("read subscription metadata: %w", err))
 	}
-	var metadata metadataDocument
-	if err := decodeStrictJSON(contents, &metadata); err != nil {
+	metadata := metadataDocument{Fallback: fallbackoverride.Selection{Mode: fallbackoverride.ModeNone}}
+	if err := storageFormat.Decode(contents, &metadata); err != nil {
 		return metadataDocument{}, invalidMetadata(metadataPath, contents, id, fmt.Errorf("parse subscription metadata: %w", err))
 	}
 	if err := validateStoredMetadata(metadata, id); err != nil {
@@ -636,9 +646,13 @@ func (s *Store) writeMetadataUnlocked(metadata metadataDocument) error {
 	if err := ensureManagedDirectory(directory); err != nil {
 		return fmt.Errorf("inspect subscription directory: %w", err)
 	}
-	contents, err := marshalMetadata(metadata)
+	contents, err := storageFormat.MarshalFile(filepath.Join(directory, "metadata.json"), metadata)
 	if err != nil {
 		return err
+	}
+	contents = append(contents, '\n')
+	if len(contents) > maxSubscriptionMetadataBytes {
+		return fmt.Errorf("subscription metadata exceeds size limit")
 	}
 	stage, err := os.CreateTemp(directory, ".metadata-stage-")
 	if err != nil {
@@ -705,8 +719,9 @@ func prepareCreateInput(input createInput) (createInput, error) {
 		}
 		input.SourceURL = parsed.String()
 		input.OriginalFileName = ""
+		input.SourceFilePath = ""
 	case SourceFile:
-		if input.ImportMethod != ImportFile || filepath.Base(input.OriginalFileName) != input.OriginalFileName || strings.TrimSpace(input.OriginalFileName) == "" {
+		if input.ImportMethod != ImportFile || filepath.Base(input.OriginalFileName) != input.OriginalFileName || strings.TrimSpace(input.OriginalFileName) == "" || !validStoredFileSource(input.SourceFilePath) {
 			return createInput{}, fmt.Errorf("subscription file source metadata is invalid")
 		}
 		input.SourceURL = ""
@@ -814,11 +829,11 @@ func validateStoredMetadata(metadata metadataDocument, id string) error {
 		}
 	}
 	if metadata.SourceKind == SourceURL {
-		if _, err := validateRemoteURL(metadata.SourceURL); err != nil || metadata.OriginalFileName != "" || metadata.ImportMethod == ImportFile {
+		if _, err := validateRemoteURL(metadata.SourceURL); err != nil || metadata.OriginalFileName != "" || metadata.SourceFilePath != "" || metadata.ImportMethod == ImportFile {
 			return fmt.Errorf("subscription URL source metadata is invalid")
 		}
 	} else if metadata.SourceKind == SourceFile {
-		if metadata.SourceURL != "" || metadata.ImportMethod != ImportFile || filepath.Base(metadata.OriginalFileName) != metadata.OriginalFileName || metadata.OriginalFileName == "" {
+		if metadata.SourceURL != "" || metadata.ImportMethod != ImportFile || filepath.Base(metadata.OriginalFileName) != metadata.OriginalFileName || metadata.OriginalFileName == "" || !validStoredFileSource(metadata.SourceFilePath) {
 			return fmt.Errorf("subscription file source metadata is invalid")
 		}
 	} else {
@@ -951,7 +966,7 @@ func observedRemoteProfile(profile RemoteProfile, observedAt string) RemoteProfi
 }
 
 func detailFromMetadata(metadata metadataDocument) Detail {
-	return Detail{Summary: summaryFromMetadata(metadata), SourceURL: metadata.SourceURL}
+	return Detail{Summary: summaryFromMetadata(metadata), SourceURL: metadata.SourceURL, SourceFilePath: metadata.SourceFilePath}
 }
 
 func sourceLabel(metadata metadataDocument) string {
@@ -1032,22 +1047,6 @@ func ensureManagedDirectory(path string) error {
 	}
 	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
 		return fmt.Errorf("managed directory is invalid")
-	}
-	return nil
-}
-
-func decodeStrictJSON(contents []byte, target any) error {
-	decoder := json.NewDecoder(bytes.NewReader(contents))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(target); err != nil {
-		return err
-	}
-	var extra any
-	if err := decoder.Decode(&extra); err != io.EOF {
-		if err == nil {
-			return fmt.Errorf("unexpected trailing JSON")
-		}
-		return err
 	}
 	return nil
 }

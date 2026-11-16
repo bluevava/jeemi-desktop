@@ -35,7 +35,7 @@ rules:
 func fallbackService(t *testing.T) (*Service, *fallbackFetcher, subscription.State) {
 	t.Helper()
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	s, err := NewService(dataDirectory)
+	s, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}

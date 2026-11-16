@@ -1207,8 +1207,7 @@
 }
 
 .subscription-form,
-.subscription-association-form,
-.subscription-raw-view {
+.subscription-association-form {
   display: grid;
   gap: 15px;
   padding-top: 8px;
@@ -1291,43 +1290,19 @@
 .subscription-readonly-source strong {
   color: var(--color-text);
   font-size: var(--font-size-body);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.subscription-readonly-source .ant-btn {
+  justify-self: start;
+  max-width: 100%;
 }
 
 .subscription-modal-title {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-}
-
-.subscription-raw-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.subscription-raw-meta code {
-  overflow: hidden;
-  color: var(--color-text-secondary);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: var(--font-size-caption);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.subscription-raw-view pre {
-  overflow: auto;
-  max-height: 58vh;
-  margin: 0;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 13px;
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: var(--font-size-small);
-  line-height: 1.55;
-  white-space: pre;
 }
 
 .subscription-association-form p {

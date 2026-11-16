@@ -1,13 +1,10 @@
 package resources
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -267,13 +264,8 @@ func (s *Store) loadUnlocked() (result State, resultErr error) {
 		return State{}, fmt.Errorf("local resource library exceeds size limit")
 	}
 	var document libraryDocument
-	decoder := json.NewDecoder(bytes.NewReader(contents))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&document); err != nil {
+	if err := storageFormat.Decode(contents, &document); err != nil {
 		return State{}, fmt.Errorf("parse local resource library: %w", err)
-	}
-	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		return State{}, fmt.Errorf("parse local resource library: trailing data")
 	}
 	if document.Version != documentVersion || document.Revision < 1 {
 		return State{}, fmt.Errorf("local resource library version is unsupported")
@@ -312,7 +304,7 @@ func (s *Store) saveUnlocked(state State) (State, error) {
 		StrategyGroups: state.StrategyGroups,
 		RuleSets:       state.RuleSets,
 	}
-	contents, err := json.MarshalIndent(document, "", "  ")
+	contents, err := storageFormat.MarshalFile(s.file, document)
 	if err != nil {
 		return State{}, err
 	}

@@ -19,6 +19,9 @@ func CheckStartupConfiguration(root string) error {
 }
 
 func invalidMetadata(path string, contents []byte, id string, cause error) error {
+	if configfile.IsUnsupported(cause) {
+		return configfile.Invalid(path, contents, cause)
+	}
 	repaired := repairMetadata(contents, id)
 	if repaired == nil {
 		return configfile.Invalid(path, contents, cause)
@@ -26,8 +29,8 @@ func invalidMetadata(path string, contents []byte, id string, cause error) error
 	return configfile.InvalidWithRepair(path, contents, repaired, cause)
 }
 
-// Only the current metadata schema is recoverable. Unknown fields are removed
-// in an explicit, confirmed repair, never silently during ordinary reads.
+// Only malformed optional values in the current metadata schema are recoverable.
+// Unknown fields are retained, and required future features are never repaired.
 // Source identity, revisions, associations and valid preferences must survive
 // the complete current-schema validation before a repair can be offered.
 func repairMetadata(contents []byte, id string) []byte {
@@ -45,7 +48,7 @@ func repairMetadata(contents []byte, id string) []byte {
 		return nil
 	}
 	var metadata metadataDocument
-	if err := json.Unmarshal(known, &metadata); err != nil {
+	if err := storageFormat.Decode(known, &metadata); err != nil {
 		return nil
 	}
 	if metadata.ManifestVersion != manifestVersion || metadata.ID != id {
@@ -64,9 +67,12 @@ func repairMetadata(contents []byte, id string) []byte {
 	if err := validateStoredMetadata(metadata, id); err != nil {
 		return nil
 	}
-	repaired, err := marshalMetadata(metadata)
+	repaired, err := storageFormat.Marshal(contents, metadata)
 	if err != nil {
 		return nil
 	}
-	return repaired
+	if len(repaired)+1 > maxSubscriptionMetadataBytes {
+		return nil
+	}
+	return append(repaired, '\n')
 }

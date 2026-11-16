@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"jeemi/internal/configdocument"
 	"jeemi/internal/configfile"
 	"jeemi/internal/dnsquery"
 	"jeemi/internal/geodata"
@@ -94,7 +94,7 @@ func (s *Store) SetMihomoVersion(version string) (Document, error) {
 		return Document{}, err
 	}
 	document.Mihomo.SelectedVersion = version
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "mihomo.selectedVersion"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -113,7 +113,7 @@ func (s *Store) SetSelectedSubscription(id string) (Document, error) {
 	}
 	normalizeDocument(&document)
 	document.Subscriptions.SelectedID = id
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "subscriptions.selectedId"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -139,7 +139,7 @@ func (s *Store) SetSubscriptionPreferences(density string, delayTestConcurrency 
 	document.Subscriptions.SelectorDensity = density
 	document.Subscriptions.DelayTestConcurrency = delayTestConcurrency
 	document.Subscriptions.ConnectionResetMode = connectionResetMode
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "subscriptions.selectorDensity", "subscriptions.delayTestConcurrency", "subscriptions.connectionResetMode"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -161,7 +161,7 @@ func (s *Store) SetSubscriptionSelectorDisplayPreferences(sortMode string, viewM
 	normalizeDocument(&document)
 	document.Subscriptions.SelectorSortMode = sortMode
 	document.Subscriptions.SelectorViewMode = viewMode
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "subscriptions.selectorSortMode", "subscriptions.selectorViewMode"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -179,7 +179,7 @@ func (s *Store) SetRuntimePreferences(preferences runtimeconfig.Preferences) (Do
 	}
 	normalizeDocument(&document)
 	document.Runtime = preferences
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "runtime"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -198,7 +198,7 @@ func (s *Store) SetGeoDataPreferences(preferences geodata.Preferences) (Document
 	}
 	normalizeDocument(&document)
 	document.GeoData = preferences
-	if err := s.saveUnlocked(document); err != nil {
+	if err := s.saveUnlocked(document, "geoData"); err != nil {
 		return Document{}, err
 	}
 	return document, nil
@@ -207,17 +207,22 @@ func (s *Store) SetGeoDataPreferences(preferences geodata.Preferences) (Document
 func (s *Store) loadUnlocked() (Document, error) {
 	contents, err := os.ReadFile(s.path)
 	if errors.Is(err, os.ErrNotExist) {
-		return Document{}, nil
+		var document Document
+		normalizeDocument(&document)
+		return document, nil
 	}
 	if err != nil {
 		return Document{}, configfile.Unreadable(s.path, fmt.Errorf("read settings: %w", err))
 	}
 
 	var document Document
-	if err := json.Unmarshal(contents, &document); err != nil {
+	if err := (configdocument.Format{}).Decode(contents, &document); err != nil {
 		return Document{}, configfile.Invalid(s.path, contents, fmt.Errorf("parse settings: %w", err))
 	}
 	if err := validateSubscriptionOrder(document.Subscriptions.Order); err != nil {
+		return Document{}, configfile.Invalid(s.path, contents, err)
+	}
+	if err := validateStoredPreferences(contents, document); err != nil {
 		return Document{}, configfile.Invalid(s.path, contents, err)
 	}
 	normalizeDocument(&document)
@@ -265,13 +270,13 @@ func validSelectorViewMode(mode string) bool {
 	return mode == SelectorViewPanel || mode == SelectorViewTabs
 }
 
-func (s *Store) saveUnlocked(document Document) error {
+func (s *Store) saveUnlocked(document Document, fields ...string) error {
 	directory := filepath.Dir(s.path)
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return fmt.Errorf("create settings directory: %w", err)
 	}
 
-	contents, err := json.MarshalIndent(document, "", "  ")
+	contents, err := (configdocument.Format{}).PatchFile(s.path, document, fields...)
 	if err != nil {
 		return fmt.Errorf("encode settings: %w", err)
 	}

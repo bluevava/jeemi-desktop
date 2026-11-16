@@ -12,7 +12,7 @@ import (
 
 func TestDNSQuerySavesOnQueryAndRestoresAfterRestartEvenWhenProxyFails(t *testing.T) {
 	directory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(directory)
+	service, err := newTestService(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func TestDNSQuerySavesOnQueryAndRestoresAfterRestartEvenWhenProxyFails(t *testin
 	if err != nil || response.Domain != "example.com" || response.Proxy.Error != "proxy_invalid" || response.Custom.Error != "proxy_invalid" || response.Direct.Error != "invalid_server" {
 		t.Fatalf("QueryDNS() = %+v, %v", response, err)
 	}
-	reopened, err := NewService(directory)
+	reopened, err := newTestService(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func TestDNSQuerySavesOnQueryAndRestoresAfterRestartEvenWhenProxyFails(t *testin
 }
 
 func TestDNSQuerySavesBeforeValidationAndCancellation(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	service, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}

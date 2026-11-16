@@ -231,6 +231,7 @@ func parseLegacyProxyURI(raw string, line int) (proxyNode, string, error) {
 		if userkey != "" {
 			return n, "snell_userkey_unsupported", nil
 		}
+		// The native URI parser handles v6 and its typed mode/reuse options.
 		if n.SnellVersion < 1 || n.SnellVersion > 5 || mode != "" {
 			return n, "unsupported_protocol_version", nil
 		}

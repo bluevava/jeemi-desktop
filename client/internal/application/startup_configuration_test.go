@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"jeemi/internal/configfile"
@@ -49,7 +50,7 @@ func TestStartupRecoveryUsesActualReadersAndKeepsUnrelatedData(t *testing.T) {
 	if err != nil || count != len(paths) {
 		t.Fatal(err, count)
 	}
-	if _, err := NewService(root); err != nil {
+	if _, err := newTestService(root); err != nil {
 		t.Fatal("startup still failed after recovery", err)
 	}
 	contents, err := os.ReadFile(keep)
@@ -78,7 +79,11 @@ func TestStartupCheckIdentifiesSemanticErrorsWithoutWriting(t *testing.T) {
 			}
 			err := CheckStartupConfiguration(root)
 			var failure *configfile.Failure
-			if !errors.As(err, &failure) || failure.Path != path || failure.Reason != "invalid" {
+			reason := "invalid"
+			if strings.Contains(test.contents, `"version":99`) {
+				reason = "unsupported"
+			}
+			if !errors.As(err, &failure) || failure.Path != path || failure.Reason != reason {
 				t.Fatalf("missing file diagnostic: %v", err)
 			}
 			contents, _ := os.ReadFile(path)
@@ -115,8 +120,9 @@ func TestStartupSubscriptionRecoveryResumesOfflineComposition(t *testing.T) {
 				t.Fatal(err)
 			}
 			metadata["futurePreference"] = json.RawMessage(`true`)
+			metadata["autoUpdateIntervalMinutes"] = json.RawMessage(`"broken"`)
 			if !test.repair {
-				metadata["manifestVersion"] = json.RawMessage(`99`)
+				metadata["id"] = json.RawMessage(`"broken"`)
 			}
 			contents, err = json.Marshal(metadata)
 			if err != nil {
@@ -138,7 +144,7 @@ func TestStartupSubscriptionRecoveryResumesOfflineComposition(t *testing.T) {
 			if fetcher.calls.Load() != requests {
 				t.Fatal("startup repair fetched a subscription")
 			}
-			recovered, err := NewService(root)
+			recovered, err := newTestService(root)
 			if err != nil {
 				t.Fatal("service construction failed after recovery", err)
 			}

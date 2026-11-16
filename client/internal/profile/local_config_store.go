@@ -1,13 +1,10 @@
 package profile
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,6 +17,7 @@ import (
 	"jeemi/internal/config/document"
 	configresources "jeemi/internal/config/resources"
 	"jeemi/internal/config/schema"
+	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
 
 	"gopkg.in/yaml.v3"
@@ -456,11 +454,14 @@ func (s *LocalConfigStore) loadUnlocked(id string) (LocalConfig, error) {
 		return LocalConfig{}, fmt.Errorf("read local configuration manifest: %w", err)
 	}
 	var manifest manifestDocument
-	if err := decodeStrictJSON(manifestBytes, &manifest); err != nil {
+	if err := manifestFormat.Decode(manifestBytes, &manifest); err != nil {
 		return LocalConfig{}, fmt.Errorf("parse local configuration manifest: %w", err)
 	}
 	if manifest.ManifestVersion != manifestVersion || manifest.ID != id ||
 		manifest.SchemaVersion != schema.Version || manifest.Revision < 1 {
+		if manifest.ManifestVersion != manifestVersion || manifest.SchemaVersion != schema.Version {
+			return LocalConfig{}, configfile.UnsupportedFormat("local configuration format is unsupported")
+		}
 		return LocalConfig{}, fmt.Errorf("local configuration manifest is inconsistent")
 	}
 	if strings.TrimSpace(manifest.Name) == "" || len([]rune(manifest.Name)) > maxLocalConfigNameLength || len([]rune(manifest.Description)) > maxLocalConfigDescriptionLength {
@@ -486,11 +487,11 @@ func (s *LocalConfigStore) loadUnlocked(id string) (LocalConfig, error) {
 		return LocalConfig{}, fmt.Errorf("read local configuration merge plan: %w", err)
 	}
 	var plan mergePlanDocument
-	if err := decodeStrictJSON(planBytes, &plan); err != nil {
+	if err := planFormat.Decode(planBytes, &plan); err != nil {
 		return LocalConfig{}, fmt.Errorf("parse local configuration merge plan: %w", err)
 	}
 	if plan.Version != mergePlanVersion || plan.Resources.Version != configresources.CurrentPlanVersion {
-		return LocalConfig{}, fmt.Errorf("local configuration merge plan version is unsupported")
+		return LocalConfig{}, configfile.UnsupportedFormat("local configuration merge plan version is unsupported")
 	}
 	plan.Resources, err = configresources.NormalizePlan(plan.Resources)
 	if err != nil {
@@ -596,11 +597,11 @@ func (s *LocalConfigStore) writeWithCommitUnlocked(manifest manifestDocument, ov
 	if err := os.Chmod(stage, 0o700); err != nil {
 		return fmt.Errorf("protect local configuration stage: %w", err)
 	}
-	manifestBytes, err := json.MarshalIndent(manifest, "", "  ")
+	manifestBytes, err := manifestFormat.MarshalFile(filepath.Join(s.root, manifest.ID, "manifest.json"), manifest)
 	if err != nil {
 		return err
 	}
-	planBytes, err := json.MarshalIndent(mergePlanDocument{Version: mergePlanVersion, Rules: plan, Transforms: transforms, Resources: resources}, "", "  ")
+	planBytes, err := planFormat.MarshalFile(filepath.Join(s.root, manifest.ID, "merge-plan.json"), mergePlanDocument{Version: mergePlanVersion, Rules: plan, Transforms: transforms, Resources: resources})
 	if err != nil {
 		return err
 	}
@@ -687,22 +688,6 @@ func readLimitedFile(path string, limit int64) ([]byte, error) {
 		return nil, fmt.Errorf("managed file is invalid or too large")
 	}
 	return os.ReadFile(path)
-}
-
-func decodeStrictJSON(contents []byte, target any) error {
-	decoder := json.NewDecoder(bytes.NewReader(contents))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(target); err != nil {
-		return err
-	}
-	var extra any
-	if err := decoder.Decode(&extra); err != io.EOF {
-		if err == nil {
-			return fmt.Errorf("unexpected trailing JSON")
-		}
-		return err
-	}
-	return nil
 }
 
 func ensureManagedConfigPath(path, root string) error {

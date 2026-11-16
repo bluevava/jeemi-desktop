@@ -1,10 +1,8 @@
 package chainproxy
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"io"
 	"jeemi/internal/config/document"
@@ -64,20 +62,12 @@ func (s *Store) load() (Library, error) {
 		return Library{}, configfile.Unreadable(s.file, failure("input_limit"))
 	}
 	var result Library
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&result)
-	if err == nil {
-		var extra any
-		if decoder.Decode(&extra) != io.EOF {
-			err = failure("invalid_library")
-		}
-	}
+	err = storageFormat.Decode(raw, &result)
 	if err == nil {
 		err = ValidateLibrary(result)
 	}
 	if err != nil {
-		return Library{}, configfile.Invalid(s.file, raw, failure("invalid_library"))
+		return Library{}, configfile.Invalid(s.file, raw, err)
 	}
 	return result, nil
 }
@@ -99,7 +89,7 @@ func (s *Store) Commit(expected int, next Library) (Library, error) {
 	if err := ValidateLibrary(next); err != nil {
 		return Library{}, err
 	}
-	raw, err := json.MarshalIndent(next, "", "  ")
+	raw, err := storageFormat.MarshalFile(s.file, next)
 	if err != nil || len(raw)+1 > maxLibraryBytes {
 		return Library{}, failure("input_limit")
 	}

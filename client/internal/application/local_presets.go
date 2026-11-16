@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"jeemi/internal/config/compose"
 	"jeemi/internal/config/presets"
 	"jeemi/internal/config/resources"
 	"jeemi/internal/profile"
@@ -37,7 +38,15 @@ func (s *Service) CreateLocalConfigPreset(kind string) (result profile.LocalConf
 	for n := 2; names[name]; n++ {
 		name = fmt.Sprintf("%s (%d)", p.Name, n)
 	}
-	input := profile.SaveLocalConfigInput{Name: name, Description: p.Description, Fields: []profile.LocalConfigField{}, ResourcePlan: p.Plan}
+	input := profile.SaveLocalConfigInput{
+		Name:        name,
+		Description: p.Description,
+		Fields: []profile.LocalConfigField{
+			{Path: "/tcp-concurrent", ValueYAML: "true", Strategy: compose.StrategyReplace},
+			{Path: "/unified-delay", ValueYAML: "true", Strategy: compose.StrategyReplace},
+		},
+		ResourcePlan: p.Plan,
+	}
 	err = s.configResources.CommitImport(state, func(candidate resources.State, commit func() error) error {
 		var saveErr error
 		result, saveErr = s.localConfigs.SaveWithResourceCommit(input, candidate, commit)

@@ -1,11 +1,10 @@
 package runtime
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"jeemi/internal/configdocument"
 	"maps"
 	"os"
 	"path/filepath"
@@ -60,10 +59,8 @@ func (s selectionStore) load(id string) (map[string]string, error) {
 	if err != nil || len(data) > selectionFileLimit {
 		return nil, fmt.Errorf("cannot read proxy selection state")
 	}
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	var document selectionDocument
-	if decoder.Decode(&document) != nil || decoder.Decode(new(any)) != io.EOF || document.Version != 1 || document.SubscriptionID != id || !validSelections(document.Selections) {
+	if (configdocument.Format{VersionField: "version", Version: 1}).Decode(data, &document) != nil || document.SubscriptionID != id || !validSelections(document.Selections) {
 		return nil, fmt.Errorf("invalid proxy selection state")
 	}
 	return document.Selections, nil
@@ -100,13 +97,13 @@ func (s selectionStore) merge(id string, values map[string]string) error {
 	if !validSelections(next) {
 		return fmt.Errorf("too many proxy selections")
 	}
-	data, err := json.Marshal(selectionDocument{Version: 1, SubscriptionID: id, Selections: next})
-	if err != nil || len(data) > selectionFileLimit {
-		return fmt.Errorf("cannot encode proxy selection state")
-	}
 	path, err := s.path(id)
 	if err != nil {
 		return err
+	}
+	data, err := (configdocument.Format{}).MarshalFile(path, selectionDocument{Version: 1, SubscriptionID: id, Selections: next})
+	if err != nil || len(data) > selectionFileLimit {
+		return fmt.Errorf("cannot encode proxy selection state")
 	}
 	if err := replacePrivateFile(path, append(data, '\n')); err != nil {
 		return fmt.Errorf("cannot save proxy selection state")

@@ -51,7 +51,7 @@ var nativeProtocols = func() map[string]nativeProtocol {
 		"socks5":      protocol("", nativeTLS, fieldNames(text, "username password")),
 		"ss":          protocol("cipher password", fieldNames(text, "cipher password plugin client-fingerprint"), fieldNames(object, "plugin-opts"), fieldNames(boolean, "udp-over-tcp"), fieldNames(integer, "udp-over-tcp-version")),
 		"ssr":         protocol("cipher password obfs protocol", fieldNames(text, "cipher password obfs protocol obfs-param protocol-param")),
-		"snell":       protocol("psk", fieldNames(text, "psk"), fieldNames(integer, "version"), fieldNames(object, "obfs-opts")),
+		"snell":       protocol("psk", fieldNames(text, "psk mode"), fieldNames(integer, "version"), fieldNames(boolean, "reuse"), fieldNames(object, "obfs-opts")),
 		"vmess":       protocol("uuid", nativeTLS, nativeTransport, fieldNames(text, "uuid cipher packet-encoding"), fieldNames(integer, "alterId"), fieldNames(boolean, "global-padding authenticated-length")),
 		"vless":       protocol("uuid", nativeTLS, nativeTransport, fieldNames(text, "uuid flow encryption packet-encoding")),
 		"trojan":      protocol("password", nativeTLS, nativeTransport, fieldNames(text, "password"), fieldNames(object, "ss-opts")),

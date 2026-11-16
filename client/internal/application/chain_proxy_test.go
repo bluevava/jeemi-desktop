@@ -28,7 +28,7 @@ const chainLanding = "anytls://fixture-password@landing.example.invalid:443?type
 func chainService(t *testing.T) (*Service, string, subscription.State) {
 	t.Helper()
 	root := t.TempDir()
-	s, err := NewService(root)
+	s, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestChainURLRefreshSyncsStableSourceAndPreservesFailedSource(t *testing.T) 
 		t.Fatal("fetched per node instead of per source")
 	}
 	// Ordinary reopen reads the cached group and node identities, without fetch.
-	reopened, err := NewService(root)
+	reopened, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}

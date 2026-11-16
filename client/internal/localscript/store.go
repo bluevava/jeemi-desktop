@@ -1,13 +1,10 @@
 package localscript
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -224,7 +221,7 @@ func (s *Store) loadUnlocked(id string) (Script, error) {
 		return Script{}, fmt.Errorf("read local script manifest: %w", err)
 	}
 	var manifest manifestDocument
-	if err := decodeStrictJSON(manifestBytes, &manifest); err != nil {
+	if err := storageFormat.Decode(manifestBytes, &manifest); err != nil {
 		return Script{}, fmt.Errorf("parse local script manifest: %w", err)
 	}
 	contents, err := readLimitedFile(filepath.Join(directory, "script.js"), maxScriptBytes)
@@ -249,7 +246,7 @@ func (s *Store) writeUnlocked(manifest manifestDocument, contents []byte) error 
 	if err := os.Chmod(stage, 0o700); err != nil {
 		return fmt.Errorf("protect local script stage: %w", err)
 	}
-	manifestBytes, err := json.MarshalIndent(manifest, "", "  ")
+	manifestBytes, err := storageFormat.MarshalFile(filepath.Join(s.root, manifest.ID, "manifest.json"), manifest)
 	if err != nil {
 		return fmt.Errorf("encode local script manifest: %w", err)
 	}
@@ -409,19 +406,6 @@ func writeSyncedFile(path string, contents []byte) error {
 		return err
 	}
 	return file.Close()
-}
-
-func decodeStrictJSON(contents []byte, target any) error {
-	decoder := json.NewDecoder(bytes.NewReader(contents))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(target); err != nil {
-		return err
-	}
-	var extra any
-	if err := decoder.Decode(&extra); err != io.EOF {
-		return fmt.Errorf("unexpected trailing JSON")
-	}
-	return nil
 }
 
 func randomID() (string, error) {

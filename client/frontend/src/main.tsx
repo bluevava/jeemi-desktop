@@ -13,6 +13,7 @@ import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/layout.css";
 import "./styles/components.css";
+import "./styles/configuration-viewer.css";
 import "./styles/runtime.css";
 import "./styles/authorization.css";
 import "./styles/connections.css";

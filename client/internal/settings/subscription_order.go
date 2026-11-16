@@ -13,7 +13,7 @@ func (s *Store) SetSubscriptionOrder(ids []string) error {
 		return err
 	}
 	document.Subscriptions.Order = append([]string(nil), ids...)
-	return s.saveUnlocked(document)
+	return s.saveUnlocked(document, "subscriptions.order")
 }
 
 func validateSubscriptionOrder(ids []string) error {

@@ -133,7 +133,7 @@ func TestProtocolFields(t *testing.T) {
 }
 
 func TestUnsupportedNodesAreReportedNotDowngraded(t *testing.T) {
-	for _, extra := range []string{"snell://pw@node.example.invalid:443?version=5&userkey=independent-secret", "snell://pw@node.example.invalid:443?version=6", "anytls://pw@node.example.invalid:443?pinSHA256=unknown-public-key", "vmess://unsupported"} {
+	for _, extra := range []string{"snell://pw@node.example.invalid:443?version=5&userkey=independent-secret", "snell://fixture-long-psk@node.example.invalid:443?version=7", "anytls://pw@node.example.invalid:443?pinSHA256=unknown-public-key", "vmess://unsupported"} {
 		r := normalize(t, simpleURI+"\n"+extra)
 		if r.Report.ProxyCount != 1 || r.Report.SkippedNodes != 1 || len(r.Report.Diagnostics) != 1 {
 			t.Fatal("unsupported node was not reported")

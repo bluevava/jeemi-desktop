@@ -1,9 +1,10 @@
 import { FileTextOutlined } from "@ant-design/icons";
-import { Alert, Button, Modal, Spin, Tag, Tooltip } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Tag, Tooltip } from "antd";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useRuntimeStatus } from "../../app/runtime/RuntimeStatusContext";
+import { ConfigurationViewer } from "../../components/configuration/ConfigurationViewer";
 import { getRuntimeConfigurationText } from "../../services/appBridge";
 import type { RuntimeConfigurationText } from "../../types/runtime";
 
@@ -24,18 +25,23 @@ export function RuntimeConfigurationViewer({
   const [configuration, setConfiguration] =
     useState<RuntimeConfigurationText | null>(null);
   const disabled = !runtime?.configuration.subscriptionId;
+  const request = useRef(0);
+
+  useEffect(() => () => { request.current += 1; }, []);
 
   const showConfiguration = async () => {
+    const currentRequest = ++request.current;
     setOpen(true);
     setBusy(true);
     setError(false);
+    setConfiguration(null);
     try {
-      setConfiguration(await getRuntimeConfigurationText());
+      const next = await getRuntimeConfigurationText();
+      if (request.current === currentRequest) setConfiguration(next);
     } catch {
-      setConfiguration(null);
-      setError(true);
+      if (request.current === currentRequest) setError(true);
     } finally {
-      setBusy(false);
+      if (request.current === currentRequest) setBusy(false);
     }
   };
 
@@ -61,43 +67,26 @@ export function RuntimeConfigurationViewer({
           />
         </span>
       </Tooltip>}
-      <Modal
-        footer={null}
-        onCancel={() => setOpen(false)}
+      <ConfigurationViewer
+        contents={configuration?.contents ?? ""}
+        error={error ? t("home.runtimeConfiguration.error") : undefined}
+        loading={busy}
+        loadingLabel={t("home.runtimeConfiguration.loading")}
+        onClose={() => { request.current += 1; setOpen(false); }}
         open={open}
         title={t("home.runtimeConfiguration.title")}
-        width={920}
-      >
-        <div className="runtime-configuration-view">
-          {busy ? (
-            <div className="runtime-configuration-loading">
-              <Spin />
-              <span>{t("home.runtimeConfiguration.loading")}</span>
-            </div>
-          ) : error ? (
-            <Alert
-              description={t("home.runtimeConfiguration.error")}
-              showIcon
-              type="error"
-            />
-          ) : configuration ? (
-            <>
-              <div className="runtime-configuration-meta">
-                <Tag color={configuration.source === "active" ? "success" : "processing"}>
-                  {t(`home.runtimeConfiguration.sources.${configuration.source}`)}
-                </Tag>
-                <span>
-                  {t("home.runtimeConfiguration.core", {
-                    version: configuration.coreVersion || "—",
-                  })}
-                </span>
-                <code>{configuration.subscriptionRevision}</code>
-              </div>
-              <pre>{configuration.contents}</pre>
-            </>
-          ) : null}
-        </div>
-      </Modal>
+        metadata={configuration ? <>
+          <Tag color={configuration.source === "active" ? "success" : "processing"}>
+            {t(`home.runtimeConfiguration.sources.${configuration.source}`)}
+          </Tag>
+          <span>
+            {t("home.runtimeConfiguration.core", {
+              version: configuration.coreVersion || "—",
+            })}
+          </span>
+          <code>{configuration.subscriptionRevision}</code>
+        </> : null}
+      />
     </>
   );
 }

@@ -4,13 +4,14 @@ import {
   ExperimentOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
-import { Alert, App, Button, Card, Input, Modal, Spin, Tag } from "antd";
+import { Alert, App, Button, Card, Input, Spin, Tag } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useUnsavedChangesGuard } from "../../../app/navigationGuard/NavigationGuardContext";
 import { FeatureHelp } from "../../../components/help/FeatureHelp";
+import { ConfigurationViewer } from "../../../components/configuration/ConfigurationViewer";
 import { errorText } from "../../../lib/errorText";
 import {
   getLocalScript,
@@ -270,30 +271,23 @@ export function LocalScriptEditorPage() {
           </Button>
         </div>
       </nav>
-      <Modal
-        footer={null}
-        onCancel={() => setTestResult(null)}
+      <ConfigurationViewer
+        contents={testResult?.contents ?? ""}
+        onClose={() => setTestResult(null)}
         open={testResult !== null}
         title={t("localScript.test.title")}
-        width={900}
-      >
-        {testResult ? (
-          <div className="local-script-test-result">
-            <div className="local-script-test-meta">
-              <Tag color="success">{t("localScript.test.staticValidated")}</Tag>
-              <Tag color={testResult.coreValidated ? "success" : "processing"}>
-                {t(
-                  testResult.coreValidated
-                    ? "localScript.test.coreValidated"
-                    : "localScript.test.corePending",
-                )}
-              </Tag>
-              <span><FlagText>{testResult.subscriptionName}</FlagText></span>
-            </div>
-            <pre>{testResult.contents}</pre>
-          </div>
-        ) : null}
-      </Modal>
+        metadata={testResult ? <>
+          <Tag color="success">{t("localScript.test.staticValidated")}</Tag>
+          <Tag color={testResult.coreValidated ? "success" : "processing"}>
+            {t(
+              testResult.coreValidated
+                ? "localScript.test.coreValidated"
+                : "localScript.test.corePending",
+            )}
+          </Tag>
+          <span><FlagText>{testResult.subscriptionName}</FlagText></span>
+        </> : null}
+      />
     </div>
   );
 }

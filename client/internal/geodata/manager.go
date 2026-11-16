@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"jeemi/internal/configdocument"
 	"jeemi/internal/configfile"
 	"jeemi/internal/platform/paths"
 )
@@ -32,9 +33,11 @@ type Validator interface {
 
 type ManagerOptions struct {
 	DataDirectory string
-	HTTPClient    HTTPClient
-	Validator     Validator
-	Now           func() time.Time
+	// RuntimeDataDirectory retains the shared core home when configuration is isolated.
+	RuntimeDataDirectory string
+	HTTPClient           HTTPClient
+	Validator            Validator
+	Now                  func() time.Time
 }
 
 type Manager struct {
@@ -78,7 +81,11 @@ func NewManager(options ManagerOptions) (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	runtimeDirectory, err := paths.MihomoRuntimeDirectoryFromRoot(options.DataDirectory)
+	runtimeRoot := options.RuntimeDataDirectory
+	if runtimeRoot == "" {
+		runtimeRoot = options.DataDirectory
+	}
+	runtimeDirectory, err := paths.MihomoRuntimeDirectoryFromRoot(runtimeRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +382,16 @@ func (m *Manager) pendingLocked(document manifest, preferences Preferences) bool
 			}
 		}
 	}
-	return false
+	// Workspaces share the core home but own independent desired/active metadata.
+	// Another version can materialize a different database there. Existence alone
+	// must not suppress activation of this workspace's verified revision.
+	var activeKinds []Kind
+	for _, kind := range SelectedKinds(preferences) {
+		if document.Active[string(kind)] != "" {
+			activeKinds = append(activeKinds, kind)
+		}
+	}
+	return m.healthForDocument(document, preferences, activeKinds).Status == HealthInvalid
 }
 
 func activeMode(document manifest) string {
@@ -484,7 +500,7 @@ func (m *Manager) PrepareActivation(preferences Preferences) (*Activation, error
 		name, _ := CanonicalName(kind)
 		activeInfo, activeErr := os.Lstat(filepath.Join(m.runtimeDirectory, name))
 		activeAvailable := activeErr == nil && activeInfo.Mode().IsRegular() && activeInfo.Mode()&os.ModeSymlink == 0
-		if desiredSHA == "" || (desiredSHA == document.Active[string(kind)] && activeAvailable) {
+		if desiredSHA == "" || (desiredSHA == document.Active[string(kind)] && activeAvailable && fileMatchesSHA256(filepath.Join(m.runtimeDirectory, name), desiredSHA)) {
 			continue
 		}
 		if _, err := m.readRevision(kind, desiredSHA); err != nil {
@@ -679,7 +695,7 @@ func (m *Manager) loadManifest() (loaded manifest, resultErr error) {
 			resultErr = configfile.Invalid(path, contents, resultErr)
 		}
 	}()
-	if err := json.Unmarshal(contents, &result); err != nil {
+	if err := (configdocument.Format{VersionField: "version", Version: manifestVersion}).Decode(contents, &result); err != nil {
 		return manifest{}, fmt.Errorf("parse GEO data manifest: %w", err)
 	}
 	if result.Version != manifestVersion {
@@ -722,7 +738,7 @@ func (m *Manager) saveManifest(document manifest) error {
 	if err := os.MkdirAll(m.directory, 0o700); err != nil {
 		return fmt.Errorf("create GEO data directory: %w", err)
 	}
-	contents, err := json.MarshalIndent(document, "", "  ")
+	contents, err := (configdocument.Format{}).MarshalFile(filepath.Join(m.directory, "manifest.json"), document)
 	if err != nil {
 		return err
 	}

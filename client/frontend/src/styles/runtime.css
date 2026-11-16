@@ -19,53 +19,6 @@
   margin-bottom: 14px;
 }
 
-.runtime-configuration-view {
-  display: grid;
-  gap: 14px;
-  padding-top: 8px;
-}
-
-.runtime-configuration-loading {
-  display: flex;
-  min-height: 220px;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-secondary);
-  gap: 10px;
-}
-
-.runtime-configuration-meta {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  flex-wrap: wrap;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-  gap: 8px;
-}
-
-.runtime-configuration-meta code {
-  overflow: hidden;
-  max-width: 420px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.runtime-configuration-view pre {
-  overflow: auto;
-  max-height: 58vh;
-  margin: 0;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 13px;
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: var(--font-size-small);
-  line-height: 1.55;
-  white-space: pre;
-}
-
 .runtime-traffic-card .ant-card-body {
   display: grid;
   gap: 12px;

@@ -30,14 +30,15 @@ type App struct {
 	initializeOnce  sync.Once
 	initializeError error
 
-	runtimeMu         sync.RWMutex
-	runtimeCtx        context.Context
-	quitRequested     atomic.Bool
-	uiReloadRequested atomic.Bool
-	screenImport      screenImportOperation
-	exitCleanupOnce   sync.Once
-	exitCleanupDone   chan struct{}
-	stopSessionWatch  func()
+	runtimeMu            sync.RWMutex
+	runtimeCtx           context.Context
+	initializationCancel context.CancelFunc
+	quitRequested        atomic.Bool
+	uiReloadRequested    atomic.Bool
+	screenImport         screenImportOperation
+	exitCleanupOnce      sync.Once
+	exitCleanupDone      chan struct{}
+	stopSessionWatch     func()
 }
 
 func NewApp(dataDirectory string) (*App, error) {
@@ -136,11 +137,32 @@ func (a *App) requestQuit(ctx context.Context) {
 	if !a.quitRequested.CompareAndSwap(false, true) {
 		return
 	}
+	a.cancelInitialization()
 	a.screenImport.cancelActive()
 	if a.tray != nil {
 		a.tray.Stop()
 	}
 	wailsRuntime.Quit(ctx)
+}
+
+func (a *App) preparationContext(parent context.Context) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(parent)
+	a.runtimeMu.Lock()
+	a.initializationCancel = cancel
+	if a.quitRequested.Load() {
+		cancel()
+	}
+	a.runtimeMu.Unlock()
+	return ctx, cancel
+}
+
+func (a *App) cancelInitialization() {
+	a.runtimeMu.RLock()
+	cancel := a.initializationCancel
+	a.runtimeMu.RUnlock()
+	if cancel != nil {
+		cancel()
+	}
 }
 
 func (a *App) SetTrayLanguage(language string) {

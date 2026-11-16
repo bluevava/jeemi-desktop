@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"gopkg.in/yaml.v3"
 	"jeemi/internal/localscript"
 	mihomoruntime "jeemi/internal/mihomo/runtime"
 	"jeemi/internal/subscription"
@@ -15,7 +16,7 @@ import (
 
 const runtimeCompatibilityFixture = `# keep the complete downloaded subscription
 proxies:
-  - {name: Unsupported, type: snell, server: 192.0.2.1, port: 8390, version: 6, psk: fixture, userkey: fixture, mode: unsafe-raw}
+  - {name: Unsupported, type: snell, server: 192.0.2.1, port: 8390, version: 7, psk: fixture, userkey: fixture, mode: unsafe-raw}
   - {name: Supported, type: anytls, server: 192.0.2.2, port: 443, password: fixture}
 proxy-groups:
   - {name: Proxy, type: select, proxies: [Unsupported, Supported]}
@@ -56,7 +57,7 @@ func assertCompatibleProjection(t *testing.T, s *Service, state subscription.Sta
 }
 
 func TestNativeSubscriptionFiltersUnsupportedOnlyInRuntime(t *testing.T) {
-	s, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	s, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func TestNativeSubscriptionFiltersUnsupportedOnlyInRuntime(t *testing.T) {
 	// Local scripts receive the original full configuration; both source and
 	// script-added unsupported nodes are pruned only after that script completes.
 	scriptSource := `function main(c) {
-  if (c.proxies[0].type !== 'snell' || c.proxies[0].version !== 6) throw new Error('source was filtered early');
+  if (c.proxies[0].type !== 'snell' || c.proxies[0].version !== 7) throw new Error('source was filtered early');
   c.proxies.push({name: 'ScriptUnsupported', type: 'unsupported-fixture'});
   c['proxy-groups'][0].proxies.push('ScriptUnsupported');
   c['x-script-ran'] = true;
@@ -129,7 +130,7 @@ func TestNativeRefreshAcceptsUnsupportedNodesWithoutChangingSavedSource(t *testi
 
 	// An entirely incompatible native source still refreshes, with no implicit
 	// direct fallback and no native-format skip notification.
-	fetcher.contents = "proxies: [{name: Unsupported, type: snell, version: 6}]\nproxy-groups: [{name: Proxy, type: select, proxies: [Unsupported]}]\nrules: ['MATCH,Proxy']\n"
+	fetcher.contents = "proxies: [{name: Unsupported, type: snell, version: 7}]\nproxy-groups: [{name: Proxy, type: select, proxies: [Unsupported]}]\nrules: ['MATCH,Proxy']\n"
 	state, err = s.RefreshSubscription(id)
 	if err != nil || state.Projection.Status != projectionReady || len(state.Projection.Proxies) != 0 {
 		t.Fatal("fully filtered runtime was not safely composed", err)
@@ -142,5 +143,45 @@ func TestNativeRefreshAcceptsUnsupportedNodesWithoutChangingSavedSource(t *testi
 	source, _ := s.SubscriptionText(id)
 	if source.Contents != fetcher.contents || state.Projection.Summary.Normalization.SkippedNodes != 0 {
 		t.Fatal("fully filtered runtime changed source or emitted a skip report")
+	}
+}
+
+func TestSnell6RefreshPreservesProjectionFieldsAndSource(t *testing.T) {
+	s, fetcher, state := fallbackService(t)
+	id := state.SelectedSubscriptionID
+	for _, mode := range []string{"default", "unshaped", "unsafe-raw"} {
+		fetcher.contents = `proxies:
+  - {name: Snell6, type: snell, server: 192.0.2.1, port: 28390, version: 6, psk: fixture-long-psk, userkey: fixture-userkey, udp: true, mode: ` + mode + `}
+  - {name: Unsupported, type: unsupported-fixture}
+proxy-groups:
+  - {name: Proxy, type: select, proxies: [Snell6, Unsupported]}
+rules: ['DOMAIN,example.invalid,Snell6', 'MATCH,Proxy']
+`
+		state, err := s.RefreshSubscription(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if state.Projection == nil || state.Projection.Status != projectionReady || len(state.Projection.Proxies) != 1 || state.Projection.Proxies[0].Name != "Snell6" {
+			t.Fatal("refresh hid the supported Snell v6 node")
+		}
+		var raw map[string]any
+		if err := yaml.Unmarshal([]byte(fetcher.contents), &raw); err != nil {
+			t.Fatal(err)
+		}
+		config := normalizedRuntime(t, s)
+		if !reflect.DeepEqual(config["proxies"], raw["proxies"].([]any)[:1]) {
+			t.Fatal("runtime changed the Snell version, credentials, or mode")
+		}
+		group := config["proxy-groups"].([]any)[0].(map[string]any)
+		if !reflect.DeepEqual(group["proxies"], []any{"Snell6"}) {
+			t.Fatal("Snell selector reference was lost")
+		}
+		source, err := s.SubscriptionText(id)
+		if err != nil || source.Contents != fetcher.contents {
+			t.Fatal("refresh rewrote the original subscription", err)
+		}
+		if state.Projection.Summary.Normalization.SkippedNodes != 0 || s.runtimeManager.Status().State != mihomoruntime.StateStopped {
+			t.Fatal("offline refresh emitted skip diagnostics or started the core")
+		}
 	}
 }

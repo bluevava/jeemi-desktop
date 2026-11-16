@@ -150,6 +150,15 @@ describe("selector rendering cost", () => {
     expect(render("tabs", selectors, warnings)).toContain("subscription.selector.dynamicFiltersPending");
   });
 
+  it("disables node and nested-group selection while another selector is switching", () => {
+    const root = { ...selectors[0], members: [selectors[0].members[0],
+      { name: "Automatic", type: "group", source: "group" as const, providerName: "" }] };
+    const child = { ...selectors[1], name: "Automatic", type: "url-test", hidden: true };
+    const html = render("tabs", [root, child], [], true, { busySelection: "Another selector" });
+    expect(html.match(/class="selector-node-select" disabled=""/g)).toHaveLength(2);
+    expect(nestedCard(html)).toContain('aria-label="subscription.selector.nested.open" class="selector-node-delay">');
+  });
+
   it.each(["tabs", "panel"] as const)("shows only the final exit in %s and uses its delay on nested cards", (view) => {
     const root = { ...selectors[0], name: "Google", defaultSelection: "Manual",
       members: [{ name: "Manual", type: "group", source: "group" as const, providerName: "" }] };

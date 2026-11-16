@@ -41,6 +41,9 @@ func InvalidWithRepair(path string, contents, replacement []byte, cause error) e
 
 func Invalid(path string, contents []byte, cause error) error {
 	f := &Failure{Path: path, Reason: "invalid", cause: cause, digest: sha256.Sum256(contents), size: int64(len(contents))}
+	if IsUnsupported(cause) {
+		f.Reason = "unsupported"
+	}
 	var syntax *json.SyntaxError
 	var value *json.UnmarshalTypeError
 	if errors.As(cause, &syntax) {

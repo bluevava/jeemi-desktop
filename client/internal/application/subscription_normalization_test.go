@@ -35,7 +35,7 @@ func normalizedRuntime(t *testing.T, service *Service) map[string]any {
 
 func TestConvertedSubscriptionSharesLocalAndRuntimeComposition(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "jeemi_data")
-	s, err := NewService(root)
+	s, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestConvertedSubscriptionSharesLocalAndRuntimeComposition(t *testing.T) {
 }
 
 func TestConvertedImportCoreRequirementFailsBeforePersistence(t *testing.T) {
-	s, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	s, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}

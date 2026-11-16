@@ -6,7 +6,7 @@ import "fmt"
 
 const (
 	// Also invalidates derived projections when runtime compatibility changes.
-	Version             = 4
+	Version             = 5
 	MaxBytes            = 4 << 20
 	maxLines            = 20000
 	maxLineBytes        = 384 << 10 // cert:// can carry a bounded PEM chain.

@@ -23,9 +23,9 @@ import (
 )
 
 func TestBootstrapStateReportsFrameworkWithoutPretendingCoreIsInstalled(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	service, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
-		t.Fatalf("NewService() error = %v", err)
+		t.Fatalf("newTestService() error = %v", err)
 	}
 	state := service.BootstrapState()
 
@@ -47,9 +47,9 @@ func TestBootstrapStateReportsFrameworkWithoutPretendingCoreIsInstalled(t *testi
 }
 
 func TestServiceExposesLocalConfigurationWithoutStartingMihomo(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	service, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
-		t.Fatalf("NewService() error = %v", err)
+		t.Fatalf("newTestService() error = %v", err)
 	}
 	created, err := service.SaveLocalConfig(profile.SaveLocalConfigInput{
 		Name: "Test local configuration",
@@ -74,7 +74,7 @@ func TestServiceExposesLocalConfigurationWithoutStartingMihomo(t *testing.T) {
 
 func TestServiceKeepsSubscriptionAssociationReferentiallySafe(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +111,7 @@ func TestServiceKeepsSubscriptionAssociationReferentiallySafe(t *testing.T) {
 
 func TestServiceValidatesLocalScriptBeforeAssociationAndReferencedSave(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +165,7 @@ func TestServiceValidatesLocalScriptBeforeAssociationAndReferencedSave(t *testin
 
 func TestServiceFormatsLocalScriptTestUnicodeForDisplay(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func TestServiceFormatsLocalScriptTestUnicodeForDisplay(t *testing.T) {
 
 func TestServiceReportsOnlyManagedDomainDirectories(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +225,7 @@ func TestServiceReportsOnlyManagedDomainDirectories(t *testing.T) {
 
 func TestServicePersistsCompleteSubscriptionPreferences(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestServicePersistsCompleteSubscriptionPreferences(t *testing.T) {
 
 func TestServicePersistsRuntimePreferencesWithoutChangingLiveStatus(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -280,7 +280,7 @@ func TestServicePersistsRuntimePreferencesWithoutChangingLiveStatus(t *testing.T
 	if !reflect.DeepEqual(saved, preferences) {
 		t.Fatalf("SaveRuntimePreferences() = %+v", saved)
 	}
-	reloaded, err := NewService(dataDirectory)
+	reloaded, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -298,7 +298,7 @@ func TestServicePersistsRuntimePreferencesWithoutChangingLiveStatus(t *testing.T
 }
 
 func TestServiceExposesRuntimeDefaultsAndValidatesOnlyAllowListedYAML(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	service, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +324,7 @@ func TestServiceExposesRuntimeDefaultsAndValidatesOnlyAllowListedYAML(t *testing
 
 func TestServiceBuildsStaticSelectorProjectionFromAssociatedLocalConfiguration(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -375,7 +375,7 @@ func TestServiceBuildsStaticSelectorProjectionFromAssociatedLocalConfiguration(t
 
 func TestServiceResolvesReusableGroupsAndRuleSetsIntoSubscriptionProjection(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -461,7 +461,7 @@ func TestServiceResolvesReusableGroupsAndRuleSetsIntoSubscriptionProjection(t *t
 
 func TestServiceAppliesPerSubscriptionRuleProviderSwitchesToProjectionAndResolvedConfig(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -528,7 +528,7 @@ rules:
 
 func TestServicePersistsCurrentSubscriptionWithoutTreatingItAsRuntime(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -559,7 +559,7 @@ func TestServicePersistsCurrentSubscriptionWithoutTreatingItAsRuntime(t *testing
 	if _, err := service.SelectSubscription(selectedID); err != nil {
 		t.Fatal(err)
 	}
-	reloaded, err := NewService(dataDirectory)
+	reloaded, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -577,7 +577,7 @@ func TestServicePersistsCurrentSubscriptionWithoutTreatingItAsRuntime(t *testing
 
 func TestServiceAutomaticallyMaintainsSafeResolvedRuntimeSnapshot(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -638,7 +638,7 @@ func TestServiceAutomaticallyMaintainsSafeResolvedRuntimeSnapshot(t *testing.T) 
 
 func TestInvalidRuntimePreferencesAreNotPersistedAndAreReportedOnHomeStatus(t *testing.T) {
 	dataDirectory := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(dataDirectory)
+	service, err := newTestService(dataDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -662,7 +662,7 @@ func TestInvalidRuntimePreferencesAreNotPersistedAndAreReportedOnHomeStatus(t *t
 
 func TestStopProxyClearsActiveFingerprintWithoutHidingConfigurationFailure(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "jeemi_data")
-	service, err := NewService(root)
+	service, err := newTestService(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -698,7 +698,7 @@ func TestStopProxyClearsActiveFingerprintWithoutHidingConfigurationFailure(t *te
 }
 
 func TestServicePersistsProxyDelayCacheWithoutChangingRuntime(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "jeemi_data"))
+	service, err := newTestService(filepath.Join(t.TempDir(), "jeemi_data"))
 	if err != nil {
 		t.Fatal(err)
 	}

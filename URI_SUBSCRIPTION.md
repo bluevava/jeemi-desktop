@@ -74,7 +74,7 @@ ws-opts=%7B%22path%22%3A%22%2Fws%22%2C%22headers%22%3A%7B%22Host%22%3A%22cdn.exa
 | [SOCKS5](https://wiki.metacubex.one/config/proxies/socks/) `socks5` | 同 HTTP | `username`、`password` |
 | [Shadowsocks](https://wiki.metacubex.one/config/proxies/ss/) `ss` | `cipher:password@` 或查询字段 | `cipher`、`password`、`plugin`、对象 `plugin-opts`、`client-fingerprint`、`udp-over-tcp`、`udp-over-tcp-version` |
 | [ShadowsocksR](https://wiki.metacubex.one/config/proxies/ssr/) `ssr` | `cipher:password@`，另填 `protocol/obfs` | `cipher`、`password`、`protocol`、`protocol-param`、`obfs`、`obfs-param` |
-| [Snell](https://wiki.metacubex.one/config/proxies/snell/) `snell` | `psk@` 或查询 `psk` | `psk`、`version`、对象 `obfs-opts`；版本 1–5，默认 1，版本 1/2 不接受 `udp=true` |
+| [Snell](https://wiki.metacubex.one/config/proxies/snell/) `snell` | `psk@` 或查询 `psk` | `psk`、`version`、`mode`、布尔 `reuse`、对象 `obfs-opts`；版本 1–6，默认 1，版本 1/2 不接受 `udp=true`；v6 的 PSK 为 12–255 字节，mode 为 `default` / `unshaped` / `unsafe-raw`，不接受 http/tls obfs |
 | [VMess](https://wiki.metacubex.one/config/proxies/vmess/) `vmess` | `uuid@` 或查询 `uuid` | `uuid`、`alterId`、`cipher`、`global-padding`、`authenticated-length`、`packet-encoding`；默认 `alterId=0`、`cipher=auto` |
 | [VLESS](https://wiki.metacubex.one/config/proxies/vless/) `vless` | `uuid@` 或查询 `uuid` | `uuid`、`flow`、`encryption`、`packet-encoding` |
 | [Trojan](https://wiki.metacubex.one/config/proxies/trojan/) `trojan` | `password@` 或查询 `password` | `password`、对象 `ss-opts` |
@@ -280,7 +280,7 @@ ssr://<Base64(server:port:protocol:cipher:obfs:Base64(password)/?参数)>
 - SS 密码中的冒号（含 SS2022 密码）作为完整密码保留，按 URI 组件编码。插件推荐用标准 `plugin` 和 JSON `plugin-opts`；其他客户端的分号打包插件串不在兼容范围内。
 - VMess JSON 兼容 `v/ps/add/port/id/aid/scy/net/type/tls/sni/fp/alpn/path/host`，`type` 只接受空值或 `none`；无法等价转换的私有字段会跳过该节点。
 - SSR 兼容 Base64 查询值 `obfsparam/protoparam/remarks/group`，其中 `group` 是来源展示信息，不生成 mihomo 选择器。
-- 未定义的 `pinSHA256`、Snell 独立 `userkey` / v6 等不猜测、不降级。未知字段不能依靠忽略后强行导入。
+- 未定义的 `pinSHA256`、Snell 独立 `userkey` 等 URI 字段不猜测、不丢弃后强行导入。Snell v6 按 mihomo v1.19.34 支持并保留版本与 mode，不降级到 v5；原生 YAML/JSON 中的扩展字段则保持原文，最终协议过滤不因 `userkey` 或 `mode` 删除节点。
 - 部分 Surge 节点和可识别 DNS 继续兼容；Surge 的原选择器、路由、脚本、MITM、系统设置不迁移为同等语义。完整配置请使用 YAML。
 
 ## 混合订阅、跳过规则与更新行为

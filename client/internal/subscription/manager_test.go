@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -238,8 +239,9 @@ func TestManagerImportsOnlySupportedConfigurationFiles(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if strings.Contains(string(metadata), directory) {
-				t.Fatalf("subscription metadata persisted the selected absolute path:\n%s", metadata)
+			var document metadataDocument
+			if err := json.Unmarshal(metadata, &document); err != nil || document.SourceFilePath != path {
+				t.Fatal("subscription metadata did not persist the source path", err)
 			}
 		})
 	}

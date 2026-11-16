@@ -19,6 +19,16 @@ import { enExternalUI, enExternalUIHelp } from "./external-ui";
 import { enChainProxy, enChainProxyHelp, enChainProxyFilterHelp, enChainProxyImportHelp } from "./chain-proxy";
 
 export const enUS = {
+  configurationViewer: {
+    search: "Search configuration",
+    placeholder: "Find… (Ctrl/⌘+F)",
+    previous: "Previous match (Shift+Enter)",
+    next: "Next match (Enter)",
+    matches: "Match {{current}} of {{total}}",
+    noMatches: "No matches",
+    content: "Configuration content",
+    loading: "Reading configuration…",
+  },
   subscriptionAutoUpdate: enSubscriptionAutoUpdate,
   resourceLibrary: enResourceLibrary,
   offlineConfig: enOfflineConfig,
@@ -519,9 +529,7 @@ export const enUS = {
       collapse: "Collapse subscription shelf",
       collapseHint: "Click to collapse subscription panel",
       expand: "Expand subscription shelf",
-      refreshCurrent: "Fetch the current subscription again",
-      refreshUnavailable:
-        "A file subscription has no remote address to fetch again",
+      refreshCurrent: "Refresh the current subscription",
       openRuleProviders: "View rule providers",
       subscriptionTools: "Current-subscription shortcuts",
       selectorTools: "Proxy-selector shortcuts",
@@ -663,7 +671,8 @@ export const enUS = {
     },
     menu: {
       label: "Subscription actions for {{name}}",
-      refresh: "Fetch again",
+      refresh: "Refresh subscription",
+      refreshFile: "Read the source file again",
       edit: "Edit subscription",
       rawText: "View source config",
       associate: "Associate local config",
@@ -676,7 +685,10 @@ export const enUS = {
       nameOptional: "Subscription name (optional)",
       nameAutoPlaceholder: "Leave blank to use the response header or host",
       url: "Subscription URL",
-      file: "Original imported file",
+      file: "Source file",
+      chooseSourceFile: "Choose another file",
+      filePending: "Save to read the new file. The source and revision change only after validation succeeds.",
+      fileRefreshHint: "Refresh rereads this file. Choose it again if it has moved or been deleted.",
       description: "Description",
       descriptionPlaceholder: "Describe the source or intended use.",
       icon: "Icon",
@@ -745,6 +757,10 @@ export const enUS = {
         "URL fetching failed. Check the address, network, file size, and configuration format. No incomplete content was saved.",
       fileImport:
         "File import failed. Supported extensions are .yaml, .json, .txt and .conf, containing mihomo, Surge or supported URI subscriptions.",
+      fileSourceMissing: "This subscription has no saved source file path. Choose the file again when editing. The current revision is unchanged.",
+      fileSourceUnavailable: "The source file is unreadable, empty or larger than 4 MiB. Check the file and read permissions, or choose another file when editing. The current revision is unchanged.",
+      fileSourceChanged: "The source file changed while being read. Wait for it to finish saving, then refresh again. The current revision is unchanged.",
+      fileSelectionExpired: "The file selection expired or the subscription changed. Choose the file again before saving.",
       qrImport:
         "QR image import failed. Make sure the image is clear and the QR content is an http/https subscription URL.",
       screenImport:
@@ -766,10 +782,10 @@ export const enUS = {
       screenNoQR:
         "No QR code containing a valid http/https subscription address was found. Show the whole code and enlarge it before trying again.",
       refresh:
-        "Fetching again failed. The current URL and usable revision remain unchanged.",
+        "Refreshing failed. The current source and usable revision remain unchanged.",
       detail:
         "Could not read subscription details. Confirm that the subscription still exists.",
-      edit: "Saving failed. The subscription name, source URL, and current revision remain unchanged.",
+      edit: "Saving failed. The subscription name, source, and current revision remain unchanged.",
       rawText:
         "Could not read the current subscription source. Check the managed revision file integrity.",
       association:
@@ -1790,8 +1806,8 @@ export const enUS = {
       subscriptionImport: {
         title: "Subscription import",
         purpose: "Import mihomo, Surge, or common URI subscriptions from HTTP(S) URLs, files, or QR codes, preserving traceable source revisions.",
-        scenarios: "Use it for a first subscription, a YAML/JSON/TXT/CONF file, or a provider-supplied subscription QR code.",
-        cautions: "Surge/URI nodes and DNS are converted before local processing and runtime preferences. Source routing rules are omitted; unsupported nodes have explanations. Source text is immutable and conversion or validation failures preserve the current revision.",
+        scenarios: "Use it for a first subscription, a YAML/JSON/TXT/CONF file, or a provider-supplied QR code. File subscriptions remember the source path and reread it on manual refresh; choose another file in the editor.",
+        cautions: "A newly selected file takes effect only after Save and validation. Missing files, read errors or invalid configurations preserve the previous source and revision. Older imports without a saved path need one new file selection. Files are not polled, rewritten or deleted. Surge/URI nodes and DNS are converted while full source revisions are preserved.",
       },
       subscriptionQRCode: {
         title: "QR subscription import",

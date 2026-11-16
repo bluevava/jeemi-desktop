@@ -61,10 +61,8 @@ func TestStartupRepairPreservesSubscriptionSourceAndValidPreferences(t *testing.
 		interval int
 		edit     func(map[string]json.RawMessage)
 	}{
-		{"unknown fields", SourceURL, 180, func(m map[string]json.RawMessage) { m["futurePreference"] = json.RawMessage(`{"enabled":true}`) }},
 		{"wrong interval type", SourceURL, 60, func(m map[string]json.RawMessage) { m["autoUpdateIntervalMinutes"] = json.RawMessage(`"incompatible"`) }},
 		{"invalid interval", SourceURL, 60, func(m map[string]json.RawMessage) { m["autoUpdateIntervalMinutes"] = json.RawMessage(`5`) }},
-		{"missing fallback", SourceURL, 180, func(m map[string]json.RawMessage) { delete(m, "fallback") }},
 		{"file interval", SourceFile, 0, func(m map[string]json.RawMessage) { m["autoUpdateIntervalMinutes"] = json.RawMessage(`60`) }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -116,13 +114,11 @@ func TestStartupRepairPreservesSubscriptionSourceAndValidPreferences(t *testing.
 }
 
 func TestStartupResetRemovesOnlyUnrepairableMetadata(t *testing.T) {
-	for _, corruption := range []string{"syntax", "version", "identity", "revision", "source"} {
+	for _, corruption := range []string{"syntax", "identity", "revision", "source"} {
 		t.Run(corruption, func(t *testing.T) {
 			root, store, before, path := recoverySubscription(t, SourceURL)
 			changeMetadata(t, path, func(m map[string]json.RawMessage) {
 				switch corruption {
-				case "version":
-					m["manifestVersion"] = json.RawMessage(`99`)
 				case "identity":
 					m["id"] = json.RawMessage(`"not-the-subscription"`)
 				case "revision":
@@ -163,7 +159,7 @@ func TestStartupResetRemovesOnlyUnrepairableMetadata(t *testing.T) {
 
 func TestStartupSubscriptionCheckKeepsSupportedOptionalFieldsWithoutWriting(t *testing.T) {
 	root, store, detail, path := recoverySubscription(t, SourceURL)
-	original := changeMetadata(t, path, func(m map[string]json.RawMessage) { delete(m, "autoUpdateIntervalMinutes") })
+	original := changeMetadata(t, path, func(m map[string]json.RawMessage) { delete(m, "autoUpdateIntervalMinutes"); delete(m, "fallback") })
 	if err := CheckStartupConfiguration(root); err != nil {
 		t.Fatal(err)
 	}

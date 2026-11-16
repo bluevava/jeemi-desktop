@@ -4,6 +4,8 @@
   --color-accent-strong: #4632a5;
   --color-accent-soft: #eeebfa;
   --color-on-accent: #ffffff;
+  --color-search-match: #eeebfa;
+  --color-search-current: #5c47c9;
   --color-positive: #17734b;
   --color-positive-soft: #e6f3eb;
   --color-warning: #8a540c;
@@ -51,6 +53,8 @@
   --color-accent-strong: #a493ed;
   --color-accent-soft: #343044;
   --color-on-accent: #201a36;
+  --color-search-match: #343044;
+  --color-search-current: #b6a7ff;
   --color-positive: #78d5aa;
   --color-positive-soft: #223a30;
   --color-warning: #ebc17b;
